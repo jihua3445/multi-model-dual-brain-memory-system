@@ -41,6 +41,8 @@
 
 本仓库包含构建脚本与一个内存参考实现，用于透明与可复现，**不是生产系统**。
 
+**模型无关。** 参考实现不调用任何厂商 API；这些契约可与 OpenAI、Anthropic、Google、DeepSeek、Qwen、Llama、Mistral 或本地模型配合，但不依赖、也不背书任何一家。
+
 | 路径 | 用途 |
 |---|---|
 | `source/zh/build.py` | 从 `source/zh/parts` 构建中文 HTML |
