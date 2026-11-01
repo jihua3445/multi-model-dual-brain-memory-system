@@ -6,7 +6,7 @@ Version 2.1 · 2026
 > **Status: a conceptual note.**  
 > This repository records a line of thinking, not a framework, product, or validated practice. It explores how memory, relationships, and multi-model division might be organized; it does not claim a complete architecture or implementation. `runtime/` is a small reference probe for selected contracts, not the framework itself.
 
-[中文 README](README.md)
+[中文](README.md) | **English**
 
 ## Why this project
 
