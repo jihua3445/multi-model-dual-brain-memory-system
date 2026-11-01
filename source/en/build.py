@@ -4,7 +4,7 @@ import os, re, glob
 from html.parser import HTMLParser
 BASE=os.path.dirname(os.path.abspath(__file__))
 PARTS=sorted(glob.glob(os.path.join(BASE,'parts','*.html')))
-OUT=os.path.abspath(os.path.join(BASE,'..','..','docs','en','dual-brain-memory-system-v2.1-en.html'))
+OUT=os.path.abspath(os.path.join(BASE,'..','..','docs','en','dual-brain-system-v2.1-en.html'))
 def build():
     chunks=[]
     for p in PARTS:

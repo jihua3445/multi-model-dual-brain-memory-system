@@ -1,11 +1,15 @@
 [简体中文](README.md) | **English**
 
-# Dual-Brain Memory System: From Neural Mechanisms to a Multi-Model Simulation Approach
+# Multi-Model Dual-Brain Memory System
+
+**From Neural Mechanisms to a Multi-Model Simulation Approach**
 
 Version 2.1 · 2026
 
 > **Status: a conceptual note.**  
 > This repository records a line of thinking, not a framework, product, or validated practice. It explores how memory, relationships, and multi-model division might be organized; it does not claim a complete architecture or implementation. `runtime/` is a small reference probe for selected contracts, not the framework itself.
+
+> **Document title note:** The HTML/PDF documents retain their original title, *Dual-Brain Memory System: From Neural Mechanisms to a Multi-Model Simulation Approach*; the repository uses the shorter project name.
 
 ## Why this project
 
@@ -28,10 +32,10 @@ If memory is organized by person–event–relationship; if context contains onl
 
 | Language | HTML | PDF |
 |---|---|---|
-| Chinese | [Chinese HTML](https://jihua3445.github.io/dual-brain-memory-system-from-neural-mechanisms-to-multi-model-simulation/zh/双脑记忆系统-从神经机制到多模型模拟方案.html) | [Chinese PDF](https://jihua3445.github.io/dual-brain-memory-system-from-neural-mechanisms-to-multi-model-simulation/zh/双脑记忆系统-从神经机制到多模型模拟方案.pdf) |
-| English | [dual-brain-memory-system-v2.1-en.html](https://jihua3445.github.io/dual-brain-memory-system-from-neural-mechanisms-to-multi-model-simulation/en/dual-brain-memory-system-v2.1-en.html) | [dual-brain-memory-system-v2.1-en.pdf](https://jihua3445.github.io/dual-brain-memory-system-from-neural-mechanisms-to-multi-model-simulation/en/dual-brain-memory-system-v2.1-en.pdf) |
+| Chinese | [Chinese HTML](https://jihua3445.github.io/multi-model-dual-brain-memory-system/zh/双脑记忆系统-从神经机制到多模型模拟方案.html) | [Chinese PDF](https://jihua3445.github.io/multi-model-dual-brain-memory-system/zh/双脑记忆系统-从神经机制到多模型模拟方案.pdf) |
+| English | [dual-brain-system-v2.1-en.html](https://jihua3445.github.io/multi-model-dual-brain-memory-system/en/dual-brain-system-v2.1-en.html) | [dual-brain-system-v2.1-en.pdf](https://jihua3445.github.io/multi-model-dual-brain-memory-system/en/dual-brain-system-v2.1-en.pdf) |
 
-Read online: <https://jihua3445.github.io/dual-brain-memory-system-from-neural-mechanisms-to-multi-model-simulation/>
+Read online: <https://jihua3445.github.io/multi-model-dual-brain-memory-system/>
 
 ## Reference Implementation (Reference Only)
 
@@ -63,4 +67,4 @@ python3 pipeline.py         # end-to-end JSON with audit trace
 
 ## License
 
-MIT License. See [LICENSE](https://github.com/jihua3445/dual-brain-memory-system-from-neural-mechanisms-to-multi-model-simulation/blob/main/LICENSE).
+MIT License. See [LICENSE](https://github.com/jihua3445/multi-model-dual-brain-memory-system/blob/main/LICENSE).

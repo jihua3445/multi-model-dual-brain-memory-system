@@ -1,12 +1,15 @@
 **简体中文** | [English](README.en.md)
 
-# 双脑记忆系统：从神经机制到多模型模拟方案
+# 多模型双脑记忆系统
 
-**Dual-Brain Memory System: From Neural Mechanisms to a Multi-Model Simulation Approach**  
+**从神经机制到多模型模拟方案**
+
 版本 2.1 · 2026
 
 > **状态：思路稿。**  
 > 本仓库记录的是一条构建思路，不是已落地的框架、产品，也不是经过验证的实践。文档讨论记忆、关系与多模型分工可以如何组织，不声称已经给出完整架构或实现。`runtime/` 只是对部分契约的参考探针，不代表框架本身。
+
+> **文档题名说明：** 正文 HTML/PDF 保留原题《双脑记忆系统：从神经机制到多模型模拟方案》；仓库使用更简洁的项目名。
 
 ## 为什么做这套方案
 
@@ -29,10 +32,10 @@
 
 | 语言 | HTML | PDF |
 |---|---|---|
-| 中文 | [双脑记忆系统-从神经机制到多模型模拟方案.html](https://jihua3445.github.io/dual-brain-memory-system-from-neural-mechanisms-to-multi-model-simulation/zh/双脑记忆系统-从神经机制到多模型模拟方案.html) | [双脑记忆系统-从神经机制到多模型模拟方案.pdf](https://jihua3445.github.io/dual-brain-memory-system-from-neural-mechanisms-to-multi-model-simulation/zh/双脑记忆系统-从神经机制到多模型模拟方案.pdf) |
-| English | [dual-brain-memory-system-v2.1-en.html](https://jihua3445.github.io/dual-brain-memory-system-from-neural-mechanisms-to-multi-model-simulation/en/dual-brain-memory-system-v2.1-en.html) | [dual-brain-memory-system-v2.1-en.pdf](https://jihua3445.github.io/dual-brain-memory-system-from-neural-mechanisms-to-multi-model-simulation/en/dual-brain-memory-system-v2.1-en.pdf) |
+| 中文 | [双脑记忆系统-从神经机制到多模型模拟方案.html](https://jihua3445.github.io/multi-model-dual-brain-memory-system/zh/双脑记忆系统-从神经机制到多模型模拟方案.html) | [双脑记忆系统-从神经机制到多模型模拟方案.pdf](https://jihua3445.github.io/multi-model-dual-brain-memory-system/zh/双脑记忆系统-从神经机制到多模型模拟方案.pdf) |
+| English | [dual-brain-system-v2.1-en.html](https://jihua3445.github.io/multi-model-dual-brain-memory-system/en/dual-brain-system-v2.1-en.html) | [dual-brain-system-v2.1-en.pdf](https://jihua3445.github.io/multi-model-dual-brain-memory-system/en/dual-brain-system-v2.1-en.pdf) |
 
-在线浏览：<https://jihua3445.github.io/dual-brain-memory-system-from-neural-mechanisms-to-multi-model-simulation/>
+在线浏览：<https://jihua3445.github.io/multi-model-dual-brain-memory-system/>
 
 ## 参考实现（仅参考）
 
@@ -64,4 +67,4 @@ python3 pipeline.py         # 端到端 JSON + 审计轨迹
 
 ## License
 
-MIT License. See [LICENSE](https://github.com/jihua3445/dual-brain-memory-system-from-neural-mechanisms-to-multi-model-simulation/blob/main/LICENSE).
+MIT License. See [LICENSE](https://github.com/jihua3445/multi-model-dual-brain-memory-system/blob/main/LICENSE).
