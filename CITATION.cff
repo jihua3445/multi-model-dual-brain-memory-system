@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite it."
+title: "Multi-Model Dual-Brain Memory System: From Neural Mechanisms to a Multi-Model Simulation Approach"
+abstract: "A conceptual note on a multi-model dual-brain memory system for AI agents: relationship-centered memory, context engineering, one integrating center, and a Python reference implementation."
+authors:
+  - name: "jihua3445"
+version: 2.1.0
+date-released: 2026-10-31
+url: "https://github.com/jihua3445/multi-model-dual-brain-memory-system"
+license: MIT
