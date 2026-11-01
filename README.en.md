@@ -41,6 +41,8 @@ Read online: <https://jihua3445.github.io/multi-model-dual-brain-memory-system/>
 
 This repository includes the build scripts and an in-memory reference implementation for transparency and reproducibility — **not** a production system.
 
+**Model-agnostic.** The reference implementation calls no vendor API. The contracts can be paired with OpenAI, Anthropic, Google, DeepSeek, Qwen, Llama, Mistral, or local models; none is required or endorsed.
+
 | Path | Purpose |
 |---|---|
 | `source/zh/build.py` | Build Chinese HTML from `source/zh/parts` |
