@@ -1,5 +1,7 @@
 [简体中文](README.md) | **English**
 
+![version](https://img.shields.io/badge/version-2.1.0-0d5b55) ![license](https://img.shields.io/badge/license-MIT-0d5b55) ![tests](https://img.shields.io/badge/tests-128%20passed-0d5b55)
+
 # Multi-Model Dual-Brain Memory System
 
 **From Neural Mechanisms to a Multi-Model Simulation Approach**
