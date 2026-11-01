@@ -1,4 +1,4 @@
-**中文** ｜ [English](README.en.md)
+**简体中文** | [English](README.en.md)
 
 # 双脑记忆系统：从神经机制到多模型模拟方案
 
