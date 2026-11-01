@@ -1,0 +1,128 @@
+<section class="sec" id="s5">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">05 · Runtime Loops</span>
+      <h2 class="sec-title">The Six Runtime Loops</h2>
+      <p class="sec-sub">The three online loops handle "now"; the three offline loops handle "later".</p>
+    </div>
+
+    <p class="lead">Whether a memory system is really "working" depends not on how many tables it has, but on whether it has stable closed loops: whether input can be encoded correctly, whether a cue can recall the right fragments, whether a better decision can be made after recall, whether action outcomes can be written back, whether experience can be distilled into knowledge at night, and whether old information can be safely forgotten or updated. There are six loops, and none of them is dispensable.</p>
+
+    <div class="diagram">
+      <div class="dtitle">Figure 2 · Memory Lifecycle</div>
+      <div class="flow vertical">
+        <div class="node"><b>01 ENCODE · Online</b>Perception → candidate events → salience gating → event log / index</div>
+        <div class="ar">↓</div>
+        <div class="node"><b>02 CONSOLIDATE · Offline</b>Scan → cluster → replay → abstract → merge / prune</div>
+        <div class="ar">↓</div>
+        <div class="node"><b>03 RETRIEVE · Online</b>Cue → pattern separation / completion → reconstruction → source audit → ContextPacket</div>
+        <div class="ar">↓</div>
+        <div class="node"><b>04 DECIDE · Online</b>Main Brain reads the packet → fast path / slow path → choice → write down the expected outcome</div>
+        <div class="ar">↓</div>
+        <div class="node"><b>05 ACT · Online</b>Expression / tools / carrier → observe outcome → write back the event</div>
+        <div class="ar">↓</div>
+        <div class="node"><b>06 RECONSOLIDATE / FORGET · Online + Offline</b>Versioned update, or decay / cold archiving</div>
+      </div>
+      <div class="dnote">Online loop: 01 → 03 → 04 → 05 → 06; offline loop: 02 runs at night or while idle, reads the events produced by 01/05, and feeds back into the retrieval quality of 03. 06 is not an endpoint, but the input to the next round of 01.</div>
+    </div>
+
+    <h3>5.1 Encoding loop: from perceptual stream to events</h3>
+    <ol class="steps">
+      <li><b>Segment.</b>Use prediction-error peaks, goal switches, scene changes, and topic turns to cut the continuous perceptual stream into candidate events. Over-fine segmentation fragments the record; over-coarse segmentation loses detail. The default unit is "one nameable episode".</li>
+      <li><b>Score salience.</b><code>salience = σ(w·[novelty, goal_relevance, social_impact, |valence|, prediction_error, explicit])</code>. Events scoring below the threshold enter a short-TTL buffer and are not immediately allocated a long-term engram.</li>
+      <li><b>Resolve identity.</b>Faces, voiceprints, forms of address, and context jointly produce person candidates; when uncertain, keep candidates rather than forcing an identification. An identity error contaminates the entire relationship chain, so it is better to ask one more question.</li>
+      <li><b>Write the event.</b>Write to an immutable event log: time, scene, participants, action, outcome, source, status. Actions must be structured (who did what to whom), not merely a paragraph of summary.</li>
+      <li><b>Allocate an index.</b>Generate a sparse code and association edges: person, place, topic, goal, affect, causes and consequences. The index stores only pointers and weights, never a copy of the full text.</li>
+      <li><b>Three derivations.</b>Judge whether this experience yields a knowledge candidate, a skill candidate, or relationship evidence; candidates are not promoted immediately but enter a pending-verification queue.</li>
+      <li><b>Working memory.</b>If the event is relevant to the current task, allocate a slot pointer to the ContextPacket; otherwise it remains in long-term storage only.</li>
+    </ol>
+    <h4>5.1.1 Executable rules for event segmentation</h4>
+    <p>Event segmentation theory holds that boundaries occur at prediction-error peaks or at goal/scene switches (Zacks &amp; Swallow 2007). In engineering terms, do not use fixed windows; use the OR of four rules:</p>
+    <pre class="code">boundary = (precision * |observed - expected| &gt; θ_pe)
+        or topic_changed or person_changed
+        or gap_seconds &gt; θ_gap
+        or duration_seconds &gt; θ_max</pre>
+    <p>θ_pe comes from the precision-weighted error of 2.4: the larger the error and the higher the precision, the more readily a boundary triggers. θ_gap / θ_max prevent a single conversation from being cut into infinitely many fragments. After segmentation, the event inherits participants, topic, maximum salience, and start time; the text serves only as a summary, while the raw perception is still retained.</p>
+
+    <div class="note"><span class="tag">Implementation convention</span>The "graph" here is not a graph database but a <b>lightweight association index</b>: an adjacency list with 1–2 hop expansion, decaying per hop with a capped budget; it outputs <code>path / hop</code>, and simulated edges are excluded by default. It is used only for candidate expansion and does not replace the original scoring. See <code>runtime/graph_retrieval.py</code>.</div>
+
+    <div class="note"><span class="tag">Frontier addendum</span>Retrieval is not neutral: goal-directed retrieval temporarily suppresses competing items (retrieval-induced forgetting) and may also facilitate related items; however, direct evidence from 2024–2026 remains limited. The current implementation performs only a <b>reversible, time-limited accessibility penalty</b>: after a hit, competing items on the same topic or involving the same person are multiplied by 0.85 for 3 logical time units (turns by default; seconds in production if configured), restoring when the TTL expires; no evidence is deleted and no relationship is altered.</div>
+
+    <div class="note"><span class="tag">Guardrail</span>The encoding stage does not permit "summarizing into facts while writing". Facts and interpretations must be kept separate; a summary may only occupy the <code>summary</code> field and may not replace the raw event.</div>
+
+    <h3>5.2 Retrieval loop: from cue to ContextPacket</h3>
+    <ol class="steps">
+      <li><b>Parse the cue.</b>Extract person, time, place, topic, affect, and goal; determine the query type: fact, experience, relationship, commitment, procedure, or "can't quite say".</li>
+      <li><b>Pattern separation.</b>Disambiguate first: two "Boss Zhangs", two "last times", two versions of a contract. When similarity exceeds the threshold but time, scene, or outcome differ, force them into separate candidates and supply the discriminating evidence.</li>
+      <li><b>Pattern completion.</b>Perform multiple rounds of expansion over the person–event–relationship graph; vector nearest neighbors supplement semantic similarity; temporal and causal constraints filter. Each round reranks by <code>cue_overlap + association + recency + salience + source_reliability − interference</code>.</li>
+      <li><b>Reconstruct.</b>Assemble the candidate fragments into a coherent narrative, annotating each sentence with its source <code>[E102]</code>; state facts and interpretations separately; where uncertain, say explicitly that it is uncertain.</li>
+      <li><b>Audit sources.</b>For each sentence check the source type (first-hand / relayed / inferred / generated), the number of supporting evidence items, and whether it conflicts with known records; then give an overall confidence.</li>
+      <li><b>Compile the context.</b>Compress the result into 4±1 slots: who, relationship, experiences, goal, commitments, changes, uncertainties. Each slot has a token cap; beyond it, use a summary or switch to a pointer.</li>
+    </ol>
+    <p>Retrieval is not "finding all the relevant documents". It is "selecting the fewest blocks that suffice for this round of thought". If a ContextPacket needs twenty fragments to be intelligible, that usually means the system has not consolidated well, not that the Main Brain needs more context.</p>
+
+    <h3>5.3 Decision loop: how the Main Brain uses the ContextPacket</h3>
+    <ol class="steps">
+      <li><b>Orient.</b>Read the ContextPacket and confirm: who the individual is, who the other party is, what relationship holds between them, what is to be done now, which commitments are outstanding, and what is uncertain.</li>
+      <li><b>Choose a mode.</b>If the situation signature hits the habit cache and risk is low, time is tight, and outcomes are stable → take the model-free fast path; otherwise take the model-based slow path. The arbitration authority belongs to the Main Brain, not to the Backend.</li>
+      <li><b>Simulate.</b>On the slow path the Main Brain may call future simulation: generate 2–3 candidate scripts from related episodes and compare expected outcomes, risks, and relationship effects; it may also ask the Backend to expand a particular event or verify a particular claim.</li>
+      <li><b>Decide.</b>The Main Brain selects an action and writes down the expected outcome (for the later RPE). The decision requires no Backend "approval", and the Backend has no approval authority.</li>
+      <li><b>Express / act.</b>Execute through the Effector: speak, send a message, call a tool, make a movement. The Effector only executes; it never initiates on its own.</li>
+    </ol>
+
+    <h3>5.4 Action write-back loop: how outcomes change memory</h3>
+    <ol class="steps">
+      <li><b>Observe.</b>Record the actual outcome, the other party's response, side effects, and whether the expectation was met.</li>
+      <li><b>Compute RPE.</b><code>δ = r − V(s)</code>; a positive error reinforces the previous step, a negative error weakens it and flags it as "needs re-evaluation".</li>
+      <li><b>Update the event.</b>Change the event status from "open" to "closed / to follow up"; append the outcome without overwriting the original record.</li>
+      <li><b>Update the relationship.</b>A single interaction counts as only one piece of evidence; the relationship summary aggregates over a sliding window and does not lurch on a single event (unless the impact is extreme).</li>
+      <li><b>Update source calibration.</b>On write-back, call <code>record_outcome</code>: confirmation/refutation updates the source's history; the outcome is written as a direct event; a large prediction error triggers a new version of the explanation; the same outcome counts as one piece of relationship evidence only, and repeated write-backs are not double-counted.</li>
+      <li><b>Flag for consolidation.</b>Events with high salience, high prediction error, or unresolved commitments enter the nightly consolidation queue.</li>
+    </ol>
+
+    <h3>5.5 Offline consolidation loop: what sleep does</h3>
+    <p>Offline consolidation is not "summarizing today's conversations". It comprises at least five stages:</p>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>Table 9 · The five stages of the consolidation batch</caption>
+        <thead><tr><th style="width:14%">Stage</th><th style="width:30%">What it does</th><th>Corresponding mechanism</th></tr></thead>
+        <tbody>
+          <tr><td><b>Scan</b></td><td>Traverse the day's events, ordered by salience × prediction error × goal relevance × degree of incompletion</td><td>Global scanning by slow oscillation</td></tr>
+          <tr><td><b>Cluster</b></td><td>Group events by person, project, theme, and time; select representative events</td><td>Local packing by sleep spindles</td></tr>
+          <tr><td><b>Replay</b></td><td>For each group, replay "cause → action → outcome" and generate counterfactuals and lessons</td><td>Sequence replay by hippocampal ripples</td></tr>
+          <tr><td><b>Abstract</b></td><td>Extract schemas, rules, and skill candidates from multiple events; require a sufficient count of independent evidence</td><td>Systems consolidation / schema assimilation</td></tr>
+          <tr><td><b>Merge and prune</b></td><td>Write into the semantic graph / skill library; update relationship summaries; decay low-value indexes; compress ordinary interactions into phase summaries</td><td>Synaptic homeostasis / adaptive forgetting</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The priority of consolidation is not "newest first" but "most useful for the future first": events that are high in salience, high in prediction error, tied to unfinished goals, or repeatedly accessed but not yet abstracted are replayed first. Conversely, low-value, repetitive, consequence-free daily interactions should be compressed into phase summaries rather than retained one by one.</p>
+
+    <h3>5.6 Forgetting and reconsolidation loop: changing the past safely</h3>
+    <p>These two loops are often conflated, but they point in opposite directions: <b>forgetting</b> lowers retrievability, while <b>reconsolidation</b> updates content. They share one trigger: retrieval. Every retrieval records one <code>access</code> but does not add evidence; if the retrieval comes with a significant prediction error or new information, a new version is created; otherwise only the timestamp and accessibility are updated.</p>
+    <pre class="code"><span class="c"># Minimal reconsolidation decision</span>
+access_log.append(event_id, timestamp, cue, context)
+
+PE = |expected_outcome − observed_outcome|
+novelty = 1 − cos(new_info, existing_summary)
+
+if PE &gt; θ_pe or novelty &gt; θ_novelty:
+    new_version = revise(event, new_info, basis=evidence_ids)
+    new_version.supersedes = old_version.id
+    store.append(new_version)          <span class="c"># does not overwrite the old version</span>
+    enqueue_for_consolidation(new_version)
+else:
+    event.last_accessed = now
+    event.access_count += 1            <span class="c"># raises accessibility only; adds no evidence</span></pre>
+    <p>Forgetting follows the retention formula: <code>R = exp(−Δt / S) × (1 + α|valence|) × (0.5 + 0.5·utility) × relationship_factor</code>. Content below the threshold moves to cold archive; content below a lower threshold and not on the exemption list is removed from the active index. The raw event log is still retained, for auditing and for lawful tracing beyond the "right to be forgotten".</p>
+
+    <h3>5.7 Coupling between the loops: no single link can be optimized alone</h3>
+    <p>The six loops are not a pipeline but interlocking circuits. Optimizing any single link usually pushes the problem into another:</p>
+    <ul class="clean">
+      <li><b>Encoding ↔ retrieval.</b>If no cue is left at encoding time, retrieval will "draw a blank"; patterns of retrieval failure should feed back into the encoding strategy, telling the system "what to record for this kind of event next time".</li>
+      <li><b>Retrieval ↔ consolidation.</b>Events that are repeatedly accessed but never abstracted are prime candidates for consolidation; conversely, events never accessed and with no future utility should enter cold archive earlier.</li>
+      <li><b>Consolidation ↔ encoding.</b>The schemas formed by consolidation change the salience of the next encoding: information consistent with the schema is merged faster, while inconsistent information deserves deeper encoding.</li>
+      <li><b>Forgetting ↔ retrieval.</b>Forgetting reduces interference and makes retrieval more precise; but excessive forgetting makes the system "rediscover" lessons it has already learned. The retention formula and the exemption list are the regulating valve between the two.</li>
+    </ul>
+    <div class="note"><span class="tag">Engineering implication</span>Do not evaluate the system on "retrieval hit rate" alone. A system that optimizes only retrieval will tend to keep everything and refuse to forget; eventually the context becomes dirty and decisions slow down. Loop metrics must come in pairs: recall with precision, retention with false-deletion rate, compression ratio with information loss.</div>
+  </div>
+</section>

@@ -1,0 +1,137 @@
+<section class="sec" id="s6b" style="border-top:none;padding-top:0">
+  <div class="wrap">
+    <h3>6.5 Salience and attention: what enters encoding <span class="small">· evidence grade D</span></h3>
+    <p><b>Mechanism recap.</b>Encoding is not passive registration. Information must first pass attention and salience gating before it can produce durable change; attention is selection, not capacity. Whether an event is worth keeping depends on whether it makes a difference to future judgments, not on how "intense" it is.</p>
+    <p><b>Salience scoring.</b>Each new event is first given a score in 0–1:</p>
+    <pre class="code">salience = σ( w1*novelty + w2*goal_relevance + w3*social_impact
+            + w4*|valence| + w5*prediction_error + w6*explicit_importance )
+         * (1 + γ*impact_gap)        <span class="c"># event impact gap, not bodily state</span></pre>
+    <p>All six components can be estimated with lightweight models; <code>impact_gap</code> is the event impact gap of 2.7.1, applied as a multiplicative gate rather than a seventh independent weight. <code>novelty</code> uses distance from recent events/schemas; <code>goal_relevance</code> uses similarity to the current goals; <code>social_impact</code> uses relationship weight × the event's effect on status/commitments; <code>valence</code> uses affect classification; <code>prediction_error</code> uses the gap between outcome and expectation; <code>explicit_importance</code> captures explicit instructions such as "remember this".</p>
+    <p>Salience is not "emotional intensity" but "how much difference this makes to future judgment". Repeated routine, predictable small talk, and consequence-free details should be habituated rather than written down item by item; a surprise, a commitment, a change in a relationship boundary — those deserve a long-term engram.</p>
+    <p>Event impact enters salience through <code>impact_gap</code>: the higher the goal pressure, relationship strain, resource load, and uncertainty, and the more they exceed coping capacity, the more the event deserves priority. State-level explanations are tagged <code>state_bias</code> and are not written back as relationship traits; the machine does not maintain a "bodily state".</p>
+    <p>In implementation, do not have a large model "feel emotions" every turn; use a lightweight classifier/regressor to estimate these components from text and interaction history, then map them to parameters. That is cheap, reproducible, and avoids turning "emotion" into unexplainable mysticism.</p>
+    <div class="warn"><span class="tag">Guardrail</span>Salience changes only "whether to encode, whether to prioritize retrieval"; it does not change "what the fact is". It must never become an excuse for altering evidence, concealing conflicts, or manipulating the user's emotions; every decision must record the salience components at the time, for auditability.</div>
+
+    <h3>6.6 Working memory: 4±1 slots and gating <span class="small">· evidence grade A/B</span></h3>
+    <p><b>Mechanism recap.</b>Working memory capacity is about 4±1 chunks; the prefrontal cortex exhibits both sustained activity and "activity-silent" hidden states; the basal ganglia perform gating, deciding when to update and when to maintain.</p>
+    <p><b>Slot accounting.</b>The fixed header (the ratified self, unresolved commitments) is not counted in the 4±1 and occupies its own budget; the 4±1 counts only variable experience-type content. This way, current experience is not squeezed out as the self/commitments grow.</p>
+    <p><b>Slot design.</b>The ContextPacket has four fixed slot classes, at most five: <code>who</code> (person and identity), <code>goal</code> (current goals and success criteria), <code>constraint</code> (limits, commitments, boundaries), <code>uncertainty</code> (open questions and candidates). Each slot holds "content or a pointer", with source, confidence, and TTL.</p>
+    <pre class="code">Slot {
+  type: who | goal | constraint | uncertainty,
+  content: string | pointer(trace_id),
+  source_event_ids: [],
+  confidence: 0–1,
+  ttl: turns,
+  pinned: bool          <span class="c"># goals/commitments can be pinned by the Main Brain</span>
+}</pre>
+    <p><b>Gating.</b>Not every new piece of information can squeeze into a slot. The gate score is determined jointly by relevance, urgency, salience, and switch cost:</p>
+    <pre class="code">candidate = relevance * urgency * (1 + novelty)
+gain = candidate - current_slot_value - switch_cost
+if gain &gt; θ_gate and not current_slot.pinned:
+    replace(current_slot, candidate)</pre>
+    <p><b>Activity-silent.</b>A slot need not always hold the full text. It can hold only a <code>pointer(trace_id)</code>, and the Main Brain issues <code>EXPAND</code> to retrieve the details when needed. This keeps the context small while information remains reachable. This is the engineering version of "activity-silent": not all relevant memories have to be lit at once.</p>
+    <p><b>Overflow handling.</b>When candidates exceed 4±1: first merge slots on the same theme (chunking), then downgrade low-relevance slots to pointers, and finally drop the lowest scoring items while logging them in <code>dropped</code>. Do not truncate silently, or the system will "forget that it forgot something".</p>
+    <h4>6.6.1 The context window is not working memory</h4>
+    <p>Equating an LLM's context window directly with human working memory is a common but dangerous simplification. The two resemble each other only in "limited capacity"; below that, the nature of the limit is not the same.</p>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>Table 12 · Working memory and the context window</caption>
+        <thead><tr><th style="width:16%">Dimension</th><th style="width:38%">Human working memory</th><th>LLM context window</th></tr></thead>
+        <tbody>
+          <tr><td><b>Unit of capacity</b></td><td>About 4±1 chunks; chunks can grow with expertise</td><td>Number of tokens; semantic density may be high or low</td></tr>
+          <tr><td><b>Nature of the boundary</b></td><td>Elastic, task-dependent, trainable</td><td>Hard upper limit, set by model architecture</td></tr>
+          <tr><td><b>Content</b></td><td>Currently active representations + pointers that can be summoned at any time</td><td>All tokens actually placed in the window</td></tr>
+          <tr><td><b>Control</b></td><td>Attention, inhibition, goal maintenance, gating</td><td>attention weights + prompt orchestration</td></tr>
+          <tr><td><b>Compression</b></td><td>Chunking, schemas, gist extraction</td><td>Summarization, RAG, truncation</td></tr>
+          <tr><td><b>Extension</b></td><td>Notes, tools, other people, external memory</td><td>Tool calls, retrieval, files</td></tr>
+          <tr><td><b>Typical failure</b></td><td>Distraction, overload, forgetting</td><td>Lost-in-the-middle, interference from irrelevant information</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Three key differences. First, the human limit is "the number of chunks participating in a decision at once", not "how many characters fit"; an expert can compress a whole chess position or a block of code structure into a single chunk, so effective capacity varies with experience. Second, human working memory is an active control process that decides what enters and what is inhibited; a context window is a passive container — whatever is put in is there, and the model can only find it via attention on its own. Third, humans do not need to move all long-term memory into working memory but recall on demand through cues; if an LLM relies only on a long context, it is cramming long-term memory onto the stage as well, and both cost and interference rise.</p>
+    <p>Therefore the <code>ContextPacket</code> in this proposal is not "a smaller context window" but the <b>selection interface</b> of working memory: the 4±1 slots hold only the few blocks the current decision actually needs, while the rest remains in the event log, relationship graph, and semantic library, to be <code>EXPAND</code>ed on demand. 4±1 is not a requirement that the model read only four items, but a requirement to "select first, then expand". A larger context window does not automatically solve the memory problem; it only moves the bottleneck from "does not fit" to "selects inaccurately and dilutes attention".</p>
+    <div class="warn"><span class="tag">Guardrail</span>The Main Brain may "pin" a goal or commitment slot, and no Backend has the right to evict it; this corresponds to the Main Brain maintaining continuous control of the current task, and it also prevents the Backend from leading the Main Brain astray with high-salience information.</div>
+
+    <h3>6.7 Decision: arbitration between model-free and model-based <span class="small">· evidence grade B/C</span></h3>
+    <p><b>Mechanism recap.</b>The habit system (dorsal striatum) compresses high-frequency "situation—action—outcome" into a fast pathway; the goal-directed system (prefrontal cortex—hippocampus) simulates consequences internally and suits novel, high-stakes, explanation-demanding situations. Neither replaces the other; they are arbitrated by reliability, risk, and time pressure.</p>
+    <p><b>Fast path.</b>If the current situation signature hits the habit cache and "high confidence, low risk, tight time, stable outcome" are all satisfied, the Main Brain may directly adopt <b>ratified</b> (<code>status=ratified</code>) habit templates and skills; a <code>candidate</code> may serve only as a hint and may not directly drive action. Note: what is cached is a template of "how a similar situation was handled last time", not a decision that "this time it must be done this way"; the Main Brain may still veto.</p>
+    <p><b>Slow path.</b>Otherwise the Main Brain calls future simulation: generate 2–3 candidate scripts from related episodes and compare expected outcomes, risks, relationship effects, and value consistency. Future simulation provides only scenario drafts and risk warnings; it does not choose on the Main Brain's behalf.</p>
+    <pre class="code">if habit.match(sig) and habit.status == "ratified" and habit.confidence &gt; h
+   and scheduler.fast_path
+   and stakes &lt; s and time_pressure &gt; t:
+    policy = habit.context_template      <span class="c"># fast path: template only</span>
+else:
+    scenarios = future_sim(packet, options=3)
+    policy = main_brain.deliberate(scenarios, values, constraints)
+
+outcome = act(policy)
+delta = outcome.reward - policy.expected_value
+update_value(policy, delta)
+if abs(delta) &gt; θ_rpe: enqueue_for_consolidation(policy.event)</pre>
+    <p><b>Forming and abolishing habits.</b>A habit is created only when the same situation signature recurs ≥N times and the outcome is consistently positive; after ≥M consecutive failures, or a major negative consequence, it is immediately down-weighted and flagged "pending review". A habit saves effort; it is not an exemption from responsibility.</p>
+    <div class="warn"><span class="tag">Guardrail</span>The Backend may not "recommend taking the fast path". The choice between fast and slow path is judged by the Main Brain from the ContextPacket; the Backend may at most supply "historical success rate" and "risk signals", never "you should".</div>
+
+    <h4>6.7.1 How memory enters choice: precedents, expectations, and "remembering ≠ doing"</h4>
+    <p>Memory is not "recalled" at the moment of choice; it <b>changes the expected value of the options</b>. A precedent is (situation, action, outcome); its contribution to the current option is weighted by similarity, salience, and source reliability, and conflicting precedents are down-weighted rather than averaged:</p>
+    <pre class="code">V(a|s) = V0 + α · Σ w_i (r_i − V0) / max(1, Σ w_i)
+w_i = similarity_i × salience_i × reliability_i × (0.5 if conflict_i else 1)</pre>
+    <p>Three failure modes: <b>availability bias</b> — vivid events are overweighted; <b>source confusion</b> — taking hearsay for first-hand experience; <b>narrative completion</b> — treating a counterfactual as a fact. Source auditing, side-by-side conflict display, and evidence counting are the countermeasures.</p>
+    <p>Relationship memory changes trust, commitment, and boundary judgments, not factual recall; procedural memory and episodic memory are separate: <b>remembering how to do something is not the same as being able to do it</b>. Skill execution depends on the amount of practice, not on recall confidence; high recall confidence shows only that "it is remembered", not that "it can be done".</p>
+
+    <h4>6.7.2 The boundary of counterfactual simulation: it can only generate candidates, never be written as fact <span class="small">· evidence grade C/D</span></h4>
+    <p>Future simulation can generate candidates of the form "if this is done, this might happen", but it is not memory. The boundary must be hard-coded in the schema and the write gateway:</p>
+    <ul class="clean">
+      <li><b>The source is fixed as <code>simulation</code></b>, with <code>is_fact=false</code>; no degree of confidence can turn it into a fact.</li>
+      <li><b>It cannot be written into the event log</b> and cannot count toward <code>evidence_count</code>; a simulation is not an observation and cannot supply evidence for itself.</li>
+      <li><b>Only an observed outcome is an event</b>; only independent evidence can promote a candidate to <code>hypothesis</code>, and even then it remains a hypothesis, not a fact.</li>
+      <li><b>Failure modes</b>: imagination inflation (the more it is imagined, the truer it feels), source confusion (taking a simulation for an experience), narrative completion (filling memory gaps with counterfactuals). The countermeasures are source labels, write-gateway rejection, and audit sampling.</li>
+    </ul>
+    <p>In the system implementation, <code>simulation</code> and <code>event</code> use different schemas; the write gateway rejects <code>simulation → event</code> outright, rather than relying on a prompt reminding the model "don't believe it".</p>
+    <p><b>Reality monitoring does not rest on source labels alone.</b>Research published in Neuron in 2025 shows that reality judgments depend on the strength of activity produced by imagination or perception in mid-level visual cortex, and interact with binary judgments in the frontal lobes; fluctuations in activity predict imagination/perception confusion (Dijkstra et al. 2025). In engineering terms, simulated and retrieved content should carry both <code>source</code> and <code>signal_strength</code>; high vividness is not the same as truth, and the source label remains a hard constraint. Dreams are offline generation under low constraint and low reality monitoring; they are not written as a mechanism here, only the boundary of "write no facts, count no evidence" is kept.</p>
+    <p><b>Engineering thresholds (suggested, grade-D design values).</b>Split strength into three estimable terms: <code>strength = 0.4·perceptual_detail + 0.3·multimodal_coherence + 0.3·source_reliability</code>. Two classes of alert: <b>high-vividness simulation</b> — <code>strength &gt; 0.7</code> with a source of <code>simulation / compositional_replay</code>; <b>faint first-hand experience</b> — <code>strength &lt; 0.3</code> with a source of <code>direct</code>. The former warns "this may have been made up", the latter warns "this may be poorly remembered"; both only lower confidence and never rewrite facts directly.</p>
+
+    <h3>6.8 Relationship memory: the person–event bipartite graph <span class="small">· evidence grade C/D</span></h3>
+    <p><b>Mechanism recap.</b>Person knowledge, theory of mind, and autobiographical memory share a medial network; a relationship is not a single dimension but a set of multi-dimensional judgments — familiarity, closeness, trust, cooperation, commitment, boundaries, role; shared experience deepens a relationship and may also create distance.</p>
+    <p><b>Graph structure.</b>Use a bipartite graph to store "person—event", with participation records as edges; then use a relationship summary to store the multi-dimensional "individual—other" state. A person can summon events, and an event can summon persons; places, sounds, objects, and topics are all cue nodes.</p>
+    <pre class="code">Person --participates--> Event
+Person --relationship--> Relationship --evidence--> Event
+Event --cue--> Place / Sound / Object / Topic
+
+Relationship {
+  self_to_other: { familiarity, closeness, trust_scope, cooperation,
+                   commitment, boundaries, social_role,
+                   social_safety, belonging_need },
+  other_to_self: { ... },          <span class="c"># inferred, with uncertainty</span>
+  attachment_prior: { self_worth, other_availability },
+  interdependence: { satisfaction, alternatives, investment },
+  evidence_event_ids: [],
+  scope: work | family | public,
+  updated_at, confidence
+}</pre>
+    <p><b>Update rules.</b>A single interaction is only one piece of evidence; relationship dimensions aggregate over a sliding window and update with a slow learning rate:</p>
+    <pre class="code">for d in dimensions:
+    evidence = events_in_window(person, d)
+    target = weighted_mean(evidence, weights=[salience, recency, source])
+    value[d] = (1 - λ) * value[d] + λ * target
+    confidence[d] = calibrate(evidence_count, source_quality)</pre>
+    <p><b>Relationship strain term.</b>Relationship weight looks not only at interaction frequency but at whether the interaction reduced relationship strain: being responded to, being treated reliably, promises being kept. The update target becomes "evidence mean × strain reduction × reliability" rather than a plain moving average:</p>
+    <pre class="code">strain_gap = relationship_strain - perceived_support
+reliability = promises_kept / max(1, promises_made)
+target[d] = weighted_mean(evidence) * (1 + α * strain_reduction) * (1 + β * reliability)
+value[d] = (1 - λ) * value[d] + λ * target[d]</pre>
+    <p>Here <code>strain_reduction</code> is the drop in <code>strain_gap</code> across the interaction; <code>reliability</code> is the ratio of "doing what was said", not "how many kind words were said". These two quantities give relationship updates the meaning of event impact rather than merely counting interactions. Relationship weight updates still follow the proposal–ratification of 3.7: the Backend may only issue a <code>RelationshipProposal</code>, and only after Main Brain ratification does it enter the relationship summary.</p>
+    <p><b>Asymmetry.</b>"The individual trusts him" and "he trusts the individual" must be kept separate. The former can come from the individual's direct experience; the latter can come only from his behavior, hearsay, or inference, and must be marked with uncertainty. Collapsing the two into one "trust score" is the most common error in relationship memory.</p>
+    <p><b>Commitment tracking.</b>An unresolved commitment is an "open edge" on the relationship graph, carrying a deadline, counterpart, and status; it does not take part in forgetting decay until it is fulfilled, cancelled, or renegotiated. This is more useful than "remembering all conversations": relationships are often sustained not by recollection but by "whether what was promised was done".</p>
+    <h4>6.8.1 How relationship memory changes trust and commitment</h4>
+    <p>Relationship memory is not "remembering what he did" but where those precedents set the <b>thresholds of trust, commitment, and boundaries</b>. A single interaction is only one piece of evidence; negative precedents carry more weight, and conflicting precedents are down-weighted:</p>
+    <pre class="code">Δd = η · reliability · salience · (1 if positive else −λ) · (0.5 if conflict)
+d  ← clamp(d + Δd, −1, 1)
+commit_ok = trust ≥ τ and capacity ≥ cost</pre>
+    <p><b>Affect is not trust.</b>Hatred, dislike, and closeness are affect (<code>affect</code>); whether someone is worth trusting is an objective judgment about that person (<code>trust</code>). The two are stored and updated separately: hating someone does not prevent judging them reliable, and liking someone does not make them trustworthy. Retention uses affective intensity only; commitment uses trust and capacity.</p>
+    <p>λ &gt; 1 means negative precedents weigh more; a single event is not enough to change a trait and requires a count of independent evidence. Three failure modes: <b>overfitting to one event</b> (one late arrival and the verdict is "unreliable"), <b>negative spiral</b> (noticing only negative evidence), <b>boundary erosion</b> (compromising continuously until no boundary remains). The countermeasures are evidence counting, source auditing, and the proposal–ratification of 3.7. Repeated write-backs of the same <code>event_id</code> are idempotent: they do not recount evidence and do not amplify the relationship value a second time. Co-occurrence and actual interaction carry different weights: 0.3 for the former, 1.0 for the latter; "being in the same room" is not treated as "association". A relationship is not only closeness and hatred: familiarity, trust, cooperation, commitment, and boundaries are updated separately; <code>valence</code> is direction and <code>intensity</code> is strength; retention uses only <code>intensity</code>, while trust/commitment use the specific dimensions.</p>
+
+    <p><b>Boundary of the frontier evidence.</b>As of 2026, direct evidence for the "decontextualization" of autobiographical memory still consists mainly of preprints and indirect material; the current relationship update keeps a fixed slow learning rate and does not introduce a hard rule of "the more evidence, the lower the learning rate". Decontextualization is treated as a direction awaiting verification, not as an established conclusion.</p>
+
+    <div class="warn"><span class="tag">Guardrail</span>Do not elevate a single event directly into a person's trait. One late arrival does not equal "unreliable"; one act of help does not equal "close". A trait judgment requires at least several independent events, or one event of very large impact, with its basis and scope annotated.</div>
+  </div>
+</section>

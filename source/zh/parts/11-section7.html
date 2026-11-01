@@ -1,0 +1,94 @@
+<section class="sec" id="s7">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">07 · Context Economy</span>
+      <h2 class="sec-title">多模型分工与上下文经济</h2>
+      <p class="sec-sub">省上下文的关键，不是把提示词写短，而是让每个模型只面对自己那一小片世界。</p>
+    </div>
+
+    <p class="lead">“多智能体”常被误解为“多几个模型一起讨论”。如果每个模型都读同一份长上下文，再互相转发，成本会更高、噪声会更大。真正的分工是<b>按 schema 切分上下文</b>：人物识别只看脸、声、称呼；检索只看线索与索引；关系判断只看事件摘要；主脑只看 4±1 个槽位。跨层只传一个情境包，而不是把整段对话复制十遍。</p>
+
+    <h3>7.1 为什么要多个模型，而不是一个更大的模型</h3>
+    <div class="defs">
+      <div class="row"><div class="term">上下文隔离</div><div class="desc">每个后台角色只读自己需要的字段，输入从“整段对话”降到“一个结构化切片”。这既省 token，也减少无关信息对判断的干扰。</div></div>
+      <div class="row"><div class="term">能力专精</div><div class="desc">人物识别适合多模态小模型，显著性适合分类器，检索适合嵌入 + 图算法，主脑才需要大模型。用大模型做所有事，是成本与延迟的双重浪费。</div></div>
+      <div class="row"><div class="term">并行</div><div class="desc">感知、检索、关系判断可以同时跑；主脑只等“情境包”这一个汇合点。关键路径从“串行十步”变成“并行三路 + 一次编译”。</div></div>
+      <div class="row"><div class="term">故障隔离</div><div class="desc">检索错了，来源审计可以拦住；关系判断偏了，主脑可以看到依据与不确定性。一个巨型模型出错，往往整段回答一起错。</div></div>
+      <div class="row"><div class="term">可替换</div><div class="desc">每个角色有固定输入/输出 schema，可以单独换模型、换供应商、换版本，不必重写整个系统。</div></div>
+    </div>
+
+    <h3>7.2 模型档位与角色分配</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 13 · 角色—模型档位（示意）</caption>
+        <thead><tr><th style="width:20%">角色</th><th style="width:18%">建议档位</th><th style="width:24%">上下文规模</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>人物识别</td><td>小模型 / 多模态嵌入</td><td>1–2k</td><td>人脸/声纹/称呼匹配，输出候选与置信度</td></tr>
+          <tr><td>显著性</td><td>小模型 / 分类器</td><td>&lt;1k</td><td>六维打分，不需要生成</td></tr>
+          <tr><td>记忆检索</td><td>中模型 + 向量/图</td><td>3–5k</td><td>查询解析、多轮扩展、重排</td></tr>
+          <tr><td>关系判断</td><td>中模型</td><td>2–4k</td><td>读事件摘要与关系维度，输出带依据的判断</td></tr>
+          <tr><td>情境编译</td><td>中模型</td><td>4–6k</td><td>把候选压成 4±1 槽位，严格 token 预算</td></tr>
+          <tr><td>来源审计</td><td>中模型</td><td>3–5k</td><td>逐句核对来源、冲突、置信度</td></tr>
+          <tr><td>巩固重放</td><td>大模型（离线）</td><td>8–16k/批</td><td>批量重放、抽象、写知识/技能候选</td></tr>
+          <tr><td>未来模拟</td><td>大模型</td><td>4–8k</td><td>生成 2–3 个情景草案与风险</td></tr>
+          <tr><td>主脑（整合器官）</td><td>大模型</td><td>3–6k</td><td>情境包 + 价值/目标 + 当前对话</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>7.3 上下文契约</h3>
+    <p>每个 Agent 都必须有一份“上下文契约”：输入字段、输出 schema、最大 token、超时、失败回退。这比“角色提示词”更重要，因为它把“你应该只看这些”变成系统约束。</p>
+    <pre class="code">AgentContract {
+  name, role,
+  input_schema,            <span class="c"># 只允许这些字段进入上下文</span>
+  output_schema,           <span class="c"># 结构化输出，拒绝自由文本</span>
+  max_input_tokens,
+  max_output_tokens,
+  timeout_ms,
+  fallback,                <span class="c"># 失败时返回“未知”，不编造</span>
+  permissions: read | write | act
+}</pre>
+    <p>例如，人物识别 Agent 的输入只有人脸/声纹特征、称呼、最近一次出现的时间和地点；它看不到完整对话，也不需要知道合同条款。关系判断 Agent 只看到与当前人物相关的事件摘要与关系维度，不需要看到所有项目文档。这样每个模型的上下文都小，而且“该看什么”是设计出来的，不是碰运气。</p>
+
+    <h3>7.4 并行、缓存与惰性展开</h3>
+    <p>在线关键路径可以画成一个 DAG：感知与身份识别并行；身份确定后，检索与关系判断并行；两者汇合到情境编译；编译完成后主脑才启动。来源审计可以在编译后、主脑前跑一遍，也可以在主脑生成后做“事后审计”。</p>
+    <div class="diagram">
+      <div class="dtitle">图 3 · 在线关键路径</div>
+      <div class="flow six">
+        <div class="node"><b>T0</b>感知 / 分段</div><span class="ar">→</span>
+        <div class="node"><b>T1</b>人物识别 ∥ 显著性</div><span class="ar">→</span>
+        <div class="node"><b>T2</b>记忆检索 ∥ 关系判断</div><span class="ar">→</span>
+        <div class="node"><b>T3</b>情境编译</div><span class="ar">→</span>
+        <div class="node"><b>T4</b>主脑决策</div><span class="ar">→</span>
+        <div class="node"><b>T5</b>表达 / 行动</div>
+      </div>
+      <div class="dnote">T1 的两路可并行；T2 的两路可并行；T3 是唯一汇合点。来源审计可放在 T3 后（前置审计）或 T5 后（后置审计），前者更安全，后者更低延迟。</div>
+    </div>
+    <p><b>缓存。</b>人物档案、关系摘要、常用事件索引、嵌入向量都可以缓存；同一人物/项目的重复查询不必每次重算。缓存失效由事件写入触发，而不是固定 TTL。</p>
+    <p><b>惰性展开。</b>情境包只给“一句话 + 指针”；主脑需要细节时再发 <code>EXPAND</code>。这把“一次拉全量”变成“按需分页”，既省 token，又让主脑的注意力集中在当前问题。</p>
+
+    <h3>7.5 成本模型：省在哪里</h3>
+    <p>假设一个单体系统每轮把 50 段历史（约 30k tokens）塞进大模型；多模型方案每轮主脑只读 1k 情境包 + 2k 系统提示，后台十路平均 2k tokens 且大部分并行。粗略算，单轮总 token 不一定少（后台也要跑），但<b>大模型 token 大幅下降</b>，延迟由并行摊薄，且检索质量更高。真正的节省来自三件事：</p>
+    <ul class="clean">
+      <li><b>用小模型做分类/抽取。</b>显著性、人物识别、来源标签不需要大模型。</li>
+      <li><b>用结构代替原文。</b>事件记录、关系摘要、稀疏索引比整段对话短一个数量级。</li>
+      <li><b>用离线换在线。</b>巩固、抽象、去重放在夜间批处理，在线只做检索与编译。</li>
+    </ul>
+    <div class="note"><span class="tag">反直觉</span>多模型系统的总 token 可能比单体系统更高，但“主脑每轮必须读的 token”更低，决策质量更稳。优化目标不是总 token 最少，而是<b>每单位决策质量的最低成本</b>。</div>
+
+    <h3>7.6 与现有记忆架构的差异</h3>
+    <p>把本方案放到现有的“大模型记忆”谱系里，差异会清楚一些。它们大多在解决“如何把相关文本找回来”，而本方案在解决“记忆如何形成、如何改变、如何被信任、如何服务于决策”。</p>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 13b · 四类记忆架构的对照</caption>
+        <thead><tr><th style="width:18%">架构</th><th style="width:30%">核心机制</th><th>相对本方案缺什么</th></tr></thead>
+        <tbody>
+          <tr><td><b>RAG</b></td><td>切块、嵌入、向量 top-k、拼进提示词</td><td>没有编码门控、巩固、遗忘、来源审计与关系结构；检索到“相似”不等于“发生过”</td></tr>
+          <tr><td><b>MemGPT 类</b></td><td>把上下文当内存，做分页、换入换出</td><td>解决的是上下文容量，不是记忆语义；没有事件、版本、关系与离线蒸馏</td></tr>
+          <tr><td><b>Generative Agents 类</b></td><td>记忆流 + 反思 + 计划</td><td>有“记忆流”，但缺少事件级证据账本、多维关系、再巩固版本链与双系统仲裁</td></tr>
+          <tr><td><b>本方案</b></td><td>多存储 + 后台编译 + 主脑决策 + 离线巩固 + 来源审计</td><td>复杂度更高，需要更强的工程约束与评估；不适合所有轻量场景</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>

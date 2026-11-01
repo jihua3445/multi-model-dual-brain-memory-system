@@ -1,0 +1,54 @@
+<section class="part" id="part1">
+  <div class="wrap">
+    <div class="roman">Part I · Mechanism</div>
+    <h2>Understand the Brain First,<br>Then Design the System</h2>
+    <p class="part-deck">Memory is not a hard drive that can be read and written at will. It is a set of systems that compete with, inhibit, and complement one another: some handle fast binding, some slow abstraction; some maintain the present, some prune over the long term. To simulate it, you must first know what problem each part is solving.</p>
+    <div class="part-list">
+      <span><b>01</b> Memory is not storage</span>
+      <span><b>02</b> From mechanism to computational primitives</span>
+    </div>
+  </div>
+  <div class="ghost">01</div>
+</section>
+
+<section class="sec" id="s1">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">01 · Neuroscience of Memory</span>
+      <h2 class="sec-title">Memory Is Not Storage: A Dynamic System</h2>
+      <p class="sec-sub">Encoding, consolidation, retrieval, reconsolidation, forgetting — five stages, five different computational problems.</p>
+    </div>
+
+    <p class="lead">If you compare memory to a library, you naturally think of “acquisition, indexing, borrowing”. The brain is not like that. Not one book in the brain is preserved as it stands; every “borrowing” rebinds it, and may even rewrite a few pages. The brain is more like an archive that keeps rearranging itself: intake has a threshold, cataloguing relies on sparse indexes, a dedicated archivist merges similar files into summaries at night, and every reader leaves new marginalia. Understanding this process matters more than remembering the name of any brain region.</p>
+
+    <h3>1.1 The Multi-System Map: Memory Is Not One Ability</h3>
+    <p>Long-term memory divides into <b>declarative</b> (episodic: what one has experienced; semantic: what one knows) and <b>non-declarative</b> (procedural, priming, conditioning, habituation), plus a very small working memory and a relationship memory carrying emotional and social attributes. They depend on different brain systems, and their rules of writing and reading differ (Squire 2004; Eichenbaum 2004). The first design decision is not “build one larger store” but “build several stores with different write rates and read rules”.</p>
+
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>Table 1 · Memory systems at a glance</caption>
+        <thead><tr><th style="width:18%">System</th><th style="width:34%">The question it answers</th><th>Write / read characteristics</th></tr></thead>
+        <tbody>
+          <tr><td><b>Episodic</b></td><td>When, where, and with whom one experienced what</td><td>Fast, sparse, single-shot write; depends on indexing and pattern separation</td></tr>
+          <tr><td><b>Semantic</b></td><td>What the world is, how concepts relate</td><td>Slow, overlapping, statistical learning; relies on repetition and sleep distillation</td></tr>
+          <tr><td><b>Procedural</b></td><td>How to do something</td><td>Gradual, automatized; error-driven and reinforced</td></tr>
+          <tr><td><b>Relationship</b></td><td>Who this person is, what we have been through</td><td>Person–Event bidirectional binding; multi-dimensional, asymmetric, evidence-bearing</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>1.2 Encoding: Salience Gating and the Hippocampal Index</h3>
+    <p>Encoding first passes through attention and a salience gate: emotional arousal modulates hippocampal and cortical encoding (McGaugh 2000; Cahill &amp; McGaugh 1998), and an unexpectedly good outcome is marked as worth learning (Schultz et al. 1997). The hippocampus does not store the whole experience, only providing a <b>sparse index</b> (Teyler &amp; DiScenna 1986); the dentate gyrus performs <b>pattern separation</b> and CA3 performs <b>pattern completion</b>. At the molecular level, the coincidence detection of NMDA, together with CaMKII and AMPA changes in LTP, requires transcription and translation to persist (Bliss &amp; Lomo 1973; Malenka &amp; Bear 2004; Davis &amp; Squire 1984). A 2024 mouse study further found that CA1 engram cells show DNA double-strand breaks and TLR9–NF-κB signaling at encoding, suggesting that writing carries a cost and requires repair (Jovasevic et al. 2024; still a single mouse paradigm). Implication for the system: <b>a salience gate, an index gate, and an allocation gate</b> — missing any one of them and the design degrades into a full log.</p>
+
+    <h3>1.3 Consolidation: Sleep Replay and Schema Assimilation</h3>
+    <p><b>Synaptic consolidation</b> stabilizes early LTP on the scale of minutes to hours (Frey &amp; Morris 1997); <b>systems consolidation</b> hands the scaffolding over to the neocortex on the scale of days to years, while the hippocampus retains the index and detail (Squire &amp; Alvarez 1995; Nadel &amp; Moscovitch 1997). During sleep, slow oscillations, spindles, and hippocampal ripples couple, replaying the day's sequences (Staresina 2024; Schreiner et al. 2024); replay preferentially favors sequences that are highly salient, carry high prediction error, or relate to unfinished goals, and can also replay in reverse or simulate paths that never occurred (Foster &amp; Wilson 2006; Pfeiffer &amp; Foster 2013). Information compatible with a schema is assimilated faster (Tse et al. 2007). Implication for the system: <b>two paths — gist abstraction and detail retention</b>; first judge “which schema is this compatible with”, then decide how deep to write.</p>
+
+    <h3>1.4 Retrieval: Pattern Completion and Reconstruction</h3>
+    <p>Retrieval is not playback but <b>reconstruction</b>: the current goal, emotion, and knowledge are used to assemble fragments into a self-consistent story (Bartlett 1932; Loftus &amp; Palmer 1974). CA3 pattern completion lets a partial cue recall an entire memory, but it also over-completes: activating engram cells is sufficient to create a “false experience” (Ramirez et al. 2013). Encoding specificity determines whether a cue is effective (Tulving &amp; Thomson 1973); <b>source monitoring</b> determines whether this was experienced, heard, or imagined (Johnson et al. 1993). Implication for the system: multi-dimensional cues (person, place, time, emotion, goal) plus source tags; retrieval without a source is a defense that does not exist.</p>
+
+    <h3>1.5 Reconsolidation: Retrieval Is Rewriting</h3>
+    <p>Retrieval pushes a memory back into an unstable state, after which it must be consolidated again (Nader et al. 2000). It is not that “every recollection necessarily rewrites”: memory age, strength, prediction error, and contextual novelty determine whether updating occurs (Nader &amp; Hardt 2009); the clinical use of propranolol to weaken fear memory remains at the research stage (Kindt et al. 2009). Implication for the system: <b>retrieval is writing, but write a new version, never overwrite the old one</b>.</p>
+
+    <div class="pull">The stability of memory is not “unchanged”, but “safely updatable”.<span>What reconsolidation teaches the system: retrieval is writing, but what gets written is a new version, not an overwrite of the old one.</span></div>
+  </div>
+</section>

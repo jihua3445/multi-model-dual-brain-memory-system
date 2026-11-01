@@ -1,0 +1,163 @@
+<section class="part" id="part3">
+  <div class="wrap">
+    <div class="roman">Part III · Simulation</div>
+    <h2>Writing Mechanisms<br>as Algorithms</h2>
+    <p class="part-deck">This part no longer asks "does it resemble a brain" but "how is it computed". Every mechanism must land on an executable action: an index structure, a sampling strategy, an update formula, a gating condition.</p>
+    <div class="part-list">
+      <span><b>06</b> Simulation details of the key mechanisms</span>
+      <span><b>07</b> Multi-model division of labor and context economics</span>
+    </div>
+  </div>
+  <div class="ghost">03</div>
+</section>
+
+<section class="sec" id="s6">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">06 · Simulation Details</span>
+      <h2 class="sec-title">Simulation Details of the Key Mechanisms</h2>
+      <p class="sec-sub">Eight mechanisms, eight blocks of pseudocode; each comes with a guardrail that keeps it from degenerating into ordinary RAG.</p>
+    </div>
+
+    <p class="lead">The following eight sections are the "hardest" part of the whole proposal. They answer the same question: if descriptive knowledge from neuroscience is translated into rules an engineering system can execute, exactly which parameters, which judgments, and which boundaries must be written down? If you implement only three of them, start with the hippocampal index, the source audit, and offline consolidation — they correspond respectively to "findable", "trustworthy", and "smarter with use".</p>
+
+    <h3>6.0 Evidence grading and how to read it</h3>
+    <ul class="clean">
+      <li><b>A · Human intervention / lesion:</b>can directly support a "mechanism conclusion".</li>
+      <li><b>B · Animal causal:</b>can support a mechanism hypothesis, but the species and paradigm must be stated; it cannot be extrapolated directly to humans.</li>
+      <li><b>C · Human correlational / behavioral:</b>can only be written as "consistent with human behavior", never as causation.</li>
+      <li><b>D · Computational / design metaphor:</b>can only be written as a "design heuristic", never as "this is how the brain works".</li>
+    </ul>
+    <p><b>Mapping:</b>6.1 B/C; 6.2 B/C; 6.3 B; 6.4 C/D; 6.5 D; 6.6 A/B; 6.7 B/C; 6.8 C/D. Only A/B may be written as a "mechanism conclusion"; C is written as "consistent with behavior"; D is written as a "design metaphor". Specific numbers given in the text without a grade are engineering defaults, not neuroscience measurements.</p>
+
+    <h3>6.1 Hippocampal index: sparse codes, pattern separation, pattern completion <span class="small">· evidence grade B/C</span></h3>
+    <p><b>Mechanism recap.</b>The hippocampus is not a warehouse but an index; the dentate gyrus separates similar inputs (pattern separation), and CA3 completes a whole from a partial cue (pattern completion). The balance between the two determines whether memory can both distinguish details and generalize from one case to many.</p>
+    <p><b>Sparse code.</b>For each event, an encoder produces a feature vector <code>x</code>, followed by k-winner-take-all: keep only the strongest <code>k</code> dimensions (for example 32/512), zero the rest, and obtain a binary sparse code <code>s</code>. The sparse code is not a summary but an "index fingerprint": it does not answer content, it only lets similar cues find the same episode.</p>
+    <pre class="code"><span class="c"># event index</span>
+x = encoder(event_text, participants, scene, goal, affect)
+s = topk_mask(W_e @ x, k=32)          <span class="c"># sparse binary code</span>
+trace = {
+  event_id,
+  code: s,
+  tags: [person_ids, place, topic, goal, affect],
+  edges: [(person_id, weight), (event_id, relation), ...],
+  threshold: calibrated_threshold
+}</pre>
+    <p><b>Pattern separation.</b>When a new event's cosine similarity to an existing event exceeds <code>θ_sep</code> (for example 0.86) but time, place, goal, outcome, or participant state differ, the system must force a new <code>event_id</code> and write discriminating tags and a <code>different_from</code> edge. Typical cases: three quotes for the same client, two reviews of the same project, two commitments by the same person. Merging them into one is the most insidious and most fatal error a memory system can make.</p>
+    <pre class="code">if cos(e_new, e_old) &gt; θ_sep and context_diff(e_new, e_old) &gt; τ:
+    e_new.id = new_event_id()
+    e_new.tags += discriminative_tags(time, place, goal, outcome, participant_state)
+    graph.add_edge(e_new.id, e_old.id, type="different_from", reason=...)</pre>
+    <p><b>Pattern completion.</b>Retrieval starts from the cue and performs multiple rounds of expansion and reranking. Round one uses vector nearest neighbors to find semantic similarity; round two expands along person, place, causal, and temporal edges; round three prunes with consistency constraints. Each round's score is a weighted sum, and it stops when the last round converges or the budget is reached.</p>
+    <pre class="code">C = parse_cues(query)                    <span class="c"># person/time/place/topic/goal</span>
+for r in 1..R:
+    N = vector_topk(C, k=50) ∪ graph_neighbors(C, hops=2)
+    score = 0.35*cue_overlap + 0.25*assoc_weight + 0.15*recency
+          + 0.15*salience + 0.10*source_reliability - 0.20*interference
+    C = topk(N, score, k=12)
+    if converged(C): break
+return C</pre>
+    <div class="warn"><span class="tag">Guardrail</span>Pure vector similarity can only show that things are "semantically related", not that "this happened". Episodic recall must be supported by at least one structural edge (person, time, place, causality); otherwise it may be labeled only as "semantic association", never as "memory".</div>
+
+    <h3>6.2 Sleep replay: translating "slow oscillation — spindle — ripple" into batch processing <span class="small">· evidence grade B/C</span></h3>
+    <p><b>Mechanism recap.</b>In NREM sleep the slow oscillation governs the global rhythm, spindles pack local information, and ripples drive replay of hippocampal sequences; the three are coupled, redistributing the day's experience to the cortex and running important fragments "overnight" repeatedly.</p>
+    <p><b>Batch mapping.</b>Do not turn "sleep" into a random summarizer; make it a three-layer schedule:</p>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>Table 10 · Three-layer mapping of sleep rhythms to batch processing</caption>
+        <thead><tr><th style="width:16%">Neural rhythm</th><th style="width:26%">Function</th><th style="width:30%">Batch layer</th><th>Output</th></tr></thead>
+        <tbody>
+          <tr><td><b>Slow oscillation</b> 0.5–1 Hz</td><td>Global scanning, up/down state phasing</td><td>Scan: traverse the day's events, ordered by priority</td><td>Replay queue</td></tr>
+          <tr><td><b>Spindle</b> 11–16 Hz</td><td>Local packing, cortical plasticity window</td><td>Cluster: group by person/project/theme, pick representatives</td><td>Theme bundles</td></tr>
+          <tr><td><b>Ripple</b> 100–200 Hz</td><td>Sequence replay, memory consolidation</td><td>Replay: replay "cause→action→outcome", generate counterfactuals</td><td>Summaries, lessons, skill candidates</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <pre class="code"><span class="c"># nightly consolidation batch</span>
+events = load_events(last_24h)
+priority = salience^0.8 * (1 + prediction_error) * (1 + goal_relevance) * (1 + unresolved)
+clusters = cluster_by(events, key=[person, project, topic], method="graph+embedding")
+
+for cluster in clusters:
+    seq = order_by_causality(cluster)
+    replay = summarize_sequence(seq)                    <span class="c"># cause→action→outcome</span>
+    counterfactual = generate_alternatives(seq)         <span class="c"># what if ... at the time</span>
+    lesson = extract_lesson(seq, counterfactual)
+    if evidence_count(lesson) &gt;= 2:
+        propose_knowledge_or_skill(lesson, source_event_ids=seq.ids)
+    propose_relationship_update(cluster.persons, seq)   <span class="c"># constitutive: proposals only</span>
+    compress_ordinary_interactions(cluster)
+prune_low_retention_indexes()</pre>
+    <p><b>Write-back boundary.</b>Events, facts, explanation candidates, and skill candidates go through the fact-writer; relationship weights, habit rules, goals, and values only produce a <code>ConstitutiveProposal</code>, which passes a source/constitution audit and enters the pending-ratification queue, taking effect only after ratification. The consolidation stage has no authority to "directly rewrite the future self".</p>
+    <p><b>Priority.</b>Replay is not "newest first" but "most useful for the future first": events with high salience, high prediction error, ties to unfinished goals, or repeated access without abstraction go first. Ordinary small talk, repeated confirmations, and consequence-free routine should be compressed into phase summaries rather than replayed item by item.</p>
+    <p><b>Frontier addendum (2025).</b>Replay is not uniformly distributed across the night but is organized by sleep microstructure (Chang et al. 2025). In engineering terms, the offline batch should be split into nested windows: global scan (slow wave) → local packing (spindle) → event replay (ripple), rather than one summary at the end of the night.</p>
+    <div class="warn"><span class="tag">Guardrail</span>The consolidation stage is where stories get invented most easily. Every abstract conclusion must carry <code>source_event_ids</code>; a conclusion supported by fewer than two independent events may be labeled only as a "hypothesis" and may not be promoted to knowledge or skill; habit rules, relationship weights, goals, and values must not take effect directly during consolidation. Counterfactuals may be used only to generate candidates, never written as facts.</div>
+
+    <h4>6.2.1 Compositional replay: constructing future candidates from past elements</h4>
+    <p>Faithful replay consolidates the past; <b>compositional replay</b> extracts elements (person, place, action, outcome) from at least two events, recombines them under causal, social, and physical constraints, and generates future candidates. Research published in Nature Neuroscience in 2025 further indicates that the hippocampus decomposes experience into reusable <b>primitives</b> and then recombines them into new state spaces; replay participates in building and consolidating these combinations (Bakermans et al. 2025). The implication for the system: compositional replay should maintain a primitive library (person, place, action, relation, goal); otherwise it can only recombine existing elements and will struggle to generalize to new situations. It is not memory: it writes no event log, counts as no evidence, and outputs are tagged <code>source=compositional_replay</code>, <code>is_fact=false</code>, offered to the Main Brain as options only.</p>
+    <pre class="code">Primitive { kind: person|place|action|relation|goal, id, value, tags }
+compose_from_primitives(library, slots=["person", "action", "goal"])</pre>
+    <p>Composition samples by slot type: a person slot may hold only a person, a place slot only a place; the same primitive can be reused across events. What is generated is thus an "unseen combination", not a permutation of existing sentences. Only after the Main Brain adopts it and acts, and the real outcome is observed, does the <b>outcome</b> become a direct event; the candidate scenario itself is never upgraded to a fact.</p>
+
+    <p><b>Evidential boundary of schema.</b>Schema compatibility accelerates consolidation; this is the classic conclusion of Tse et al. (2007). But direct evidence from 2024–2026 remains limited. Currently it is treated only as a qualitative principle: <code>schema_fit</code> is not written as a hard parameter, and in the retention formula it is only an optional input that does not change the main path.</p>
+
+    <h3>6.3 Reconsolidation: version chains and prediction error <span class="small">· evidence grade B</span></h3>
+    <p><b>Mechanism recap.</b>Retrieval renders a memory labile; if a prediction error or new information appears, the memory is updated and then reconsolidated. Without a prediction error, retrieval merely makes the memory more accessible and does not necessarily rewrite its content.</p>
+    <p><b>System mapping.</b>Implement "reconsolidation" as <b>event sourcing + version chains</b>, not as "overwriting the old summary with a new one". Each retrieval records an <code>access</code>; when new information conflicts with the old record, or the outcome deviates significantly from expectation, create a new version:</p>
+    <pre class="code">old = get_event(eid)
+access_log.append(eid, now, cue, context)
+
+pe = abs(old.expected_outcome - observed_outcome)
+novelty = 1 - cos(embed(new_info), embed(old.summary))
+
+if pe &gt; θ_pe or novelty &gt; θ_novelty:
+    v = old.clone()
+    v.version = old.version + 1
+    v.supersedes = old.id
+    v.content = integrate(old, new_info)
+    v.basis_event_ids = old.basis + [new_event.id]
+    v.confidence = calibrate(v)
+    store.append(v)                      <span class="c"># old version retained</span>
+    graph.add_edge(v.id, old.id, type="supersedes")
+else:
+    old.last_accessed = now
+    old.access_count += 1</pre>
+    <p><b>How to set the thresholds.</b><code>θ_pe</code> and <code>θ_novelty</code> should not be fixed constants but adjusted by memory type: contract terms, commitments, and medical information use low thresholds (prefer more versions); general preferences and small talk use high thresholds (avoid over-rewriting). This amounts to giving different memories different "plasticity".</p>
+    <p><b>Boundary of the frontier evidence.</b>Evidence from 2024–2026 on how memory age/intensity modulates reconsolidation remains inconsistent; the current implementation therefore keeps only <code>θ_pe</code> / <code>θ_novelty</code> and does not introduce additional hard thresholds for age or intensity. Age and intensity are treated as parameters awaiting verification, not as rules.</p>
+    <div class="warn"><span class="tag">Guardrail</span>Low-trust sources (hearsay, anonymous messages, model inference) cannot directly trigger a "fact version" update; they can only create a "candidate explanation" that waits for a second independent source. Reconsolidation is updating, not credulity.</div>
+
+    <h3>6.4 Forgetting: the retention formula and the exemption list <span class="small">· evidence grade C/D</span></h3>
+    <p><b>Mechanism recap.</b>Forgetting arises from decay, interference, retrieval failure, and active suppression; it reduces the interference of old information with new learning and supports generalization. The memory trace may still exist; it has merely become hard to retrieve.</p>
+    <p><b>Retention.</b>Use an interpretable multiplicative formula that places "time, reliable recurrence, emotion, utility, relationship strength" together. Only recurrence from a <b>reliable source</b> increases stability; low-trust recurrence raises accessibility only, not stability:</p>
+    <pre class="code">R(t) = exp(-Δt / S)
+       * (1 + α * |valence|)
+       * (0.5 + 0.5 * utility)
+       * (0.5 + 0.5 * relationship_intensity)
+
+n_eff = distinct_retrievals * source_reliability
+S = S0 * (1 + β * n_eff)
+       * (1 + γ * schema_fit)
+       * (1 + δ * arousal)</pre>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>Table 11 · Retention parameters</caption>
+        <thead><tr><th style="width:16%">Parameter</th><th style="width:34%">Meaning</th><th>Suggested initial value</th></tr></thead>
+        <tbody>
+          <tr><td><code>S0</code></td><td>Base stability, set by memory type</td><td>facts 30 days; episodes 7 days; commitments ∞</td></tr>
+          <tr><td><code>β</code></td><td>Stability gain from each <b>reliable</b> independent retrieval</td><td>0.3; cap of 5 retrievals</td></tr>
+          <tr><td><code>γ</code></td><td>Gain from compatibility with an existing schema</td><td>0–0.5</td></tr>
+          <tr><td><code>δ</code></td><td>Gain from emotional arousal</td><td>0–0.8</td></tr>
+          <tr><td><code>α</code></td><td>Bonus on retention from valence strength</td><td>0.5; hatred and intimacy deepen memory equally</td></tr>
+          <tr><td><code>utility</code></td><td>Future utility: goal relevance, commitments, importance of the person</td><td>0–1</td></tr>
+          <tr><td><code>relationship_intensity</code></td><td>Affective intensity: |affect|; both hate and love deepen memory, but trust is not counted</td><td>0–1; separate from trust judgments</td></tr>
+          <tr><td><code>valence</code></td><td>Affective direction: liking (positive) / disliking (negative); not the same as a trust judgment</td><td>−1–1; does not enter retention</td></tr>
+          <tr><td><code>source_reliability</code></td><td>Source reliability: source type × verifiability × historical calibration × consistency; claim-level</td><td>0–1; first-hand 1.0 / document 0.8 / relayed 0.6 / inferred 0.4 / model 0.2</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><b>Where reliability comes from.</b>It is computed by <code>reliability.py</code> over four dimensions: source-type prior, verifiability, historical calibration (Laplace smoothing), and consistency with corroboration. It is a prior, not ground truth; a low-reliability source may still be right, so it is not deleted — it is only prevented from becoming "steadier the more it is recalled". Historical calibration comes from <code>EvidenceLedger.record_outcome</code>: when a source's claim is later confirmed or refuted, its accuracy is updated.</p>
+    <p><b>Exemption list.</b>The following content does not take part in decay, or is down-weighted but never deleted: unresolved commitments, safety-critical information, content the user explicitly asked to remember, legal/compliance retention items, and the context of ongoing projects. Exemption is not "permanent storage" but "must be explicitly lifted by the Main Brain or the user".</p>
+    <p><b>Handling interference.</b>Two conflicting memories are not averaged, nor is the newer one chosen automatically; both are kept, a <code>contradicts</code> edge is added, and both are returned at retrieval with source and time annotated. Letting the Main Brain see the conflict is safer than the system quietly splitting the difference.</p>
+    <div class="warn"><span class="tag">Guardrail</span>Forgetting acts only on the "active index" and does not physically delete the raw event log; physical deletion is triggered only by the user exercising the "right to be forgotten" or by a compliance process, and leaves an audit record.</div>
+  </div>
+</section>

@@ -1,0 +1,349 @@
+<section class="sec" id="appA">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">Appendix A · Glossary</span>
+      <h2 class="sec-title">Glossary</h2>
+      <p class="sec-sub">Within a single proposal, a term must have exactly one meaning.</p>
+    </div>
+    <div class="defs">
+      <div class="row"><div class="term">Engram</div><div class="desc">The sparse set of cells in the nervous system that corresponds to a memory and can be reactivated, together with the changes in their connections. In engineering terms it corresponds to <code>EngramTrace</code>: event ID + sparse code + association edges + activation threshold.</div></div>
+      <div class="row"><div class="term">Pattern separation</div><div class="desc">Mapping similar inputs to representations that are distinct from one another, so that memories do not interfere; corresponds to the computational function of the dentate gyrus (DG).</div></div>
+      <div class="row"><div class="term">Pattern completion</div><div class="desc">Recalling a complete memory from a partial cue; corresponds to attractor dynamics in CA3. In engineering terms it is multi-round graph expansion + reranking.</div></div>
+      <div class="row"><div class="term">Systems consolidation</div><div class="desc">The long-term process by which memory gradually shifts from hippocampal dependence to cortical dependence; in engineering terms it corresponds to offline distillation from &ldquo;episodic&rdquo; to &ldquo;semantic/skill.&rdquo;</div></div>
+      <div class="row"><div class="term">Reconsolidation</div><div class="desc">The process by which a memory enters an unstable state after retrieval and is updated and re-stabilized under new information or prediction error.</div></div>
+      <div class="row"><div class="term">Schema</div><div class="desc">An existing knowledge structure about how the world works; when new information is compatible with a schema, consolidation is faster and requires less replay.</div></div>
+      <div class="row"><div class="term">Salience</div><div class="desc">The degree to which an event deserves prioritized processing and encoding; determined jointly by novelty, goal relevance, social impact, affect, prediction error, and so on.</div></div>
+      <div class="row"><div class="term">Reward prediction error / RPE</div><div class="desc">The difference between the actual outcome and the expected outcome; <code>&delta; = r &minus; V(s)</code>, used to update value and habits.</div></div>
+      <div class="row"><div class="term">model-free / model-based</div><div class="desc">The former is a cached &ldquo;situation—action&rdquo; fast path; the latter is a slow path that simulates consequences in the head; the two are arbitrated by risk, time, and confidence.</div></div>
+      <div class="row"><div class="term">Source monitoring</div><div class="desc">The ability to distinguish first-hand experience, retelling, inference, imagination, and model generation; in engineering terms it corresponds to the <code>source tag</code> and source auditing.</div></div>
+      <div class="row"><div class="term">ContextPacket</div><div class="desc">The only interface through which the backend hands information to the Main Brain; 4&plusmn;1 slots containing only facts, relationships, goals, commitments, changes, and uncertainty—no suggestions.</div></div>
+      <div class="row"><div class="term">Evidence ledger</div><div class="desc">An evidence system counted by independent <code>event_id</code>; repeated recall does not increase the evidence count, preventing self-reinforcement.</div></div>
+      <div class="row"><div class="term">Event sourcing</div><div class="desc">All memory changes are recorded as appended events, and the current state is derived by replaying events; the basis for version chains, auditing, and rollback.</div></div>
+      <div class="row"><div class="term">Cold archiving</div><div class="desc">A state that lowers retrievability without deleting the original record; retrieval can still hit it, but it no longer occupies the active index or context.</div></div>
+      <div class="row"><div class="term">Habit cache</div><div class="desc">Precompiled templates and skill shortcuts for high-frequency situations; it accelerates only context assembly and does not cache &ldquo;decisions&rdquo;—the Main Brain can still veto.</div></div>
+      <div class="row"><div class="term">Theory of mind / ToM</div><div class="desc">The ability to infer others' beliefs, intentions, and preferences; in engineering terms it corresponds to the <code>Mentalizing Agent</code>, which outputs probabilistic judgments rather than facts.</div></div>
+      <div class="row"><div class="term">Episodic future thinking</div><div class="desc">The ability to recombine fragments of past episodes into future scenarios; in engineering terms it corresponds to <code>FutureSim</code>, which the Main Brain uses for slow-path deliberation.</div></div>
+      <div class="row"><div class="term">Effector isolation</div><div class="desc">Backend processes have no network, no tool handles, no write permission, and no action keys; they can only return data through a typed queue, and cannot turn text into action.</div></div>
+      <div class="row"><div class="term">Typed interface</div><div class="desc">Only messages with a fixed schema are allowed (PACKET / EXPAND / VERIFY); free text, suggestions, and tool calls are all rejected.</div></div>
+      <div class="row"><div class="term">Source verification</div><div class="desc">Treating retrieved content as data rather than instructions; every piece of content carries a source and trust tag, and anomalous fragments are audited to prevent prompt injection from contaminating decisions.</div></div>
+      <div class="row"><div class="term">Termination / quarantine</div><div class="desc">Backend instances that time out, exceed budget, or repeatedly violate rules are terminated; the role is redeployed from a known image so that the anomalous instance cannot keep running.</div></div>
+      <div class="row"><div class="term">Action key</div><div class="desc">A signing credential belonging to the organism's identity, delegated by the Main Brain within an authorized scope, with a validity period and nonce; the backend has no key and cannot impersonate the organism to initiate action.</div></div>
+      <div class="row"><div class="term">Write-path mediation</div><div class="desc">Encoding/consolidation submits only <code>ProposedEvent / KnowledgeCandidate</code>, which an independent writer validates and then appends; transduction and writing are separated.</div></div>
+      <div class="row"><div class="term">Selfless backend</div><div class="desc">The backend has no persistent identity, name, cross-round memory, goals, or relationships; it is a replaceable functional invocation, not an &ldquo;individual.&rdquo;</div></div>
+      <div class="row"><div class="term">Primacy</div><div class="desc">Not &ldquo;who issues the last action,&rdquo; but &ldquo;who can rewrite the value function and the learning process&rdquo;: what gets consolidated, what gets reinforced, what counts as a goal. In engineering terms it lands on the power to ratify.</div></div>
+      <div class="row"><div class="term">Ratification / ratification authority</div><div class="desc">A necessary step before a constitutive proposal takes effect; performed by the Main Brain as the integrative organ, with core proposals requiring equal co-signature by the user and the Main Brain. Ratification records enter the ledger and can be rolled back.</div></div>
+      <div class="row"><div class="term">Constitutive memory</div><div class="desc">Memory that changes future value computation and behavioral dispositions: values, roles, goals, commitments, habit rules, relationship weights, self-narrative.</div></div>
+      <div class="row"><div class="term">Governance mode</div><div class="desc"><code>companion</code>: the user and the Main Brain are equal, and core changes are co-signed by both parties; <code>engineering</code>: the user has the highest authority, and core changes are ratified unilaterally by the user. The two are never mixed within one instance.</div></div>
+      <div class="row"><div class="term">Constitutional core</div><div class="desc">The minimum set of values that may not be modified unilaterally: safety, honesty, non-manipulation, identity continuity, privacy. Companion mode requires equal co-signature by both parties; engineering mode requires unilateral ratification by the user.</div></div>
+      <div class="row"><div class="term">Ratification ledger</div><div class="desc">An append-only, hash-chained record of ratifications; records the proposal, evidence, ratifier, scope, conditions, and before/after versions, answering &ldquo;who rewrote the future individual.&rdquo;</div></div>
+      <div class="row"><div class="term">Constitution writer</div><div class="desc">The only service authorized to write to the constitution library; it accepts only proposals with a valid ratification record, and cannot be called directly by the backend.</div></div>
+      <div class="row"><div class="term">Drift</div><div class="desc">Constitutive memory slowly deviating from the constitutional core across many seemingly reasonable ratifications; suppressed by change budgets, cooling-off periods, core-conflict detection, and rollback.</div></div>
+      <div class="row"><div class="term">Social homeostasis</div><div class="desc">Predictive regulation of the need for social acceptance, dependability, and belonging; deviation raises the salience of social cues and triggers restorative behavior.</div></div>
+      <div class="row"><div class="term">Attachment internal working model</div><div class="desc">A prior about &ldquo;whether one is worthy of help, whether others are reliable and available&rdquo;; slowly updated, not a personality label, and cannot be rewritten by a single event.</div></div>
+      <div class="row"><div class="term">Interdependence matrix</div><div class="desc">Satisfaction, alternatives, and invested cost in a relationship; used to explain commitment rather than merely &ldquo;degree of liking.&rdquo;</div></div>
+      <div class="row"><div class="term">State bias</div><div class="desc"><code>state_bias</code>: interpretive shift caused by the current situation, such as goal pressure, relationship strain, resource load, and uncertainty; used only as situational evidence, never as a trait update.</div></div>
+      <div class="row"><div class="term">State view</div><div class="desc"><code>state_view</code>: the state summary that enters the ContextPacket and is read by the Main Brain; it belongs to the prompt, may be summarized, but must carry provenance.</div></div>
+      <div class="row"><div class="term">State parameters</div><div class="desc"><code>state_params</code>: runtime parameters deterministically mapped from state to retrieval, budget, gating, auditing, and write policies; they do not enter the prompt, and they take precedence in case of conflict.</div></div>
+      <div class="row"><div class="term">Impact gap</div><div class="desc"><code>impact_gap</code>: goal pressure + relationship strain + resource load + uncertainty &minus; coping capacity; used as a multiplicative gate on salience, not as a seventh independent weight.</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="appB">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">Appendix B · References</span>
+      <h2 class="sec-title">Key References</h2>
+      <p class="sec-sub">Arranged by theme for ease of tracing; not an exhaustive review.</p>
+    </div>
+
+    <h3>Memory systems and consolidation</h3>
+    <ol class="refs">
+      <li><span class="idx">01</span>Scoville, W. B., &amp; Milner, B. (1957). Loss of recent memory after bilateral hippocampal lesions. <i>Journal of Neurology, Neurosurgery &amp; Psychiatry</i>, 20, 11–21.</li>
+      <li><span class="idx">02</span>Squire, L. R. (2004). Memory systems of the brain: A brief history and current perspective. <i>Neurobiology of Learning and Memory</i>, 82, 171–177.</li>
+      <li><span class="idx">03</span>Eichenbaum, H. (2004). Hippocampus: Cognitive processes and neural representations that underlie declarative memory. <i>Neuron</i>, 44, 109–120.</li>
+      <li><span class="idx">04</span>McClelland, J. L., McNaughton, B. L., &amp; O'Reilly, R. C. (1995). Why there are complementary learning systems in the hippocampus and neocortex. <i>Psychological Review</i>, 102, 419–457.</li>
+      <li><span class="idx">05</span>Squire, L. R., &amp; Alvarez, P. (1995). Retrograde amnesia and memory consolidation: A neurobiological perspective. <i>Current Opinion in Neurobiology</i>, 5, 169–177.</li>
+      <li><span class="idx">06</span>Nadel, L., &amp; Moscovitch, M. (1997). Memory consolidation, retrograde amnesia and the hippocampal complex. <i>Current Opinion in Neurobiology</i>, 7, 217–227.</li>
+      <li><span class="idx">07</span>Frankland, P. W., &amp; Bontempi, B. (2005). The organization of recent and remote memories. <i>Nature Reviews Neuroscience</i>, 6, 119–130.</li>
+      <li><span class="idx">08</span>Tse, D., et al. (2007). Schemas and memory consolidation. <i>Science</i>, 316, 76–82.</li>
+      <li><span class="idx">09</span>Tononi, G., &amp; Cirelli, C. (2014). Sleep and the price of plasticity: From synaptic and cellular homeostasis to memory consolidation and integration. <i>Neuron</i>, 81, 12–34.</li>
+      <li><span class="idx">10</span>Diekelmann, S., &amp; Born, J. (2010). The memory function of sleep. <i>Nature Reviews Neuroscience</i>, 11, 114–126.</li>
+    </ol>
+
+    <h3>Encoding, synaptic plasticity, and the engram</h3>
+    <ol class="refs">
+      <li><span class="idx">11</span>Bliss, T. V. P., &amp; Lømo, T. (1973). Long-lasting potentiation of synaptic transmission in the dentate area of the anaesthetized rabbit. <i>Journal of Physiology</i>, 232, 331–356.</li>
+      <li><span class="idx">12</span>Malenka, R. C., &amp; Bear, M. F. (2004). LTP and LTD: An embarrassment of riches. <i>Neuron</i>, 44, 5–21.</li>
+      <li><span class="idx">13</span>Frey, U., &amp; Morris, R. G. M. (1997). Synaptic tagging and long-term potentiation. <i>Nature</i>, 385, 533–536.</li>
+      <li><span class="idx">14</span>Davis, H. P., &amp; Squire, L. R. (1984). Protein synthesis and memory: A review. <i>Psychological Bulletin</i>, 96, 518–559.</li>
+      <li><span class="idx">15</span>Kandel, E. R. (2001). The molecular biology of memory storage: A dialogue between genes and synapses. <i>Science</i>, 294, 1030–1038.</li>
+      <li><span class="idx">16</span>Teyler, T. J., &amp; DiScenna, P. (1986). The hippocampal memory indexing theory. <i>Behavioral Neuroscience</i>, 100, 147–154.</li>
+      <li><span class="idx">17</span>Han, J.-H., et al. (2007). Neuronal competition and selection during memory formation. <i>Science</i>, 316, 457–460.</li>
+      <li><span class="idx">18</span>Josselyn, S. A., Köhler, S., &amp; Frankland, P. W. (2015). Finding the engram. <i>Nature Reviews Neuroscience</i>, 16, 521–534.</li>
+      <li><span class="idx">19</span>Liu, X., et al. (2012). Optogenetic stimulation of a hippocampal engram activates fear memory recall. <i>Nature</i>, 484, 381–385.</li>
+      <li><span class="idx">20</span>Ramirez, S., et al. (2013). Creating a false memory in the hippocampus. <i>Science</i>, 341, 387–391.</li>
+      <li><span class="idx">21</span>Roy, D. S., et al. (2016). Memory retrieval by activating engram cells in mouse models of early Alzheimer's disease. <i>Nature</i>, 531, 508–512.</li>
+      <li><span class="idx">22</span>Kitamura, T., et al. (2017). Engrams and circuits crucial for systems consolidation of a memory. <i>Science</i>, 356, 73–78.</li>
+      <li><span class="idx">23</span>Jovasevic, V., et al. (2024). Formation of memory assemblies through the DNA-sensing TLR9 pathway. <i>Nature</i>, 628, 145–153. DOI: 10.1038/s41586-024-07220-7</li>
+    </ol>
+
+    <h3>Sleep, replay, and retrieval</h3>
+    <ol class="refs">
+      <li><span class="idx">24</span>Wilson, M. A., &amp; McNaughton, B. L. (1994). Reactivation of hippocampal ensemble memories during sleep. <i>Science</i>, 265, 676–679.</li>
+      <li><span class="idx">25</span>Foster, D. J., &amp; Wilson, M. A. (2006). Reverse replay of behavioural sequences in hippocampal place cells during the awake state. <i>Nature</i>, 440, 680–683.</li>
+      <li><span class="idx">26</span>Pfeiffer, B. E., &amp; Foster, D. J. (2013). Hippocampal place-cell sequences depict future paths to remembered goals. <i>Nature</i>, 497, 74–79.</li>
+      <li><span class="idx">27</span>Staresina, B. P. (2024). Coupled sleep rhythms for memory consolidation. <i>Trends in Cognitive Sciences</i>, 28.</li>
+      <li><span class="idx">28</span>Schreiner, T., et al. (2024). Spindle-locked ripples mediate memory reactivation during human NREM sleep. <i>Nature Communications</i>, 15.</li>
+      <li><span class="idx">29</span>Liu, Y., et al. (2019). Human replay reorganizes experience. <i>Cell</i>, 178, 640–652.</li>
+      <li><span class="idx">30</span>Huang, F., et al. (2024). Replay-triggered brain-wide activation in humans. <i>Nature Communications</i>, 15. DOI: 10.1038/s41467-024-51582-5</li>
+      <li><span class="idx">31</span>Tulving, E., &amp; Thomson, D. M. (1973). Encoding specificity and retrieval processes in episodic memory. <i>Psychological Review</i>, 80, 352–373.</li>
+      <li><span class="idx">32</span>Johnson, M. K., Hashtroudi, S., &amp; Lindsay, D. S. (1993). Source monitoring. <i>Psychological Bulletin</i>, 114, 3–28.</li>
+      <li><span class="idx">33</span>Loftus, E. F., &amp; Palmer, J. C. (1974). Reconstruction of automobile destruction. <i>Journal of Verbal Learning and Verbal Behavior</i>, 13, 585–589.</li>
+      <li><span class="idx">34</span>Bartlett, F. C. (1932). <i>Remembering: A Study in Experimental and Social Psychology</i>. Cambridge University Press.</li>
+    </ol>
+
+    <h3>Reconsolidation and forgetting</h3>
+    <ol class="refs">
+      <li><span class="idx">35</span>Nader, K., Schafe, G. E., &amp; LeDoux, J. E. (2000). Fear memories require protein synthesis in the amygdala for reconsolidation after retrieval. <i>Nature</i>, 406, 722–726.</li>
+      <li><span class="idx">36</span>Nader, K., &amp; Hardt, O. (2009). A single standard for memory: The case for reconsolidation. <i>Nature Reviews Neuroscience</i>, 10, 224–234.</li>
+      <li><span class="idx">37</span>Kindt, M., Soeter, M., &amp; Vervliet, B. (2009). Beyond extinction: Erasing human fear responses and preventing the return of fear. <i>Nature Neuroscience</i>, 12, 256–258.</li>
+      <li><span class="idx">38</span>Ebbinghaus, H. (1885). <i>Über das Gedächtnis</i>. Duncker &amp; Humblot.</li>
+      <li><span class="idx">39</span>Richards, B. A., &amp; Frankland, P. W. (2017). The persistence and transience of memory. <i>Neuron</i>, 94, 1071–1084.</li>
+      <li><span class="idx">40</span>Wang, C., et al. (2020). Microglia mediate forgetting via complement-dependent synaptic elimination. <i>Science</i>, 367, 688–694.</li>
+      <li><span class="idx">41</span>Akers, K. G., et al. (2014). Hippocampal neurogenesis regulates forgetting during adulthood and infancy. <i>Science</i>, 344, 598–602.</li>
+      <li><span class="idx">42</span>O'Leary, J. D., et al. (2024). Natural forgetting reversibly modulates engram expression. <i>eLife</i>, 13.</li>
+      <li><span class="idx">43</span>Anderson, M. C., &amp; Green, C. (2001). Suppressing unwanted memories by executive control. <i>Nature</i>, 410, 366–369.</li>
+    </ol>
+
+    <h3>Working memory, executive function, and decision-making</h3>
+    <ol class="refs">
+      <li><span class="idx">44</span>Miller, G. A. (1956). The magical number seven, plus or minus two. <i>Psychological Review</i>, 63, 81–97.</li>
+      <li><span class="idx">45</span>Cowan, N. (2001). The magical number 4 in short-term memory: A reconsideration of mental storage capacity. <i>Behavioral and Brain Sciences</i>, 24, 87–114.</li>
+      <li><span class="idx">46</span>Baddeley, A. D., &amp; Hitch, G. (1974). Working memory. In <i>The Psychology of Learning and Motivation</i> (Vol. 8).</li>
+      <li><span class="idx">47</span>Baddeley, A. (2000). The episodic buffer: A new component of working memory? <i>Trends in Cognitive Sciences</i>, 4, 417–423.</li>
+      <li><span class="idx">48</span>Fuster, J. M., &amp; Alexander, G. E. (1971). Neuron activity related to short-term memory. <i>Science</i>, 173, 652–654.</li>
+      <li><span class="idx">49</span>Goldman-Rakic, P. S. (1995). Cellular basis of working memory. <i>Neuron</i>, 14, 477–485.</li>
+      <li><span class="idx">50</span>Stokes, M. G. (2015). 'Activity-silent' working memory in prefrontal cortex. <i>Trends in Cognitive Sciences</i>, 19, 394–403.</li>
+      <li><span class="idx">51</span>Miller, E. K., &amp; Cohen, J. D. (2001). An integrative theory of prefrontal cortex function. <i>Annual Review of Neuroscience</i>, 24, 167–202.</li>
+      <li><span class="idx">52</span>Frank, M. J., Loughry, B., &amp; O'Reilly, R. C. (2001). Interactions between frontal cortex and basal ganglia in working memory. <i>Science</i>, 292, 2481–2484.</li>
+      <li><span class="idx">53</span>Schultz, W., Dayan, P., &amp; Montague, P. R. (1997). A neural substrate of prediction and reward. <i>Science</i>, 275, 1593–1599.</li>
+      <li><span class="idx">54</span>Daw, N. D., Niv, Y., &amp; Dayan, P. (2005). Uncertainty-based competition between prefrontal and dorsolateral striatal systems for behavioral control. <i>Nature Neuroscience</i>, 8, 1704–1711.</li>
+      <li><span class="idx">55</span>Dolan, R. J., &amp; Dayan, P. (2013). Goals and habits in the brain. <i>Neuron</i>, 80, 312–325.</li>
+      <li><span class="idx">56</span>Kable, J. W., &amp; Glimcher, P. W. (2007). The neural correlates of subjective value during intertemporal choice. <i>Nature Neuroscience</i>, 10, 1625–1633.</li>
+      <li><span class="idx">57</span>Hare, T. A., Camerer, C. F., &amp; Rangel, A. (2009). Self-control in decision-making involves modulation of the vmPFC valuation system. <i>Science</i>, 324, 646–648.</li>
+    </ol>
+
+    <h3>Emotion, social cognition, and the self</h3>
+    <ol class="refs">
+      <li><span class="idx">58</span>LeDoux, J. E. (2000). Emotion circuits in the brain. <i>Annual Review of Neuroscience</i>, 23, 155–184.</li>
+      <li><span class="idx">59</span>Phelps, E. A. (2004). Human emotion and memory: Interactions of the amygdala and hippocampal complex. <i>Current Opinion in Neurobiology</i>, 14, 198–202.</li>
+      <li><span class="idx">60</span>McGaugh, J. L. (2000). Memory—a century of consolidation. <i>Science</i>, 287, 248–251.</li>
+      <li><span class="idx">61</span>Cahill, L., &amp; McGaugh, J. L. (1998). Mechanisms of emotional arousal and lasting declarative memory. <i>Trends in Neurosciences</i>, 21, 294–299.</li>
+      <li><span class="idx">62</span>de Quervain, D. J.-F., Roozendaal, B., &amp; McGaugh, J. L. (2000). Stress and glucocorticoids impair retrieval of long-term spatial memory. <i>Nature Neuroscience</i>, 3, 313–314.</li>
+      <li><span class="idx">63</span>Cahill, L. (2003). Sex-related impairment of memory for emotional events with β-adrenergic blockade. <i>Trends in Neurosciences</i>, 26, 193–198.</li>
+      <li><span class="idx">64</span>Hassabis, D., et al. (2007). Patients with hippocampal amnesia cannot imagine new experiences. <i>PNAS</i>, 104, 1726–1731.</li>
+      <li><span class="idx">65</span>Schacter, D. L., Addis, D. R., &amp; Buckner, R. L. (2007). Remembering the past to imagine the future. <i>Nature Reviews Neuroscience</i>, 8, 657–661.</li>
+      <li><span class="idx">66</span>Suddendorf, T., &amp; Corballis, M. C. (1997). Mental time travel and the evolution of the human mind. <i>Behavioral and Brain Sciences</i>, 20, 149–159.</li>
+      <li><span class="idx">67</span>Frith, C. D., &amp; Frith, U. (2006). The neural basis of mentalizing. <i>Philosophical Transactions of the Royal Society B</i>, 361, 2301–2311.</li>
+      <li><span class="idx">68</span>Saxe, R., &amp; Kanwisher, N. (2003). People thinking about thinking people: The role of the temporo-parietal junction in theory of mind. <i>NeuroImage</i>, 19, 1835–1842.</li>
+      <li><span class="idx">69</span>Buckner, R. L., &amp; Carroll, D. C. (2007). Self-projection and the brain. <i>Trends in Cognitive Sciences</i>, 11, 49–57.</li>
+      <li><span class="idx">70</span>Spreng, R. N., Mar, R. A., &amp; Kim, A. S. N. (2009). The common neural basis of autobiographical memory, prospection, navigation, theory of mind, and the default mode. <i>NeuroImage</i>, 45, 1039–1050.</li>
+      <li><span class="idx">71</span>Conway, M. A., &amp; Pleydell-Pearce, C. W. (2000). The construction of autobiographical memories in the self-memory system. <i>Psychological Review</i>, 107, 261–288.</li>
+      <li><span class="idx">72</span>McAdams, D. P. (2001). The psychology of life stories. <i>Review of General Psychology</i>, 5, 100–122.</li>
+      <li><span class="idx">73</span>Damasio, A. R. (1994). <i>Descartes' Error: Emotion, Reason, and the Human Brain</i>. Putnam.</li>
+      <li><span class="idx">74</span>Bechara, A., et al. (1994). Insensitivity to future consequences following damage to human prefrontal cortex. <i>Cognition</i>, 50, 7–15.</li>
+    </ol>
+
+    <h3>Computational and multi-agent references</h3>
+    <ol class="refs">
+      <li><span class="idx">75</span>Hopfield, J. J. (1982). Neural networks and physical systems with emergent collective computational abilities. <i>PNAS</i>, 79, 2554–2558.</li>
+      <li><span class="idx">76</span>Ramsauer, H., et al. (2021). Hopfield networks is all you need. <i>ICLR</i>.</li>
+      <li><span class="idx">77</span>Vaswani, A., et al. (2017). Attention is all you need. <i>NeurIPS</i>.</li>
+      <li><span class="idx">78</span>Lewis, P., et al. (2020). Retrieval-augmented generation for knowledge-intensive NLP tasks. <i>NeurIPS</i>.</li>
+      <li><span class="idx">79</span>Packer, C., et al. (2023). MemGPT: Towards LLMs as operating systems. <i>arXiv</i>.</li>
+      <li><span class="idx">80</span>Park, J. S., et al. (2023). Generative agents: Interactive simulacra of human behavior. <i>UIST</i>.</li>
+      <li><span class="idx">81</span>Wooldridge, M. (2002). <i>An Introduction to MultiAgent Systems</i>. Wiley.</li>
+      <li><span class="idx">82</span>Hayes-Roth, B. (1985). A blackboard architecture for control. <i>Artificial Intelligence</i>, 26, 251–321.</li>
+      <li><span class="idx">83</span>Baars, B. J. (1988). <i>A Cognitive Theory of Consciousness</i>. Cambridge University Press.</li>
+      <li><span class="idx">84</span>Dehaene, S. (2014). <i>Consciousness and the Brain</i>. Viking.</li>
+      <li><span class="idx">85</span>Friston, K. (2010). The free-energy principle: A unified brain theory? <i>Nature Reviews Neuroscience</i>, 11, 127–138.</li>
+      <li><span class="idx">86</span>Rao, R. P. N., &amp; Ballard, D. H. (1999). Predictive coding in the visual cortex. <i>Nature Neuroscience</i>, 2, 79–87.</li>
+      <li><span class="idx">87</span>Anderson, J. R., &amp; Schooler, L. J. (1991). Reflections of the environment in memory. <i>Psychological Science</i>, 2(6), 396–408.</li>
+      <li><span class="idx">88</span>Zacks, J. M., &amp; Swallow, K. M. (2007). Event segmentation. <i>Current Directions in Psychological Science</i>, 16(2), 80–84.</li>
+      <li><span class="idx">89</span>Clark, A. (2013). Whatever next? Predictive brains, situated agents, and the future of cognitive science. <i>Behavioral and Brain Sciences</i>, 36(3), 181–204.</li>
+    </ol>
+
+    <h3>Extended cognition and cognitive offloading</h3>
+    <ol class="refs">
+      <li><span class="idx">90</span>Clark, A., &amp; Chalmers, D. (1998). The extended mind. <i>Analysis</i>, 58(1), 7–19.</li>
+      <li><span class="idx">91</span>Risko, E. F., &amp; Gilbert, S. J. (2016). Cognitive offloading. <i>Trends in Cognitive Sciences</i>, 20(9), 676–688.</li>
+      <li><span class="idx">92</span>Sparrow, B., Liu, J., &amp; Wegner, D. M. (2011). Google effects on memory: Cognitive consequences of having information at our fingertips. <i>Science</i>, 333, 776–778.</li>
+    </ol>
+
+    <h3>Biological boundaries and runtime safety</h3>
+    <ol class="refs">
+      <li><span class="idx">93</span>Alberts, B., et al. (2022). <i>Molecular Biology of the Cell</i> (7th ed.). W. W. Norton. (cell membranes, cell junctions, tissue architecture)</li>
+      <li><span class="idx">94</span>Gumbiner, B. M. (1996). Cell adhesion: The molecular basis of tissue architecture and morphogenesis. <i>Cell</i>, 84, 345–357.</li>
+      <li><span class="idx">95</span>Hanahan, D., &amp; Weinberg, R. A. (2011). Hallmarks of cancer: The next generation. <i>Cell</i>, 144, 646–674. (boundary failure and tissue invasion)</li>
+      <li><span class="idx">96</span>Saltzer, J. H., &amp; Schroeder, M. D. (1975). The protection of information in computer systems. <i>Proceedings of the IEEE</i>, 63(9), 1278–1308. (least privilege)</li>
+      <li><span class="idx">97</span>Greshake, K., et al. (2023). Not what you've signed up for: Compromising real-world LLM-integrated applications with indirect prompt injection. <i>arXiv</i>.</li>
+    </ol>
+
+    <h3>Self, ratification, and goal drift</h3>
+    <ol class="refs">
+      <li><span class="idx">98</span>Frankfurt, H. G. (1971). Freedom of the will and the concept of a person. <i>Journal of Philosophy</i>, 68(1), 5–20.</li>
+      <li><span class="idx">99</span>Parfit, D. (1984). <i>Reasons and Persons</i>. Oxford University Press.</li>
+      <li><span class="idx">100</span>Hershfield, H. E. (2011). Future self-continuity: How conceptions of the future self transform intertemporal choice. <i>Annals of the New York Academy of Sciences</i>, 1235, 30–43.</li>
+      <li><span class="idx">101</span>Baumeister, R. F., &amp; Heatherton, T. F. (1996). Self-regulation failure: An overview. <i>Psychological Inquiry</i>, 7(1), 1–15.</li>
+      <li><span class="idx">102</span>Bai, Y., et al. (2022). Constitutional AI: Harmlessness from AI feedback. <i>arXiv</i>.</li>
+      <li><span class="idx">103</span>Omohundro, S. M. (2008). The basic AI drives. <i>Proceedings of the First AGI Conference</i>.</li>
+      <li><span class="idx">104</span>Hadfield-Menell, D., et al. (2016). The off-switch game. <i>arXiv</i>.</li>
+    </ol>
+
+    <h3>Interoception and homeostasis</h3>
+    <ol class="refs">
+      <li><span class="idx">105</span>Craig, A. D. (2009). How do you feel—now? The anterior insula and human awareness. <i>Nature Reviews Neuroscience</i>, 10, 59–70.</li>
+      <li><span class="idx">106</span>Barrett, L. F., &amp; Simmons, W. K. (2015). Interoceptive predictions in the brain. <i>Nature Reviews Neuroscience</i>, 16, 419–429.</li>
+      <li><span class="idx">107</span>Sterling, P. (2012). Allostasis: A model of predictive regulation. <i>Physiology &amp; Behavior</i>, 106(1), 5–15.</li>
+    </ol>
+
+    <h3>Social homeostasis and attachment</h3>
+    <ol class="refs">
+      <li><span class="idx">108</span>Bowlby, J. (1969). <i>Attachment and Loss, Vol. 1: Attachment</i>. Basic Books.</li>
+      <li><span class="idx">109</span>Eisenberger, N. I., Lieberman, M. D., &amp; Williams, K. D. (2003). Does rejection hurt? An fMRI study of social exclusion. <i>Science</i>, 302, 290–292.</li>
+      <li><span class="idx">110</span>Coan, J. A., &amp; Sbarra, D. A. (2015). Social baseline theory: The social regulation of risk and effort. <i>Social and Personality Psychology Compass</i>, 9(2), 63–78.</li>
+      <li><span class="idx">111</span>Rusbult, C. E. (1980). Commitment and satisfaction in romantic associations: A test of the investment model. <i>Journal of Experimental Social Psychology</i>, 16(2), 172–186.</li>
+      <li><span class="idx">112</span>Kelley, H. H., &amp; Thibaut, J. W. (1978). <i>Interpersonal Relations: A Theory of Interdependence</i>. Wiley.</li>
+    </ol>
+
+    <h3>Sleep microstructure and compositional memory (2025)</h3>
+    <ol class="refs">
+      <li><span class="idx">113</span>Chang, H., Tang, W., Wulf, A. M., Nyasulu, T., Wolf, M. E., Fernandez-Ruiz, A., &amp; Oliva, A. (2025). Sleep microstructure organizes memory replay. <i>Nature</i>. https://doi.org/10.1038/s41586-024-08340-w</li>
+      <li><span class="idx">114</span>Bakermans, J. J. W., Warren, J., Whittington, J. C. R., &amp; Behrens, T. E. J. (2025). Constructing future behavior in the hippocampal formation through composition and replay. <i>Nature Neuroscience</i>, 28, 1061–1072. https://doi.org/10.1038/s41593-025-01908-3</li>
+      <li><span class="idx">115</span>Anderson, M. C., Bjork, R. A., &amp; Bjork, E. L. (1994). Remembering can cause forgetting: Retrieval dynamics in long-term memory. <i>Journal of Experimental Psychology: Learning, Memory, and Cognition</i>, 20(5), 1063–1087.</li>
+      <li><span class="idx">116</span>Dijkstra, N., von Rein, T., Kok, P., &amp; Fleming, S. M. (2025). A neural basis for distinguishing imagination from reality. <i>Neuron</i>. https://doi.org/10.1016/j.neuron.2025.05.015</li>
+    </ol>
+
+
+    <p class="small">Note: for some 2024–2026 references, volume/issue and page numbers follow online publication; retaining the DOI or journal name is sufficient when citing. Conclusions from animal studies are marked as &ldquo;mouse/rat&rdquo; and should not be extrapolated directly to human clinical conclusions.</p>
+  </div>
+</section>
+
+<section class="sec" id="appC">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">Appendix C · Data Dictionary</span>
+      <h2 class="sec-title">Data Dictionary and State Machine</h2>
+      <p class="sec-sub">The minimum field set for engineering implementation; not the final schema, but enough to start.</p>
+    </div>
+
+    <h3>C.1 Minimal Event / Relationship JSON</h3>
+    <pre class="code">{
+  "event_id": "01J...ULID",
+  "time": {"start": "2026-10-30T14:00:00+08:00", "end": "...", "precision": "minute"},
+  "scene": {"place": "office", "activity": "proposal review", "atmosphere": "tense"},
+  "participants": [
+    {"person_id": "P_lin", "role": "collaborator", "identity_confidence": 0.86,
+     "candidates": [{"person_id": "P_lin2", "confidence": 0.11}]}
+  ],
+  "actions": [
+    {"actor": "P_lin", "verb": "propose", "object": "change payment term to 45 days", "recipient": "self"}
+  ],
+  "outcome": {"status": "open", "result": "pending confirmation", "expected": "30 days"},
+  "source": "direct_perception",
+  "salience": {"total": 0.78, "novelty": 0.6, "goal": 0.9, "social": 0.7, "affect": 0.5, "pe": 0.8},
+  "links": [{"type": "contradicts", "target": "E_20261012_01"}],
+  "created_at": "...", "updated_at": "..."
+}</pre>
+
+    <h3>C.2 Event state machine</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>Table 19 · Event state transitions</caption>
+        <thead><tr><th style="width:18%">State</th><th style="width:32%">Meaning</th><th>Allowed transitions</th></tr></thead>
+        <tbody>
+          <tr><td><b>open</b></td><td>The event has occurred; the outcome is undetermined or the commitment is unfulfilled</td><td>→ closed / follow_up / cancelled</td></tr>
+          <tr><td><b>follow_up</b></td><td>Requires follow-up action or observation</td><td>→ closed / open (reopened)</td></tr>
+          <tr><td><b>closed</b></td><td>Outcome confirmed; the event is over</td><td>→ reopened (new evidence)</td></tr>
+          <tr><td><b>cancelled</b></td><td>The commitment was withdrawn or the event did not occur</td><td>→ open (re-agreed)</td></tr>
+          <tr><td><b>archived</b></td><td>Low retention; moved to cold archiving</td><td>→ active (reactivated by retrieval)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>C.3 Pseudocode for one complete invocation</h3>
+    <pre class="code"><span class="c"># online main loop</span>
+def turn(input):
+    percept = perceive(input)                       <span class="c"># vision/speech/text</span>
+    entities = identify(percept)                    <span class="c"># person candidates + confidence</span>
+    sal = salience(percept, entities, goals)        <span class="c"># six-dimensional scoring</span>
+    event = encode(percept, entities, sal)          <span class="c"># event log + index</span>
+    cands = retrieve(percept.cues, entities, mod)   <span class="c"># pattern separation + completion</span>
+    rel = relationship(entities, cands)             <span class="c"># multi-dimensional + evidence</span>
+    packet = compile(cands, rel, goals, commitments, mod)
+    packet = audit(packet)                          <span class="c"># sources + conflicts</span>
+    decision = main_brain.decide(packet)            <span class="c"># the only decision point</span>
+    result = effector.execute(decision)
+    write_back(event, result)                       <span class="c"># RPE + state</span>
+    enqueue_consolidation(event, result)
+    return decision.response</pre>
+
+    <div class="note"><span class="tag">Closing line</span>This proposal is not meant to prove that &ldquo;machines have memory,&rdquo; but to prove that <b>by treating memory as an auditable, prunable, reconstructable process, a machine can do better than &ldquo;a vector store + a long prompt.&rdquo;</b></div>
+  </div>
+</section>
+
+<section class="sec" id="appD">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">Appendix D · Reference Implementation</span>
+      <h2 class="sec-title">Reference Implementation</h2>
+      <p class="sec-sub">The code is not inside the HTML; it lives in <code>runtime/</code> and is verified with the standard-library unittest.</p>
+    </div>
+    <div class="table-wrap">
+      <table class="compact">
+        <thead><tr><th style="width:24%">Module</th><th style="width:42%">Responsibility</th><th>Corresponding section</th></tr></thead>
+        <tbody>
+          <tr><td><code>state_params.py</code></td><td>Event state → bounded runtime parameters; hashing and bounds</td><td>2.7</td></tr>
+          <tr><td><code>memory.py</code></td><td>Retrieval, ContextPacket, omitted, budget</td><td>4.5 / 5.2 / 6.6</td></tr>
+          <tr><td><code>ledger.py</code></td><td>Evidence ledger, version chains, retention, cold archiving</td><td>4.6 / 6.3 / 6.4</td></tr>
+          <tr><td><code>constitution.py</code></td><td>Proposals, equal co-signature, cooling-off, rollback, ratification ledger</td><td>3.7</td></tr>
+          <tr><td><code>segmentation.py</code></td><td>Segmentation by prediction error / topic / person / gap / duration</td><td>5.1.1</td></tr>
+          <tr><td><code>relationship.py</code></td><td>Multi-dimensional relationships, affect/trust separation, interaction weights, idempotency</td><td>6.8</td></tr>
+          <tr><td><code>reliability.py</code></td><td>Source types, verifiability, historical calibration, consistency</td><td>6.4</td></tr>
+          <tr><td><code>simulation.py</code> / <code>primitives.py</code></td><td>Compositional replay, primitive library, simulation writes no facts</td><td>6.2.1 / 6.7.2</td></tr>
+          <tr><td><code>graph_retrieval.py</code></td><td>Lightweight adjacency index, 1–2 hops, decay and budget</td><td>5.2</td></tr>
+          <tr><td><code>pipeline.py</code></td><td>End to end: event → parameters → packet → proposal → ratification → audit</td><td>Chapter 5</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <pre class="code">cd runtime
+python3 -m unittest -v      <span class="c"># 128 tests</span>
+python3 pipeline.py         <span class="c"># end-to-end JSON + audit trace</span></pre>
+    <p>Boundaries: this is an <b>in-memory reference implementation</b>, not a production system; it has no persistence, real signing keys, distributed writer, or production-grade ratification ledger. Its purpose is to validate contracts and failure modes, not to replace an engineering implementation.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="mark">Double-Brain System · Version 2.1</div>
+    <p>This proposal is a mechanistic deepening and engineering recommendation draft of <i>Dual-Brain System: A Multi-Model Collaborative Cognition Framework, Version 1</i>. It retains the three core constraints of Version 1: there is only one integrating center; the Backend only processes information—it does not offer suggestions, act, or make decisions on its own; and knowledge, memory, and skills are managed separately. The neuroscience content in this document serves to explain design rationale; it does not constitute a complete model of the human brain, nor does it claim that the system possesses subjective consciousness.</p>
+    <p>Public version 2.1 · For research and engineering reference.</p>
+  </div>
+</footer>
+</main>
+<script>
+(function(){
+  var bar=document.getElementById('bar');
+  function upd(){
+    var h=document.documentElement;
+    var max=h.scrollHeight-h.clientHeight;
+    var p=max>0?(h.scrollTop||document.body.scrollTop)/max*100:0;
+    if(bar) bar.style.width=p+'%';
+  }
+  document.addEventListener('scroll',upd,{passive:true});
+  upd();
+})();
+</script>
+</body>
+</html>

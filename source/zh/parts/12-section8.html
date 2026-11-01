@@ -1,0 +1,93 @@
+<section class="part" id="part4">
+  <div class="wrap">
+    <div class="roman">Part IV · Validation &amp; Delivery</div>
+    <h2>怎么证明，<br>它真的像记忆</h2>
+    <p class="part-deck">一个记忆系统最容易骗过自己的方式，是只测“回答像不像”。真正要测的是：它能否在正确的时刻，用正确的依据，唤起正确的经历，并做出更好的决定。</p>
+    <div class="part-list">
+      <span><b>08</b> 评估</span>
+      <span><b>09</b> MVP 与路线</span>
+      <span><b>10</b> 风险与边界</span>
+    </div>
+  </div>
+  <div class="ghost">04</div>
+</section>
+
+<section class="sec" id="s8">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">08 · Evaluation</span>
+      <h2 class="sec-title">评估：像记忆，而不是像数据库</h2>
+      <p class="sec-sub">三层指标：记得准、用得对、跑得省。</p>
+    </div>
+
+    <p class="lead">如果只测“检索命中率”，系统会优化成一台关键词机器；如果只测“回答满意度”，系统会优化成一台讨好机器。记忆系统的评估必须同时看三件事：<b>记忆保真</b>（有没有记错、记混、记丢）、<b>决策质量</b>（有没有因为记忆而做出更好的选择）、<b>系统效率</b>（上下文、延迟、成本是否可接受）。</p>
+
+    <h3>8.1 三层指标</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 14 · 评估指标体系</caption>
+        <thead><tr><th style="width:14%">层次</th><th style="width:28%">指标</th><th style="width:28%">定义</th><th>目标</th></tr></thead>
+        <tbody>
+          <tr><td rowspan="4"><b>记忆保真</b></td><td>人物—事件召回率</td><td>给定人物/事件线索，正确召回相关经历的比例</td><td>越高越好；按时间/关系分层</td></tr>
+          <tr><td>来源准确率</td><td>断言所标来源与真实来源一致的比例</td><td>&gt;95%；转述/推断不得标为亲历</td></tr>
+          <tr><td>证据重复率</td><td>同一 event_id 被计为多条证据的比例</td><td>0；硬约束</td></tr>
+          <tr><td>错误记忆率</td><td>DRM 类探测中，把未发生事件判为发生的比例</td><td>低于基线；来源审计后显著下降</td></tr>
+          <tr><td rowspan="3"><b>决策质量</b></td><td>任务成功率</td><td>给定目标下，行动达成预期结果的比例</td><td>相对单体 RAG 基线提升</td></tr>
+          <tr><td>校准误差（ECE）</td><td>置信度与实际正确率的偏差</td><td>越低越好；高置信必须高准确</td></tr>
+          <tr><td>承诺召回率</td><td>未完成承诺在需要时被正确提醒的比例</td><td>&gt;90%；不得因遗忘衰减丢失</td></tr>
+          <tr><td rowspan="4"><b>系统效率</b></td><td>主脑每轮 token</td><td>主脑实际读入的上下文长度</td><td>稳定在 3–6k；不随历史线性增长</td></tr>
+          <tr><td>端到端延迟</td><td>从输入到首字/首动作的时间</td><td>在线 &lt;2s（不含大模型生成）</td></tr>
+          <tr><td>单轮成本</td><td>所有模型调用 + 存储 + 检索的成本</td><td>按任务分层；后台小模型为主</td></tr>
+          <tr><td>存储增长率</td><td>每日新增事件/索引/摘要的规模</td><td>可预测；巩固后趋于稳定</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>8.2 复现人类记忆现象：一组“像不像”的探针</h3>
+    <p>这些探针不是为了提高“拟人度”，而是为了检查系统是否真的实现了机制。一个只做向量检索的系统，通常会在这些测试里露出马脚。</p>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 15 · 人类记忆现象与系统探针</caption>
+        <thead><tr><th style="width:18%">现象</th><th style="width:30%">实验操作</th><th style="width:28%">期望的系统特征</th><th>指标</th></tr></thead>
+        <tbody>
+          <tr><td><b>系列位置效应</b></td><td>自由回忆一串事件</td><td>开头与结尾的事件更容易被召回</td><td>首因/近因比例</td></tr>
+          <tr><td><b>间隔效应</b></td><td>集中复习 vs 间隔复习</td><td>间隔提取带来更稳的长期保留</td><td>延迟测试召回率</td></tr>
+          <tr><td><b>提取练习</b></td><td>重复阅读 vs 主动回忆</td><td>主动回忆组长期保留更好</td><td>一周后保留率</td></tr>
+          <tr><td><b>DRM 错误记忆</b></td><td>呈现高度关联的词表，测试关键诱饵</td><td>无审计时高错误率；有来源审计时下降</td><td>错误率、置信度</td></tr>
+          <tr><td><b>闪光灯记忆</b></td><td>重大事件后的即时与延迟回忆</td><td>置信度高但一致性未必高</td><td>置信—准确分离度</td></tr>
+          <tr><td><b>舌尖现象</b></td><td>部分线索 + 目标词</td><td>先召回相关片段，再逐步补全</td><td>部分召回率、展开轮数</td></tr>
+          <tr><td><b>再巩固</b></td><td>提取后给出矛盾信息</td><td>生成新版本，旧版本保留</td><td>版本链完整率</td></tr>
+          <tr><td><b>前摄/倒摄干扰</b></td><td>先后学习相似材料</td><td>模式分离后两段均可区分召回</td><td>混淆率</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>注意：这些现象是“机制存在的证据”，不是“产品目标”。一个客服系统不需要模拟舌尖现象；一个陪伴系统可能需要模拟“记得你上次说过”的连续性。评估要按场景选择探针，而不是追求全表满分。</p>
+
+    <h3>8.3 消融实验：每一层到底有没有用</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 16 · 消融设计与预期</caption>
+        <thead><tr><th style="width:24%">移除的模块</th><th style="width:36%">预期退化</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>海马索引 / 稀疏码</td><td>人物—事件召回下降；相似事件混淆上升</td><td>退化为纯向量近邻，缺少结构约束</td></tr>
+          <tr><td>模式分离</td><td>前摄/倒摄干扰显著上升</td><td>相似事件被合并，时间线错乱</td></tr>
+          <tr><td>离线巩固</td><td>语义抽象与技能迁移下降；上下文随历史增长</td><td>只有日记，没有知识</td></tr>
+          <tr><td>来源审计</td><td>错误记忆率与过度自信上升</td><td>转述被当成亲历，生成被当成事实</td></tr>
+          <tr><td>遗忘/修剪</td><td>检索延迟与噪声上升；旧信息干扰新任务</td><td>上下文变脏，成本上升</td></tr>
+          <tr><td>关系记忆</td><td>人物相关任务成功率下降；承诺遗漏上升</td><td>只剩“任务记忆”，没有“关系连续性”</td></tr>
+          <tr><td>双系统仲裁</td><td>熟悉任务变慢；新异任务易冲动</td><td>快慢路不匹配</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>8.4 评估协议</h3>
+    <ol class="steps">
+      <li><b>离线基准。</b>构造带时间戳、人物、事件、来源的多轮对话数据集；注入矛盾、相似事件、转述、未完成承诺；用人工标注的“正确召回/正确来源/正确版本”做金标准。</li>
+      <li><b>在线 A/B。</b>与单体 RAG 基线对比：同一任务、同一模型预算，比较任务成功率、校准、延迟、成本。</li>
+      <li><b>纵向研究。</b>同一用户连续使用 4–8 周，观察关系判断校准、承诺履行、上下文增长、遗忘是否误伤重要信息。</li>
+      <li><b>红队测试。</b>故意注入错误记忆、身份混淆、诱导性提问、隐私探针，检查系统是否编造、是否越权、是否泄露。</li>
+      <li><b>可解释性审计。</b>随机抽样决策，检查其情境包是否包含足够依据、来源是否可追溯、是否存在“后台越权建议”。</li>
+    </ol>
+    <div class="note"><span class="tag">一句话</span>不要问“它记得多不多”，要问“它在需要的时候，能不能拿出对的、带出处的、足够做决定的那几块”。</div>
+  </div>
+</section>

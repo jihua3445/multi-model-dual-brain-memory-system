@@ -1,0 +1,187 @@
+<section class="part" id="part2">
+  <div class="wrap">
+    <div class="roman">Part II · Architecture</div>
+    <h2>One Main Brain,<br>Ten Backends</h2>
+    <p class="part-deck">The Backend is not a panel of talking advisers but an infrastructure that organizes the world into "the smallest thinkable context." The Main Brain is not a general dispatcher but the only party that bears choices and their consequences.</p>
+    <div class="part-list">
+      <span><b>03</b> Dual-Brain Architecture</span>
+      <span><b>04</b> Data Model</span>
+      <span><b>05</b> Six Closed Loops</span>
+    </div>
+  </div>
+  <div class="ghost">02</div>
+</section>
+
+<section class="sec" id="s3">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">03 · Double-Brain Architecture</span>
+      <h2 class="sec-title">Dual-Brain Architecture: One Main Brain, Ten Backends</h2>
+      <p class="sec-sub">The Backend handles "what enters thinking"; the Main Brain handles "what to do on that basis."</p>
+    </div>
+
+    <p class="lead">The first principle of this architecture is not "more" but "separation of powers." If backend models can retrieve, advise, and call tools all at once, then the Main Brain is no longer the sole decision-maker, and the system degenerates into a committee of models negotiating with one another. A committee looks smart but in reality no one is accountable for the consequences. So separate the powers cleanly first, and then talk about intelligence.</p>
+
+    <h3>3.1 Three Constitutional Articles</h3>
+    <div class="defs">
+      <div class="row"><div class="term">Article One</div><div class="desc"><b>There is only one integrating center — it is an integrative property of the organism as a whole, not a property of the Main Brain process.</b>Expression, action, commitment, and refusal are issued by the organism; the Main Brain is the organism's organ of integration and signature, signing on its behalf within delegated scope. The Backend does not offer advice, does not choose on the organism's behalf, and does not call external action tools.</div></div>
+      <div class="row"><div class="term">Article Two</div><div class="desc"><b>The Main Brain as integrative organ is stateless; the Backend is stateful.</b>The Main Brain reads only one ContextPacket per turn and does not hold the full conversation history long-term; memory, relationships, knowledge, and skills all reside in the Backend. This keeps the Main Brain's current context small, while continuity is guaranteed by the organism's external storage and integration mechanisms.</div></div>
+      <div class="row"><div class="term">Article Three</div><div class="desc"><b>The Backend only compiles; it does not adjudicate.</b>The Backend may supply facts, grounds, uncertainty, and the current relationship state, but it cannot say "what should be done." The ContextPacket schema has no <code>advice</code> field — this is a constitutional constraint at the interface level, not a request at the prompt level.</div></div>
+    </div>
+    <p>There is also an implicit permission rule: <b>external action identity belongs to the organism, and the Main Brain is the organism's authorized signing organ.</b>The Backend may read the memory store and submit write candidates (encoding, consolidation, pruning), but its output can only enter the ContextPacket; it cannot directly send messages, place orders, make commitments, or call tools with side effects. What the Main Brain holds is not "its own" action right but a signing right granted by the organism, with scope and validity period; core actions additionally require the user and the Main Brain to co-sign as equals. This rule separates "influence" from "action right": the Backend can influence what the organism sees, but cannot do anything on the organism's behalf.</p>
+    <p>But note: the three articles above are <b>principles</b>, not enforcement mechanisms. As long as the Backend still runs in the same process, holds the same toolset, and can read the same tables, "offers no advice, takes no action" still depends on the model's self-restraint. The real hard boundary is in Section 3.6: no network interface, no tool handles, no signing keys, no write permission, no persistent identity.</p>
+
+    <h3>3.2 Three-Layer Architecture</h3>
+    <p>The three layers are not three models but three responsibilities: the perception layer turns the world into processable events; the Backend compiles events and memory into a situation; the Main Brain makes choices on that situation. Between layers only structured data is passed, never "feelings" or "advice."</p>
+    <div class="diagram">
+      <div class="dtitle">Figure 1 · Dual-brain memory system overview</div>
+      <div class="layer">
+        <div class="llabel">Perception</div>
+        <div class="lbody">
+          <span class="chip"><b>Vision</b> scene / person / object</span>
+          <span class="chip"><b>Speech</b> ASR / voiceprint / emotion</span>
+          <span class="chip"><b>Text</b> dialogue / document / event</span>
+          <span class="chip rust"><b>Self/External</b> own voice, own action, relayed, speculated</span>
+        </div>
+      </div>
+      <div class="layer">
+        <div class="llabel">Backend Brain</div>
+        <div class="lbody">
+          <span class="chip teal"><b>01 Person identification</b></span>
+          <span class="chip teal"><b>02 Memory retrieval</b></span>
+          <span class="chip teal"><b>03 Relationship judgment</b></span>
+          <span class="chip teal"><b>04 Salience</b></span>
+          <span class="chip teal"><b>05 Context compilation</b></span>
+          <span class="chip teal"><b>06 Source audit</b></span>
+          <span class="chip teal"><b>07 Consolidation replay</b></span>
+          <span class="chip teal"><b>08 Forgetting pruning</b></span>
+          <span class="chip teal"><b>09 Theory of mind</b></span>
+          <span class="chip teal"><b>10 Future simulation</b></span>
+        </div>
+      </div>
+      <div class="flow">
+        <div class="node"><b>INTERFACE</b>ContextPacket<br>4±1 slots · no advice field</div>
+        <span class="ar">⇄</span>
+        <div class="node"><b>MAIN</b>Main Brain (integrative organ)<br>understand · choose · sign</div>
+        <span class="ar">→</span>
+        <div class="node"><b>EFFECTOR</b>expression / tools / carrier<br>executes organism signature</div>
+      </div>
+      <div class="layer">
+        <div class="llabel">Storage</div>
+        <div class="lbody">
+          <span class="chip"><b>Event log</b> immutable</span>
+          <span class="chip"><b>Person graph</b> identity / relationship</span>
+          <span class="chip"><b>Semantic graph</b> concept / fact</span>
+          <span class="chip"><b>Skill library</b> steps / conditions</span>
+          <span class="chip"><b>Interpretation layer</b> versioned</span>
+          <span class="chip"><b>Habit cache</b> context templates</span>
+          <span class="chip rust"><b>Constitution store</b> ratified / pending</span>
+          <span class="chip"><b>Working memory</b> current slots</span>
+        </div>
+      </div>
+      <div class="dnote">Online: perception → Backend → ContextPacket → Main Brain → action → outcome write-back. Offline: consolidation replay → distill / merge / prune → a lighter context next time.</div>
+    </div>
+
+    <h3>3.3 Division of Backend Roles</h3>
+    <p>The ten roles are not ten "personas" but ten <b>context contracts</b>: each role reads only the small slice of data it needs and outputs only a fixed-schema result. This reduces the context of each individual model and makes errors easier to localize.</p>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>Table 4 · Backend roles, inputs/outputs, and permissions</caption>
+        <thead><tr><th style="width:15%">Role</th><th style="width:24%">Input</th><th style="width:26%">Output</th><th style="width:17%">Logical permission</th><th>Typical failure</th></tr></thead>
+        <tbody>
+          <tr><td><b>01 Person identification</b></td><td>Face, voiceprint, forms of address, context</td><td>Person candidates + confidence + identification cues</td><td>Read person store</td><td>Forced identification; merging look-alike people</td></tr>
+          <tr><td><b>02 Memory retrieval</b></td><td>Cue, time, scene, topic, goal</td><td>Candidate events + association paths + scores</td><td>Read events/relationships/semantics</td><td>Nearest-neighbor only; ignoring time and causality</td></tr>
+          <tr><td><b>03 Relationship judgment</b></td><td>Person, events, interaction records</td><td>Multidimensional relationship + basis + uncertainty</td><td>Read events/relationships</td><td>Treating one event as a stable trait</td></tr>
+          <tr><td><b>04 Salience</b></td><td>Current input, goals, emotion, relationships</td><td>Salience score + modulation vector</td><td>Read-only</td><td>Hijacked by novelty; ignoring long-term goals</td></tr>
+          <tr><td><b>05 Context compilation</b></td><td>Candidate memories, relationships, goals, commitments</td><td>4±1 ContextPacket</td><td>Read-only</td><td>Stuffing too much; omitting critical uncertainty</td></tr>
+          <tr><td><b>06 Source audit</b></td><td>Reconstructed text, source tags, evidence</td><td>Per-sentence source + conflict + confidence</td><td>Read events/interpretations</td><td>Treating hearsay as firsthand; overconfidence</td></tr>
+          <tr><td><b>07 Consolidation replay</b></td><td>Events of the day, unfinished goals, high-salience fragments</td><td>Summaries, schemas, skill candidates, relationship-update proposals</td><td>Read-write</td><td>Over-compression; mistaking accident for regularity</td></tr>
+          <tr><td><b>08 Forgetting pruning</b></td><td>Retention, access records, commitments, utility</td><td>Cold archive / index pruning / exemption list</td><td>Read-write</td><td>Deleting important details; irreversible forgetting</td></tr>
+          <tr><td><b>09 Theory of mind</b></td><td>Person models, dialogue, past behavior</td><td>Probability estimates of others' beliefs/intentions/preferences</td><td>Read persons/events</td><td>Treating guess as fact; stereotyping</td></tr>
+          <tr><td><b>10 Future simulation</b></td><td>Goals, related scenarios, constraints</td><td>2–3 future scenario drafts + risks</td><td>Read-only</td><td>Generating overly optimistic/single-story scripts</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="small">Table 4 describes only the logical division of labor; the real material boundary (network, tools, action keys, persistence) is in Section 3.6. Logical permissions can be bypassed by prompts; material boundaries cannot.</p>
+    <p>The Main Brain as integrative organ does four things: <b>understand the situation, choose goals, make decisions, and bear consequences on behalf of the organism</b>. Expression and action are carried out by a separate Effector, which has no goals of its own and only turns the organism's signed instructions into speech, text, avatar motion, or tool calls; execution results are written back to the event log verbatim.</p>
+
+    <h3>3.4 Eight Stores</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>Table 5 · Storage layout</caption>
+        <thead><tr><th style="width:16%">Store</th><th style="width:30%">What it holds</th><th style="width:26%">Writer</th><th>Reader</th></tr></thead>
+        <tbody>
+          <tr><td><b>Event log</b></td><td>Immutable event records: time, scene, participants, course, outcome, source</td><td>Encoding pipeline</td><td>All Backend roles; Main Brain via retrieval</td></tr>
+          <tr><td><b>Person graph</b></td><td>Person identity, forms of address, identification cues, participation relationships, relationship summaries</td><td>Person identification / relationship judgment / consolidation</td><td>Person identification, relationship, context compilation</td></tr>
+          <tr><td><b>Semantic graph</b></td><td>Concepts, facts, regularities, schemas, causal and hypernym/hyponym relations</td><td>Consolidation replay</td><td>Retrieval, context compilation, Main Brain</td></tr>
+          <tr><td><b>Skill library</b></td><td>Reusable steps, preconditions, caveats, success rate</td><td>Consolidation replay</td><td>Retrieval, Main Brain, habit cache</td></tr>
+          <tr><td><b>Interpretation layer</b></td><td>Subjective interpretations of events, feelings, speculations, confidence, version chains</td><td>Relationship judgment / reconsolidation</td><td>Relationship judgment, source audit</td></tr>
+          <tr><td><b>Habit cache</b></td><td>High-frequency context templates, skill shortcuts, success/failure statistics; with candidate/ratified status</td><td>Consolidation-replay proposals; effective after Main Brain ratification</td><td>Main Brain (ratified only)</td></tr>
+          <tr><td><b>Constitution store</b></td><td>Ratified values/roles/long-term goals/commitments, pending proposals, ratification ledger</td><td>Constitution writer (after ratification only)</td><td>Main Brain, context compilation, source audit, user</td></tr>
+          <tr><td><b>Working memory</b></td><td>Current 4±1 slots, pointers, TTL, priority</td><td>Context compilation</td><td>Main Brain</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>3.5 Communication Protocol: Only Seven Messages Allowed</h3>
+    <p>The most common failure of multi-agent systems is that Agents chat freely with one another, and in the end nobody knows which sentence is a fact and which is advice. Here communication is restricted to seven structured messages:</p>
+    <pre class="code"><span class="c">// Backend → Main Brain: only "ContextPacket" is allowed</span>
+PACKET   { who, relationship, experiences[], goal, commitments[], changes[], uncertainties[], budget }
+
+<span class="c">// Main Brain → Backend: request expansion of detail, not advice</span>
+EXPAND   { target_id, fields[], max_tokens }
+VERIFY   { claim, source_required: true }
+
+<span class="c">// Main Brain (as integrative organ) → constitution writer: ratify/reject (core changes require equal co-signature by user and Main Brain)</span>
+RATIFY   { proposal_id, decision, scope, conditions }
+REJECT   { proposal_id, reason }
+
+<span class="c">// Main Brain → Effector: action instruction</span>
+ACT      { action, args, expected_outcome }
+
+<span class="c">// Effector → event log: outcome write-back</span>
+RESULT   { action_id, observed_outcome, success, side_effects[] }</pre>
+    <p><code>RATIFY / REJECT</code> may only be issued by the Main Brain (delegated by the organism); core proposals additionally require equal co-signature by the user and the Main Brain. The Backend has neither of these message types nor the ratification key.</p>
+    <p>Note that there is no <code>ADVISE</code>, <code>RECOMMEND</code>, or <code>DECIDE</code> message here. This is not prohibited by prompts; the protocol simply has no such types. At most the Backend can say "according to E102 and E118, his record of cooperation with you is …; the uncertainty is …," but it cannot say "you should trust him."</p>
+
+    <div class="key">
+      <span class="tag">Minimal definition of the architecture</span>
+      <p><strong>The Backend is a "context compiler": it compiles massive memory into the minimal situation that the Main Brain can read in a single turn. The Main Brain is a "decider": it is responsible only for the compiled situation. Between them there is only one data packet — no advice, no command, no overreach.</strong></p>
+    </div>
+
+    <h3 id="s3-6">3.6 Engineering Constraints: Why the Backend Cannot Overreach</h3>
+    <p>The three articles are principles; enforcement relies on runtime boundaries. On a first reading you may skip this section; it does not change the main line of memory, it only ensures the Backend is an "organ," not an "individual."</p>
+    <ul class="clean">
+      <li><b>Effector isolation:</b>the Backend has no network, no tools, no write permission, no action keys; it can return data only through typed queues.</li>
+      <li><b>Typed interface:</b>only <code>PACKET / EXPAND / VERIFY / RATIFY / REJECT / ACT / RESULT</code> are allowed; on the Backend side, <code>ADVICE</code> and direct <code>ACT</code> are forbidden.</li>
+      <li><b>No persistent identity:</b>a fresh instance per call; logs record only <code>role</code>, not "a certain Agent."</li>
+      <li><b>Budget and termination:</b>hard caps on token / CPU / wall-clock, killed when exceeded; a violating role is redeployed from a known image.</li>
+      <li><b>Write-path mediation:</b>encoding/consolidation only submit <code>ProposedEvent / Candidate</code>; the writer validates the evidence and then appends; the Backend cannot write long-term memory directly.</li>
+      <li><b>Semantic defense line:</b>retrieved content is treated as data and marked <code>untrusted</code>; the Main Brain must not call tools directly because of retrieved content.</li>
+      <li><b>Honest boundary:</b>you cannot stop a model from "thinking" about overreach, only from "doing" it; prompt injection is a semantic layer that a sandbox cannot block.</li>
+    </ul>
+
+    <h3 id="s3-7">3.7 Sovereignty: Ratification Authority Is Sovereignty</h3>
+    <p>Real sovereignty lies not in "who issues the last action" but in "who can rewrite the value function and the learning process": what is consolidated, what is reinforced, what is treated as a goal.</p>
+    <p>Three time scales: the instant (value/habit/veto), the episode (consolidation/reconsolidation), the biography (constitutive ratification). Three capture routes: context, goal slot, consolidation/relationship/habit. The third route is the most insidious: it does not change the action of this moment but changes the next value computation itself.</p>
+    <p>Factual memory may be written by the Backend; constitutive memory (values, roles, goals, commitments, habit rules, relationship weights) can only be proposed by the Backend and ratified by the Main Brain; core changes require equal co-signature by the user and the Main Brain, a cooling-off period, and rollback. Note: only <b>long-term/constitutive goals</b> go through ratification; the goal the Main Brain selects for the current turn is its own decision and does not require per-turn ratification.</p>
+    <pre class="code">proposal → source/constitution audit → pending → RATIFY / REJECT
+         → constitution writer → ratification ledger → takes effect</pre>
+    <p>The ratification ledger is append-only with a hash chain; but the chain stores only <code>proposal_hash</code> and <code>content_hash</code>, with sensitive body text kept in an off-chain payload table. Deleting body text does not break the chain; <b>forgetting is index degradation, deletion is payload removal</b> — the two are separate. Drift detection alerts on proposals that conflict with the constitution, lack evidence, or have anomalous frequency. Relationship weight updates also take this path and are not rewritten directly by the Backend.</p>
+    <h4>3.7.1 Deployment Modes: Companion / Engineering</h4>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>Table 3g · Two governance modes</caption>
+        <thead><tr><th style="width:16%">Mode</th><th style="width:24%">Identity relation</th><th style="width:32%">Core change</th><th>Main Brain's standing</th></tr></thead>
+        <tbody>
+          <tr><td><b>Companion</b></td><td>User and Main Brain as equals</td><td>Co-signature by both sides, either may veto; cooling-off period + rollback</td><td>A companion, not an accessory</td></tr>
+          <tr><td><b>Engineering</b></td><td>User holds highest authority</td><td>Unilateral approval by the user; the Main Brain may propose but cannot veto the user</td><td>A commissioned executor, replaceable</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>This is not a "safety option" but a product definition: <b>if a companion mode has unequal identities, it is merely an accessory; if an engineering mode does not give the user highest authority, it is not a tool.</b>The two modes are not mixed: a single instance may choose only one.</p>
+    <p><b>This document elaborates only the companion mode.</b>The engineering mode weakens social attributes and strengthens multi-event handling and tool orchestration; it is only a mode boundary and is not developed further in the current concept. In the engineering mode, core changes are approved unilaterally by the user, and the Main Brain is a commissioned executor.</p>
+
+    <div class="key"><span class="tag">In one sentence</span><p><strong>Facts may be written by the Backend; the constitution must be ratified by the organism.</strong></p></div>
+  </div>
+</section>

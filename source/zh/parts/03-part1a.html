@@ -1,0 +1,54 @@
+<section class="part" id="part1">
+  <div class="wrap">
+    <div class="roman">Part I · Mechanism</div>
+    <h2>先理解脑，<br>再设计系统</h2>
+    <p class="part-deck">记忆不是一块可以随意读写的硬盘。它是一组相互竞争、相互抑制、又相互补足的系统：有的负责快速绑定，有的负责慢速抽象；有的负责当下维持，有的负责长期修剪。要模拟它，先要知道每一部分在解决什么问题。</p>
+    <div class="part-list">
+      <span><b>01</b> 记忆不是存储</span>
+      <span><b>02</b> 从机制到计算原语</span>
+    </div>
+  </div>
+  <div class="ghost">01</div>
+</section>
+
+<section class="sec" id="s1">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">01 · Neuroscience of Memory</span>
+      <h2 class="sec-title">记忆不是存储：一套动态系统</h2>
+      <p class="sec-sub">编码、巩固、提取、再巩固、遗忘——五个阶段，五套不同的计算问题。</p>
+    </div>
+
+    <p class="lead">如果把记忆比作图书馆，你会自然想到“藏书、索引、借阅”。但脑不是这样。脑没有一本书是原样保存的；每一次“借阅”都会重新装订，甚至改写几页。脑更像一座不断重排的档案馆：入库有门槛，编目靠稀疏索引，夜间有专门的整理员把相似卷宗合并成摘要，而读者每次取阅都会留下新的批注。理解这套流程，比记住任何一个脑区名字都重要。</p>
+
+    <h3>1.1 多系统版图：记忆不是一种能力</h3>
+    <p>长时记忆分<b>陈述性</b>（情景：一个人经历过什么；语义：一个人知道什么）与<b>非陈述性</b>（程序、启动、条件反射、习惯化），另有容量极小的工作记忆与带情绪/社会属性的关系记忆。它们依赖不同脑系统，写入与读取规律不同（Squire 2004；Eichenbaum 2004）。设计的第一条不是“建一个更大的库”，而是“建几个写入速率与读取规则不同的库”。</p>
+
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 1 · 记忆系统速览</caption>
+        <thead><tr><th style="width:18%">系统</th><th style="width:34%">回答的问题</th><th>写入 / 读取特征</th></tr></thead>
+        <tbody>
+          <tr><td><b>情景</b></td><td>何时、何地、与谁经历了什么</td><td>快速、稀疏、单次即可写入；依赖索引与模式分离</td></tr>
+          <tr><td><b>语义</b></td><td>世界是什么，概念如何关联</td><td>慢速、重叠、统计学习；靠重复与睡眠蒸馏</td></tr>
+          <tr><td><b>程序</b></td><td>一件事怎么做</td><td>渐进、自动化；错误驱动与强化</td></tr>
+          <tr><td><b>关系</b></td><td>这人是谁，我们经历过什么</td><td>人物—事件双向绑定；多维、不对称、带证据</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>1.2 编码：显著性门控与海马索引</h3>
+    <p>编码先过注意与显著性门：情绪唤醒调节海马与皮层编码（McGaugh 2000；Cahill &amp; McGaugh 1998），意外的好结果被标记为值得学习（Schultz et al. 1997）。海马不存整段经历，只提供<b>稀疏索引</b>（Teyler &amp; DiScenna 1986）；齿状回做<b>模式分离</b>，CA3 做<b>模式完成</b>。分子层面，LTP 的 NMDA 巧合检测、CaMKII 与 AMPA 变化，需要转录翻译才能持久（Bliss &amp; Lomo 1973；Malenka &amp; Bear 2004；Davis &amp; Squire 1984）。2024 年小鼠研究还发现，CA1 印迹细胞在编码时出现 DNA 双链断裂与 TLR9–NF-κB 信号，提示写入伴随代价与修复（Jovasevic et al. 2024；仍属小鼠单一范式）。对系统：<b>显著性门、索引门、分配门</b>，缺一就会退化成全量日志。</p>
+
+    <h3>1.3 巩固：睡眠重放与图式同化</h3>
+    <p><b>突触巩固</b>在分钟–小时尺度稳定早期 LTP（Frey &amp; Morris 1997）；<b>系统巩固</b>在天–年尺度把骨架交给新皮层，海马保留索引与细节（Squire &amp; Alvarez 1995；Nadel &amp; Moscovitch 1997）。睡眠中慢振荡、纺锤波与海马涟漪耦合，重放白天序列（Staresina 2024；Schreiner et al. 2024）；重放优先高显著性、高预测误差、与未完成目标相关的序列，也会反向重放或模拟未发生的路径（Foster &amp; Wilson 2006；Pfeiffer &amp; Foster 2013）。图式兼容的信息更快被同化（Tse et al. 2007）。对系统：<b>要点抽象与细节保留两条路径</b>；先判断“与哪块图式兼容”，再决定写多深。</p>
+
+    <h3>1.4 提取：模式完成与重建</h3>
+    <p>提取不是回放，而是<b>重建</b>：用当前目标、情绪与知识把碎片拼成自洽故事（Bartlett 1932；Loftus &amp; Palmer 1974）。CA3 模式完成让部分线索召回整段记忆，但也会过度补全：激活印迹细胞足以制造“假经历”（Ramirez et al. 2013）。编码特异性决定线索是否有效（Tulving &amp; Thomson 1973）；<b>来源监控</b>决定这是亲历、听说还是想象（Johnson et al. 1993）。对系统：多维线索（人物、地点、时间、情绪、目标）+ 来源标签；没有来源的检索等于没有防线。</p>
+
+    <h3>1.5 再巩固：提取即改写</h3>
+    <p>提取会把记忆推回不稳定状态，随后需要再次巩固（Nader et al. 2000）。它不是“每次回忆都必然改写”：记忆年龄、强度、预测误差与情境新颖性决定是否更新（Nader &amp; Hardt 2009）；临床用普萘洛尔削弱恐惧记忆仍属研究阶段（Kindt et al. 2009）。对系统：<b>检索即写，但写新版本，不覆盖旧版本</b>。</p>
+
+    <div class="pull">记忆的稳定性，不是“不变”，而是“可被安全地更新”。<span>再巩固给系统的启示：检索即写，但写的是新版本，不是覆盖旧版本。</span></div>
+  </div>
+</section>

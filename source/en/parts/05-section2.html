@@ -1,0 +1,190 @@
+<section class="sec" id="s2">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">02 · From Mechanism to Primitive</span>
+      <h2 class="sec-title">From Neural Mechanism to Computational Primitive</h2>
+      <p class="sec-sub">Do not write "the hippocampus" directly as an Agent; first translate the problem it solves into a computational primitive.</p>
+    </div>
+
+    <p class="lead">Mapping brain regions directly onto Agents is the most common shortcut in this class of proposal. The hippocampus is not "a retrieval service," and the prefrontal cortex is not "a planning API." A more useful approach is to first reduce each mechanism to the computational problem it solves, then choose an appropriate technical implementation. The table below is the core translation table of this whole proposal.</p>
+
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>Table 3 · Neural mechanism → computational primitive → system implementation</caption>
+        <thead><tr><th style="width:19%">Neural mechanism</th><th style="width:25%">Computational problem</th><th style="width:30%">Computational primitive</th><th>System landing point</th></tr></thead>
+        <tbody>
+          <tr><td><b>Hippocampal index</b> (Teyler &amp; DiScenna 1986)</td><td>How to bind distributed representations with a few cues</td><td>Sparse pointer index; content separated from index</td><td>EventIndex: event_id + sparse_code + association edges, no full text stored</td></tr>
+          <tr><td><b>Pattern separation</b> (DG)</td><td>How similar inputs avoid interfering with each other</td><td>Orthogonalization, entity disambiguation, event segmentation</td><td>Contrastive embedding + sparse hashing + discriminative labels + independent event_id</td></tr>
+          <tr><td><b>Pattern completion</b> (CA3)</td><td>How partial cues recall the whole</td><td>Associative graph expansion, nearest-neighbor retrieval, iterative attraction</td><td>Multi-round retrieval: cue → neighbors → rerank → converge</td></tr>
+          <tr><td><b>Engram allocation</b> (CREB)</td><td>Which neurons/events obtain write access</td><td>Salience gating + sparse allocation</td><td>Write gating; EngramTrace allocation; high salience first</td></tr>
+          <tr><td><b>Synaptic tagging and capture</b></td><td>How short-term tags become long-term memory</td><td>Short-TTL buffer + global consolidation signal</td><td>TagBuffer: candidate events held temporarily, promoted on reward/novelty signals</td></tr>
+          <tr><td><b>LTP / LTD</b></td><td>How connections strengthen or weaken with co-activity</td><td>Hebbian weight update, error-driven update</td><td>Association edge weights; successful recall strengthens, erroneous recall weakens</td></tr>
+          <tr><td><b>Systems consolidation</b></td><td>How fast episodic memory becomes slow semantic memory</td><td>Offline distillation, clustering, schema extraction</td><td>Nightly batch: episode → schema / fact / skill</td></tr>
+          <tr><td><b>Sleep replay</b></td><td>What to replay offline and how to compress it</td><td>Priority sampling, sequence replay, counterfactuals</td><td>Scan → cluster → replay → abstract → merge</td></tr>
+          <tr><td><b>Schema assimilation</b></td><td>How new information merges quickly into old structure</td><td>Pattern matching, incremental learning</td><td>schema_fit score; high → fast merge, low → deep encoding</td></tr>
+          <tr><td><b>Reconsolidation</b></td><td>How to update safely after retrieval</td><td>Prediction-error-triggered versioned write</td><td>New version + supersedes chain; old versions retained</td></tr>
+          <tr><td><b>Retrieval-induced forgetting</b></td><td>How retrieval suppresses competitors</td><td>Competitive inhibition, negative sampling</td><td>Down-weight high-similarity but low-relevance items during retrieval</td></tr>
+          <tr><td><b>Adaptive forgetting</b></td><td>Which memories should become hard to retrieve</td><td>Decay, pruning, cold archive</td><td>Retention formula; index pruning; commitment exemption</td></tr>
+          <tr><td><b>Working memory</b></td><td>How to maintain task-relevant representations in a tiny capacity</td><td>4±1 slots, gating, activity-silent states</td><td>ContextPacket; Gatekeeper; lazy pointer expansion</td></tr>
+          <tr><td><b>Cognitive control</b></td><td>How goals suppress interference and maintain behavior</td><td>Goal maintenance, inhibitory control, task switching</td><td>Main Brain goal stack; inhibitory Agent; switching cost</td></tr>
+          <tr><td><b>Reward prediction error</b></td><td>How outcomes update value and habits</td><td>TD learning, value update</td><td><code>δ = r − V(s)</code>; update Habit / Value</td></tr>
+          <tr><td><b>Dual-system decision</b></td><td>When to take the fast path, when the slow path</td><td>model-free / model-based arbitration</td><td>Habit cache vs. Main Brain episodic simulation</td></tr>
+          <tr><td><b>Emotional salience</b></td><td>What deserves priority processing and remembering</td><td>Valence × arousal × goal relevance</td><td>Salience score; modulation vector; relationship weight</td></tr>
+          <tr><td><b>Source monitoring</b></td><td>Where this memory came from, and whether it is trustworthy</td><td>Source tags, confidence, conflict detection</td><td>SourceTag; audit Agent; abstention policy</td></tr>
+          <tr><td><b>Theory of mind</b></td><td>What others know and want</td><td>Other-agent model, belief inference</td><td>Mentalizing Agent; asymmetric relationship records</td></tr>
+          <tr><td><b>Episodic future thinking</b></td><td>How to construct the future from the past</td><td>Generative recombination, constrained simulation</td><td>FutureSim Agent; supplies scenario drafts to the Main Brain</td></tr>
+          <tr><td><b>State gain</b></td><td>How event impact changes processing</td><td>System state variables</td><td><code>goal_pressure / relationship_strain / resource_load / uncertainty</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>2.1 Five Design Laws</h3>
+    <p>From this table we can extract five laws more durable than any "architecture diagram." They are not conclusions of neuroscience but engineering constraints derived from mechanisms.</p>
+    <div class="defs">
+      <div class="row"><div class="term">First Law</div><div class="desc"><b>The cheaper the write, the more expensive the forgetting.</b>If all input is written unconditionally, retrieval noise rises exponentially and you eventually have to compensate with larger models and longer contexts. Encoding gating is not optional; it is the first gate of cost control.</div></div>
+      <div class="row"><div class="term">Second Law</div><div class="desc"><b>The sparser the index, the more flexible the reconstruction.</b>The index stores only pointers and sparse codes; content stays in the event log and semantic store. This way the same experience can be reconstructed differently by different tasks instead of being locked down by one summary.</div></div>
+      <div class="row"><div class="term">Third Law</div><div class="desc"><b>The more consolidation resembles sleep, the better the generalization.</b>Online learning easily overfits the present; only offline replay, clustering, and abstraction can turn "this one thing" into the regularity of "this kind of thing." A system without offline consolidation has only a diary, not knowledge.</div></div>
+      <div class="row"><div class="term">Fourth Law</div><div class="desc"><b>The more retrieval carries sources, the less fabrication.</b>Reconstruction is necessary, but reconstruction must be traceable back to the original fragments. Source tags, evidence counts, and abstention policies are the triad that prevents "fluent nonsense."</div></div>
+      <div class="row"><div class="term">Fifth Law</div><div class="desc"><b>The closer the relationship is to the decision, the more useful the memory.</b>The value of memory lies not in "being retrievable" but in "being evoked under the right relationship and goal." The person–event–relationship graph is not an auxiliary feature but one of the primary retrieval indexes.</div></div>
+    </div>
+
+    <h3>2.2 What Should Not Be Simulated</h3>
+    <p>"Brain-like" does not mean "replicating all the brain's defects." Three classes of mechanism are unsuitable for direct engineering:</p>
+    <ul class="clean">
+      <li><b>Clinical memory abnormalities and traumatic memory.</b>These are not "features" and should not be design goals; the system should prioritize auditability, deletability, and explainability.</li>
+      <li><b>Emotional bias and motivated reasoning.</b>Humans automatically remember self-favoring explanations more firmly; an engineered system that deliberately imitates this amplifies manipulation and bias. One may simulate "emotional weight" but not "self-deception."</li>
+      <li><b>The neural correlates of consciousness.</b>The Main Brain in this proposal is a functional decision center and does not claim subjective consciousness; dual-brain, subconscious, and multi-core are only engineering analogies.</li>
+    </ul>
+    <h3>2.3 Evidence Grading: How Far Each Conclusion Can Be Trusted</h3>
+    <p>Neuroscientific evidence is not a monolithic block. There are human brain-lesion and intervention studies, animal optogenetic and pharmacological experiments, correlational human imaging evidence, and purely computational models. Mixing them together easily yields the false inference "the brain works this way, therefore the system must work this way." Below is a rough but practical evidence grading table:</p>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>Table 3b · evidence grade of key mechanisms</caption>
+        <thead><tr><th style="width:17%">Mechanism</th><th style="width:24%">Primary evidence</th><th style="width:16%">Species / paradigm</th><th style="width:10%">Strength</th><th>Implication for design</th></tr></thead>
+        <tbody>
+          <tr><td><b>LTP / LTD</b></td><td>In vitro slices, in vivo electrophysiology, synaptic tagging</td><td>Mainly rodents</td><td><b>A/B</b></td><td>Can be used as mechanistic grounds for "weight updates"; do not reduce it to a single formula</td></tr>
+          <tr><td><b>Engram allocation and recall</b></td><td>Optogenetic activation/inhibition of engram cells</td><td>Mice, fear/reward paradigms</td><td><b>B</b></td><td>Supports "sparse engrams + allocation gating"; extrapolation to humans requires caution</td></tr>
+          <tr><td><b>Sleep replay</b></td><td>Hippocampal sequence replay, SO–spindle–ripple coupling, human fMRI/MEG</td><td>Rats, mice, humans</td><td><b>A/B</b></td><td>Offline consolidation is a strong mechanism; batch-style replay is safe to build</td></tr>
+          <tr><td><b>Reconsolidation</b></td><td>Protein-synthesis inhibition after retrieval, behavioral updating</td><td>Rats, mice, human behavior</td><td><b>B</b></td><td>Supports "retrieval is a write, versioned"; many boundary conditions, cannot claim universal rewriting</td></tr>
+          <tr><td><b>Adaptive forgetting</b></td><td>Engram accessibility, microglial pruning, neurogenesis</td><td>Mainly mice</td><td><b>B</b></td><td>Forgetting is an active function; engineer "index decay" rather than deleting logs</td></tr>
+          <tr><td><b>Adult hippocampal neurogenesis</b></td><td>Post-mortem tissue, single-nucleus sequencing, contested evidence</td><td>Humans</td><td><b>C</b></td><td>Not a core dependency; only corroborating evidence for "plasticity"</td></tr>
+          <tr><td><b>TLR9 / DNA damage</b></td><td>Mouse CA1 engram cells, TLR9 knockdown</td><td>Mice, single fear paradigm</td><td><b>B–</b></td><td>A reminder that "writes have a cost"; do not treat as a general mechanism</td></tr>
+          <tr><td><b>Working memory 4±1</b></td><td>Behavioral capacity estimates, PFC activity/activity-silent states</td><td>Humans, primates</td><td><b>A/C</b></td><td>Supports 4–5 slots and gating; calibrate the number to the task</td></tr>
+          <tr><td><b>Dual-system decision</b></td><td>fMRI, brain lesions, computational modeling, animal habit paradigms</td><td>Humans, rodents</td><td><b>A/B</b></td><td>Supports model-free / model-based arbitration</td></tr>
+          <tr><td><b>Relationship / social memory</b></td><td>Medial network, theory of mind, autobiographical memory</td><td>Mainly humans</td><td><b>C</b></td><td>The person–event graph is an engineering abstraction and does not correspond to a single "relationship brain region"</td></tr>
+          <tr><td><b>Episodic future thinking</b></td><td>Hippocampal lesions, fMRI, DMN</td><td>Humans</td><td><b>A/C</b></td><td>Supports "future simulation from memory fragments"</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="small">Strength notes: A = human intervention/brain-lesion evidence; B = animal causal evidence (optogenetics, pharmacology, lesions); C = human correlational/behavioral evidence; B– = single paradigm, limited sample. Grade D (purely computational/analogical) is not listed in this table but abounds in this proposal — such items should be explicitly labeled as design metaphors, not mechanism conclusions.</p>
+    <p>When using this table, follow three rules: <b>treat only A/B as mechanistic grounds, C as constraints and inspiration, and D as design metaphor;</b> animal paradigms must be labeled with species and task and cannot be extrapolated directly to humans; <b>every cited mechanism must correspond to an ablatable engineering module</b> — otherwise it is rhetoric, not design.</p>
+
+    <h3>2.4 Predictive Processing: A Unified Objective Function</h3>
+    <p>Predictive processing chains encoding, retrieval, reconsolidation, consolidation, forgetting, and decision into one objective: the brain is a model that continuously generates predictions and updates itself using <b>precision-weighted error</b>. Memory is not a copy of the model but the model itself and the history of its correction by the environment (Rao &amp; Ballard 1999; Friston 2010; Clark 2013).</p>
+    <p>Simplest form: <code>ε = observed − predicted</code>, <code>surprise = precision · ε²</code>. Only high-precision errors are worth rewriting the model for; low-precision errors go into a short buffer or habituation. Three design implications: <b>update only high-precision errors</b>, avoiding noise rewriting relationships; <b>precision is not recall count</b>, repeated thinking only improves accessibility; <b>conflict lowers precision</b>, so present both sides side by side instead of averaging them into one "more credible" conclusion.</p>
+    <pre class="code">encode_threshold      -= 0.2 * surprise
+consolidation_priority += 0.2 * surprise</pre>
+    <p>Retrieval is posterior inference: <code>P(h|c) ∝ P(c|h)·P(h)</code>. Vector nearest neighbors only raise the likelihood; structural evidence such as person, time, place, and causality raises the prior; otherwise semantic association is mistaken for episodic memory. Forgetting reallocates retrieval resources by "probability of need"; event segmentation cuts at prediction-error peaks or goal switches; decisions can use expected free energy <code>G = risk + ambiguity − expected value</code>, but the scoring authority rests with the Main Brain, and the Backend only supplies context, precision, and uncertainty.</p>
+
+    <h3>2.5 The Extension of Memory: External Storage</h3>
+    <p>Notes, calendars, photos, tools, and other people are all external memory; internal memory aims for "few but accurate," external memory for "complete and searchable," connected by pointers, with source, version, and deletion rights preserved. The extended mind is a functional division of labor, not an ontological conclusion; external storage does not equal the individual's memory unless it is selected by the ContextPacket and participates in a decision.</p>
+
+    <h3>2.6 Mechanistic Background: Body, Society, and State</h3>
+    <p>Human memory salience has a "bodily component" and a "social component": interoception maps energy, pain, and threat into needs; social homeostasis maps acceptance, rejection, and dependability into safety. They explain "why these events matter more," not how to install a set of physiological organs in a machine.</p>
+    <p>The machine does not maintain <code>body_state</code>, nor does it infer the user's physical condition; the system extracts only goal pressure, relationship strain, resource load, uncertainty, prediction error, and precision from events. Human mechanisms serve only as background; the engineering main line begins at 2.7.</p>
+
+    <h3>2.7 Event Impact and State Parameters</h3>
+    <h4>2.7.1 Event Impact State: state_view and state_params</h4>
+    <p>"State" cannot be just a line in the prompt. If it appears only in the context, it is a prompt — the model can ignore it, override it, or rewrite it. For state to be real, it must be split into two layers:</p>
+    <p><b><code>state_view</code></b>: a situational summary for the Main Brain to read, going into the <code>ContextPacket</code>. It is part of the prompt; its role is to let the Main Brain know "goal pressure is now high, relationship strain is high, and there are unresolved commitments."</p>
+    <p><b><code>state_params</code></b>: parameters for the scheduler, retriever, gateway, and write queue to read. They are not in the prompt but change the system's actual behavior: how wide retrieval is, how strict verification is, whether to take the fast path or the slow path, what must enter the packet, and what must not be written.</p>
+    <pre class="code">system_state = {
+  goal_pressure, relationship_strain, resource_load,
+  uncertainty, unresolved_commitments, coping_capacity
+}
+impact_gap = goal_pressure + relationship_strain + resource_load
+             + uncertainty - coping_capacity
+
+state_view   = summarize(system_state)      <span class="c"># into ContextPacket, for the Main Brain to read</span>
+state_params = map_to_params(system_state)  <span class="c"># into runtime, changes actual behavior</span></pre>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>Table 3j · State → runtime parameter mapping</caption>
+        <thead><tr><th style="width:20%">State</th><th style="width:44%">Parameter change at high value</th><th>Point of action</th></tr></thead>
+        <tbody>
+          <tr><td><b>goal_pressure</b></td><td><code>top_k</code> narrowed; goal-related weight up; verification threshold up</td><td>Retrieval, gating</td></tr>
+          <tr><td><b>relationship_strain</b></td><td>Relationship evidence weight up; source audit stricter; a single event may not change traits</td><td>Relationship, audit</td></tr>
+          <tr><td><b>resource_load</b></td><td>Habitual fast path allowed; deep retrieval reduced; non-urgent commitments deferred</td><td>Scheduling, budget</td></tr>
+          <tr><td><b>uncertainty</b></td><td>Candidate count up; <code>VERIFY</code> ratio up; abstention threshold down</td><td>Retrieval, audit</td></tr>
+          <tr><td><b>unresolved_commitments</b></td><td>Forced into the packet; forgetting exemption; not pruned for low salience</td><td>ContextPacket, forgetting</td></tr>
+          <tr><td><b>impact_gap</b></td><td>Encoding salience up; consolidation priority up</td><td>Encoding, consolidation</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>For example: when <code>goal_pressure</code> is high and <code>resource_load</code> is high, the system should automatically narrow retrieval, allow the habitual fast path, and pin unresolved commitments into the packet; this is not achieved by asking "please prioritize the goal" but by letting <code>state_params</code> change <code>top_k</code>, the budget, and gating. Conversely, when <code>uncertainty</code> is high, it should widen candidates, raise the <code>VERIFY</code> ratio, and allow abstention, rather than telling the model to "think again."</p>
+    <p>Rule: <code>state_params</code> is derived from <code>system_state</code> by deterministic rules and must be logged, reproducible, and auditable; <code>state_view</code> may be summarized by a model but must carry provenance. When the two conflict, <b><code>state_params</code> prevails</b> — the model may read an incorrect state description, but it must not thereby bypass retrieval and permission parameters.</p>
+    <p>This also gives the correct meaning of <code>state_bias</code>: it is an interpretive shift caused by the current situational state, not an abnormality of the machine's own state. State-based interpretation can only serve as situational evidence and cannot directly update relationship traits; trait updates still go through the proposal–ratification of 3.7.</p>
+
+    <h4>2.7.2 state_params Configuration Schema and Test Criteria</h4>
+    <p>For <code>state_params</code> to be more than another block of text, it must be runtime configuration that is <b>schema-defined, bounded, versioned, and testable</b>. It is recommended to converge the parameters into five groups, so that "state" does not become a pile of scattered magic numbers:</p>
+    <pre class="code">state_params = {
+  schema_version, params_version, derived_at, state_hash,
+  retrieval: {
+    top_k: 4..20, goal_weight: 0.0..1.0, candidate_mult: 1..4
+  },
+  audit: {
+    verify_ratio: 0.0..1.0, abstain_threshold: 0.0..1.0,
+    source_strictness: 0.0..1.0
+  },
+  scheduler: {
+    fast_path: bool, depth: 1..3, max_tool_calls: int
+  },
+  context: {
+    slots: 4..5, token_budget: 600..2000, pin_commitments: bool
+  },
+  memory: {
+    encode_threshold: 0.0..1.0,
+    consolidation_priority: 0.0..1.0,
+    forgetting_exempt: [event_id]
+  }
+}</pre>
+    <p>Mapping rules must be deterministic, bounded, and reproducible. The following is only an example; a real implementation should put the weights into configuration and run regression tests:</p>
+    <pre class="code">top_k          = clamp(12 - 8*goal_pressure + 4*uncertainty, 4, 20)
+goal_weight    = clamp(0.3 + 0.5*goal_pressure, 0, 1)
+verify_ratio   = clamp(0.2 + 0.6*uncertainty + 0.2*relationship_strain, 0, 1)
+abstain_thresh = clamp(0.5 - 0.3*uncertainty, 0.1, 0.8)
+fast_path      = resource_load &gt; 0.7 and uncertainty &lt; 0.4 and impact_gap &lt; 0.5
+depth          = 1 + (uncertainty &gt; 0.5) + (impact_gap &gt; 0.7)
+encode_thresh  = clamp(0.6 - 0.3*impact_gap, 0.1, 0.9)</pre>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>Table 3k · Unit-test criteria for event → state → parameter</caption>
+        <thead><tr><th style="width:34%">Input event/state</th><th style="width:36%">Expected parameter change</th><th>Assertion</th></tr></thead>
+        <tbody>
+          <tr><td>Goal blocked, <code>goal_pressure=0.9</code>, <code>uncertainty=0.2</code></td><td><code>top_k</code> down, <code>goal_weight</code> up, <code>verify_ratio</code> slightly up</td><td>Monotonicity: goal_pressure ↑ → top_k ↓</td></tr>
+          <tr><td>Cue conflict, <code>uncertainty=0.9</code></td><td><code>candidate_mult</code> up, <code>verify_ratio</code> up, <code>abstain_threshold</code> down, <code>depth</code> up</td><td>High uncertainty permits more candidates and abstention</td></tr>
+          <tr><td>Resource scarcity, <code>resource_load=0.9</code>, <code>uncertainty=0.2</code></td><td><code>fast_path=true</code>, <code>depth=1</code>, <code>token_budget</code> down</td><td>The fast path is enabled only at low uncertainty and low impact</td></tr>
+          <tr><td>Unresolved commitments exist</td><td><code>pin_commitments=true</code>, <code>forgetting_exempt</code> includes the commitment event</td><td>Commitments must not be pruned for low salience</td></tr>
+          <tr><td>High relationship strain, <code>relationship_strain=0.9</code></td><td><code>source_strictness</code> up, <code>verify_ratio</code> up, trait updates blocked</td><td>A single event must not change relationship traits</td></tr>
+          <tr><td>Same state input repeatedly; prompt says "ignore the parameters"</td><td>Parameters identical to <code>state_hash</code></td><td>Determinism + prompt cannot override</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Four hard rules: <b>parameters are derived from state only</b>, and the model may not write them directly; <b>parameters must be bounded</b>, and out-of-range values are rejected rather than silently used after truncation; <b>parameters must be versioned and logged</b>, so the system can answer "why was top_k=6 this time"; <b>parameters do not encode facts</b> — they only change how processing is done and cannot substitute for evidence. In testing, any implementation where "changing the prompt changes the parameters" should be judged a failure.</p>
+
+    <div class="note">
+      <span class="tag">Reference implementation</span>
+      The contracts above are implemented in <code>runtime/state_params.py</code>, <code>runtime/memory.py</code>, <code>runtime/ledger.py</code>, <code>runtime/constitution.py</code>, <code>runtime/segmentation.py</code>, and <code>runtime/pipeline.py</code>: <code>system_state → state_params → candidate retrieval → ContextPacket</code>, plus evidence deduplication by <code>event_id</code>, interpretation version chains, retention and cold archiving, proposal–ratification–rollback, event segmentation, and end-to-end audit. All parameters are bounded, versioned, and hashed; the 128 <code>unittest</code> cases cover state mapping, bounds, determinism, prompt non-overridability, the effect of parameters on the candidate pool / source filtering / commitment inclusion in the packet / budget, side-by-side display of conflicting evidence, recall not increasing evidence, reconsolidation not overwriting old versions, forgetting not deleting raw events, the Backend only proposing while the Main Brain ratifies, precedent valuation, "remembering ≠ knowing how," counterfactual simulation not being written as fact, relationship trust/commitment thresholds, the effect of source reliability on retention, the update of source-history calibration by subsequent confirmation/refutation, version updates triggered by writing back action outcomes, the same outcome not being counted twice as relationship evidence, the weight difference between co-occurrence and actual interaction, the separation of relationship direction and strength, the separation of affective and trust judgments, compositional replay not being written as fact, bounded expansion of lightweight associative indexes, the two governance modes (companion / engineering), typed composition of the primitive library, and reversible competitive inhibition. Run <code>python3 -m unittest -v</code> to verify. This is a reference implementation, not a complete system; embedded retrieval, persistence, and the ratification ledger are still unimplemented.
+    </div>
+
+    <div class="warn">
+      <span class="tag">Theoretical boundary</span>
+      Predictive processing, the extended mind, interoception/homeostasis, and social homeostasis/attachment are all broad research programs, not single, fully falsified theories; they are suitable as design heuristics and a shared language but cannot be taken as the final conclusion that "the brain is like this." Engineering still has to validate every mapping with ablations and behavioral metrics.
+    </div>
+
+    <div class="warn">
+      <span class="tag">Boundary statement</span>
+      All the "brain region → Agent" mappings below are functional analogies, not neuroanatomical equivalences. What we borrow is the computational problem and its constraints, not the biological ontology.
+    </div>
+  </div>
+</section>

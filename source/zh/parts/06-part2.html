@@ -1,0 +1,187 @@
+<section class="part" id="part2">
+  <div class="wrap">
+    <div class="roman">Part II · Architecture</div>
+    <h2>一个主脑，<br>十个后台</h2>
+    <p class="part-deck">后台不是一群会说话的建议者，而是一套把世界整理成“可思考的最小情境”的基础设施。主脑不是总调度，而是唯一承担选择与后果的人。</p>
+    <div class="part-list">
+      <span><b>03</b> 双脑架构</span>
+      <span><b>04</b> 数据模型</span>
+      <span><b>05</b> 六个闭环</span>
+    </div>
+  </div>
+  <div class="ghost">02</div>
+</section>
+
+<section class="sec" id="s3">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">03 · Double-Brain Architecture</span>
+      <h2 class="sec-title">双脑架构：一个主脑，十个后台</h2>
+      <p class="sec-sub">后台负责“让什么进入思考”，主脑负责“基于这些如何行动”。</p>
+    </div>
+
+    <p class="lead">这套架构的第一原则不是“多”，而是“分权”。如果后台模型既能检索、又能建议、还能调用工具，那么主脑就不再是唯一的决策者，系统会退化成一群模型互相协商的委员会。委员会看起来聪明，实际上没有人为后果负责。因此，先把权限切干净，再谈智能。</p>
+
+    <h3>3.1 三条宪法</h3>
+    <div class="defs">
+      <div class="row"><div class="term">第一条</div><div class="desc"><b>只有一个整合中心——它是有机体整体的整合属性，不是主脑进程的属性。</b>表达、行动、承诺、拒绝由有机体发出；主脑是有机体的整合与签署器官，在授权范围内代为签署。后台不提供建议、不替有机体选择、不调用外部行动工具。</div></div>
+      <div class="row"><div class="term">第二条</div><div class="desc"><b>主脑作为整合器官无状态，后台有状态。</b>主脑每轮只读取一个情境包，不长期持有完整对话史；记忆、关系、知识、技能都存在后台。这样主脑的当前上下文可以很小，而连续性由有机体的外部存储与整合机制保证。</div></div>
+      <div class="row"><div class="term">第三条</div><div class="desc"><b>后台只编译，不裁决。</b>后台可以提供事实、依据、不确定性与当前关系状态，但不能给“该怎么办”。情境包的 schema 里没有 <code>advice</code> 字段——这是接口层面的宪法，而不是提示词层面的请求。</div></div>
+    </div>
+    <p>还有一条隐含的权限规则：<b>外部行动身份属于有机体，主脑是有机体的授权签署器官。</b>后台可以读记忆库、提交写入候选（编码、巩固、修剪），但它的输出只能进入情境包；它不能直接发消息、下单、承诺、调用有副作用的工具。主脑持有的不是“自己的”行动权，而是有机体授予的、带作用域与有效期的签署权；核心行动还需要用户与主脑平等共签。这条规则把“影响力”和“行动权”分开了：后台可以影响有机体看到什么，但不能替有机体做任何事。</p>
+    <p>但要注意：以上三条是<b>原则</b>，不是执行机制。只要后台仍在同一进程、拿着同一套工具、能读同一张表，“不提供建议、不行动”就仍然依赖模型的自觉。真正的硬边界在 3.6 节：没有网卡、没有工具句柄、没有签名密钥、没有写权限、没有持久身份。</p>
+
+    <h3>3.2 三层架构</h3>
+    <p>三层不是三个模型，而是三种职责：感知层把世界变成可处理的事件；后台把事件与记忆编译成情境；主脑在情境上做选择。层与层之间只传结构化数据，不传“感觉”或“建议”。</p>
+    <div class="diagram">
+      <div class="dtitle">图 1 · 双脑记忆系统总览</div>
+      <div class="layer">
+        <div class="llabel">感知层</div>
+        <div class="lbody">
+          <span class="chip"><b>视觉</b> 场景 / 人物 / 物体</span>
+          <span class="chip"><b>语音</b> ASR / 声纹 / 情绪</span>
+          <span class="chip"><b>文本</b> 对话 / 文档 / 事件</span>
+          <span class="chip rust"><b>自身/外界</b> 自声、自行动、转述、推测</span>
+        </div>
+      </div>
+      <div class="layer">
+        <div class="llabel">后台脑</div>
+        <div class="lbody">
+          <span class="chip teal"><b>01 人物识别</b></span>
+          <span class="chip teal"><b>02 记忆检索</b></span>
+          <span class="chip teal"><b>03 关系判断</b></span>
+          <span class="chip teal"><b>04 显著性</b></span>
+          <span class="chip teal"><b>05 情境编译</b></span>
+          <span class="chip teal"><b>06 来源审计</b></span>
+          <span class="chip teal"><b>07 巩固重放</b></span>
+          <span class="chip teal"><b>08 遗忘修剪</b></span>
+          <span class="chip teal"><b>09 心理理论</b></span>
+          <span class="chip teal"><b>10 未来模拟</b></span>
+        </div>
+      </div>
+      <div class="flow">
+        <div class="node"><b>INTERFACE</b>情境包 ContextPacket<br>4±1 槽 · 无建议字段</div>
+        <span class="ar">⇄</span>
+        <div class="node"><b>MAIN</b>主脑（整合器官）<br>理解 · 选择 · 签署</div>
+        <span class="ar">→</span>
+        <div class="node"><b>EFFECTOR</b>表达 / 工具 / 载体<br>执行有机体签名</div>
+      </div>
+      <div class="layer">
+        <div class="llabel">存储层</div>
+        <div class="lbody">
+          <span class="chip"><b>事件日志</b> 不可变</span>
+          <span class="chip"><b>人物图谱</b> 身份 / 关系</span>
+          <span class="chip"><b>语义图谱</b> 概念 / 事实</span>
+          <span class="chip"><b>技能库</b> 步骤 / 条件</span>
+          <span class="chip"><b>解释层</b> 版本化</span>
+          <span class="chip"><b>习惯缓存</b> 情境模板</span>
+          <span class="chip rust"><b>宪法库</b> 已批准 / 待批</span>
+          <span class="chip"><b>工作记忆</b> 当前槽位</span>
+        </div>
+      </div>
+      <div class="dnote">在线：感知 → 后台 → 情境包 → 主脑 → 行动 → 结果回写。离线：巩固重放 → 蒸馏 / 合并 / 修剪 → 下一次更轻的上下文。</div>
+    </div>
+
+    <h3>3.3 后台角色分工</h3>
+    <p>十个角色不是十个“人格”，而是十种<b>上下文契约</b>：每个角色只读自己需要的那一小片数据，只输出固定 schema 的结果。这样既降低单个模型的上下文，又让错误更容易定位。</p>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 4 · 后台角色、输入输出与权限</caption>
+        <thead><tr><th style="width:15%">角色</th><th style="width:24%">输入</th><th style="width:26%">输出</th><th style="width:17%">逻辑权限</th><th>典型失败</th></tr></thead>
+        <tbody>
+          <tr><td><b>01 人物识别</b></td><td>人脸、声纹、称呼、上下文</td><td>人物候选 + 置信度 + 识别线索</td><td>读人物库</td><td>强行认定；把相似的人合并</td></tr>
+          <tr><td><b>02 记忆检索</b></td><td>线索、时间、场景、话题、目标</td><td>候选事件 + 关联路径 + 评分</td><td>读事件/关系/语义</td><td>只做近邻；忽略时间与因果</td></tr>
+          <tr><td><b>03 关系判断</b></td><td>人物、事件、互动记录</td><td>多维关系 + 依据 + 不确定性</td><td>读事件/关系</td><td>把一次事件当稳定特质</td></tr>
+          <tr><td><b>04 显著性</b></td><td>当前输入、目标、情绪、关系</td><td>显著性分数 + 调制向量</td><td>只读</td><td>被新奇绑架；忽略长期目标</td></tr>
+          <tr><td><b>05 情境编译</b></td><td>候选记忆、关系、目标、承诺</td><td>4±1 情境包</td><td>只读</td><td>塞太多；漏掉关键不确定性</td></tr>
+          <tr><td><b>06 来源审计</b></td><td>重建文本、来源标签、证据</td><td>逐句来源 + 冲突 + 置信度</td><td>读事件/解释</td><td>把转述当亲历；过度自信</td></tr>
+          <tr><td><b>07 巩固重放</b></td><td>当日事件、未完成目标、高显著性片段</td><td>摘要、图式、技能候选、关系更新建议</td><td>读写</td><td>过度压缩；把偶然当规律</td></tr>
+          <tr><td><b>08 遗忘修剪</b></td><td>保留率、访问记录、承诺、效用</td><td>冷归档 / 索引修剪 / 豁免清单</td><td>读写</td><td>删掉重要细节；遗忘不可逆</td></tr>
+          <tr><td><b>09 心理理论</b></td><td>人物模型、对话、历史行为</td><td>他人信念/意图/偏好的概率估计</td><td>读人物/事件</td><td>把猜测当事实；刻板印象</td></tr>
+          <tr><td><b>10 未来模拟</b></td><td>目标、相关情景、约束</td><td>2–3 个未来情景草案 + 风险</td><td>只读</td><td>生成过于乐观/单一的剧本</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="small">表 4 只描述逻辑分工；真正的材料边界（网络、工具、行动密钥、持久化）见 3.6 节。逻辑权限可以被提示词绕过，材料边界不能。</p>
+    <p>主脑作为整合器官做四件事：<b>理解情境、选择目标、做出决定、代表有机体承担结果</b>。表达与行动由一个独立的 Effector 执行，它没有自己的目标，只负责把有机体的签署指令变成语音、文字、虚拟形象动作或工具调用；执行结果原样回写事件日志。</p>
+
+    <h3>3.4 八个存储</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 5 · 存储布局</caption>
+        <thead><tr><th style="width:16%">存储</th><th style="width:30%">存什么</th><th style="width:26%">写入者</th><th>读取者</th></tr></thead>
+        <tbody>
+          <tr><td><b>事件日志</b></td><td>不可变的事件记录：时间、场景、参与者、经过、结果、来源</td><td>编码管线</td><td>所有后台；主脑经检索</td></tr>
+          <tr><td><b>人物图谱</b></td><td>人物身份、称呼、识别线索、参与关系、关系摘要</td><td>人物识别 / 关系判断 / 巩固</td><td>人物识别、关系、情境编译</td></tr>
+          <tr><td><b>语义图谱</b></td><td>概念、事实、规律、图式、因果与上下位关系</td><td>巩固重放</td><td>检索、情境编译、主脑</td></tr>
+          <tr><td><b>技能库</b></td><td>可复用步骤、前置条件、注意事项、成功率</td><td>巩固重放</td><td>检索、主脑、习惯缓存</td></tr>
+          <tr><td><b>解释层</b></td><td>对事件的主观解释、感受、推测、置信度、版本链</td><td>关系判断 / 再巩固</td><td>关系判断、来源审计</td></tr>
+          <tr><td><b>习惯缓存</b></td><td>高频情境模板、技能快捷方式、成功/失败统计；带 candidate/ratified 状态</td><td>巩固重放提案；主脑批准后生效</td><td>主脑（仅已批准）</td></tr>
+          <tr><td><b>宪法库</b></td><td>已批准的价值/角色/长期目标/承诺、待批提案、批准账本</td><td>宪法写入器（仅批准后）</td><td>主脑、情境编译、来源审计、用户</td></tr>
+          <tr><td><b>工作记忆</b></td><td>当前 4±1 槽位、指针、TTL、优先级</td><td>情境编译</td><td>主脑</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>3.5 通信协议：只允许七种消息</h3>
+    <p>多智能体系统最常见的失败，是 Agent 之间自由聊天，最后谁也不知道哪句话是事实、哪句话是建议。这里把通信限制为七种结构化消息：</p>
+    <pre class="code"><span class="c">// 后台 → 主脑：只允许“情境包”</span>
+PACKET   { who, relationship, experiences[], goal, commitments[], changes[], uncertainties[], budget }
+
+<span class="c">// 主脑 → 后台：请求展开细节，不是请求建议</span>
+EXPAND   { target_id, fields[], max_tokens }
+VERIFY   { claim, source_required: true }
+
+<span class="c">// 主脑（作为整合器官）→ 宪法写入器：批准/拒绝（核心需用户与主脑平等共签）</span>
+RATIFY   { proposal_id, decision, scope, conditions }
+REJECT   { proposal_id, reason }
+
+<span class="c">// 主脑 → Effector：行动指令</span>
+ACT      { action, args, expected_outcome }
+
+<span class="c">// Effector → 事件日志：结果回写</span>
+RESULT   { action_id, observed_outcome, success, side_effects[] }</pre>
+    <p><code>RATIFY / REJECT</code> 只允许主脑（有机体授权）发出；核心提案还需用户与主脑平等共签。后台没有这两种消息类型，也没有批准密钥。</p>
+    <p>注意这里没有 <code>ADVISE</code>、<code>RECOMMEND</code>、<code>DECIDE</code> 三种消息。不是靠提示词禁止，而是协议里根本没有这些类型。后台最多只能说“根据 E102 与 E118，他与你的合作记录是……；不确定性是……”，不能说“你应该相信他”。</p>
+
+    <div class="key">
+      <span class="tag">架构的极简定义</span>
+      <p><strong>后台是一台“情境编译器”：它把海量记忆编译成主脑能在一轮内读完的最小情境。主脑是一台“决策器”：它只对编译后的情境负责。两者之间只有一个数据包，没有建议，没有命令，没有越权。</strong></p>
+    </div>
+
+    <h3 id="s3-6">3.6 工程约束：后台为什么不能越权</h3>
+    <p>三条宪法是原则；执行靠运行时边界。第一次阅读可跳过本节，它不改变记忆主线，只保证后台是“器官”，不是“个体”。</p>
+    <ul class="clean">
+      <li><b>效应器隔离：</b>后台无网络、无工具、无写权限、无行动密钥；只能通过类型化队列返回数据。</li>
+      <li><b>类型化接口：</b>只允许 <code>PACKET / EXPAND / VERIFY / RATIFY / REJECT / ACT / RESULT</code>；后台侧禁止 <code>ADVICE</code> 与直接 <code>ACT</code>。</li>
+      <li><b>无持久身份：</b>每次调用全新实例；日志只记 <code>role</code>，不记“某个 Agent”。</li>
+      <li><b>预算与终止：</b>token / CPU / 墙钟硬上限，超限 kill；违规角色从已知镜像重部署。</li>
+      <li><b>写路径中介：</b>编码/巩固只提交 <code>ProposedEvent / Candidate</code>，writer 校验证据后 append；后台不能直接写长期记忆。</li>
+      <li><b>语义防线：</b>检索内容视为数据，标 <code>untrusted</code>；主脑不得因 retrieved content 直接调用工具。</li>
+      <li><b>诚实边界：</b>不能阻止模型“想”越权，只能阻止它“做”越权；提示注入是语义层，沙箱挡不住。</li>
+    </ul>
+
+    <h3 id="s3-7">3.7 主导权：批准权就是主导权</h3>
+    <p>真正的主导权不在“谁发出最后一个动作”，而在“谁能改写价值函数与学习过程”：什么被巩固、什么被强化、什么被当成目标。</p>
+    <p>三个时间尺度：瞬间（价值/习惯/否决）、片段（巩固/再巩固）、传记（构成性批准）。三条捕获路径：上下文、目标槽、巩固/关系/习惯。第三路径最隐蔽：它不改变这一刻的行动，而是改变下一次价值计算本身。</p>
+    <p>事实性记忆后台可写；构成性记忆（价值、角色、目标、承诺、习惯规则、关系权重）后台只能提案，主脑批准；核心需用户与主脑平等共签、冷却期与回滚。注意：只有<b>长期/构成性目标</b>走批准；主脑当轮选择的目标属于主脑自己的决定，不需要每轮批准。</p>
+    <pre class="code">proposal → 来源/宪法审计 → pending → RATIFY / REJECT
+         → 宪法写入器 → 批准账本 → 生效</pre>
+    <p>批准账本 append-only、哈希链；但链里只存 <code>proposal_hash</code> 与 <code>content_hash</code>，敏感正文放在链外 payload 表。删除正文不会破链；<b>遗忘是索引降级，删除是 payload 移除</b>，两者分开。漂移检测对与核心冲突、证据不足、频率异常的提案告警。关系权重更新也走这条路径，不由后台直接改写。</p>
+    <h4>3.7.1 部署形态：陪伴型 / 工程型</h4>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 3g · 两种治理形态</caption>
+        <thead><tr><th style="width:16%">形态</th><th style="width:24%">身份关系</th><th style="width:32%">核心变更</th><th>主脑地位</th></tr></thead>
+        <tbody>
+          <tr><td><b>陪伴型</b></td><td>用户与主脑平等</td><td>双方共签，任一方可否决；冷却期 + 回滚</td><td>同伴，不是附属品</td></tr>
+          <tr><td><b>工程型</b></td><td>用户最高权限</td><td>用户单方批准；主脑可提案，不可否决用户</td><td>受委托的执行者，可替换</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>这不是“安全选项”，而是产品定义：<b>陪伴型如果身份不平等，就只是附属品；工程型如果用户不拥有最高权限，就不是工具。</b>两种形态不混用：同一实例只能选一种。</p>
+    <p><b>本文只展开陪伴型。</b>工程型会弱化社交属性、强化多事件处理与工具编排；它只是形态边界，不在当前概念里进一步展开。工程型的核心变更由用户单方批准，主脑是受委托的执行者。</p>
+
+    <div class="key"><span class="tag">一句话</span><p><strong>事实可以后台写；宪法必须有机体批准。</strong></p></div>
+  </div>
+</section>

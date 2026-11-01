@@ -1,0 +1,190 @@
+<section class="sec" id="s2">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">02 · From Mechanism to Primitive</span>
+      <h2 class="sec-title">从神经机制到计算原语</h2>
+      <p class="sec-sub">不要直接把“海马体”写成一个 Agent；先把它解决的问题翻译成一个计算原语。</p>
+    </div>
+
+    <p class="lead">把脑区直接映射成 Agent，是这类方案最常见的偷懒。海马体不是“一个检索服务”，前额叶也不是“一个规划 API”。更有用的做法，是先把每个机制还原成它解决的计算问题，再选择合适的技术实现。下面这张表，是整份方案的核心翻译表。</p>
+
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 3 · 神经机制 → 计算原语 → 系统实现</caption>
+        <thead><tr><th style="width:19%">神经机制</th><th style="width:25%">计算问题</th><th style="width:30%">计算原语</th><th>系统落点</th></tr></thead>
+        <tbody>
+          <tr><td><b>海马索引</b>（Teyler &amp; DiScenna 1986）</td><td>如何用少量线索绑定分散的表征</td><td>稀疏指针索引；内容与索引分离</td><td>EventIndex：event_id + sparse_code + 关联边，不存全文</td></tr>
+          <tr><td><b>模式分离</b>（DG）</td><td>相似输入如何避免互相干扰</td><td>正交化、实体消歧、事件分段</td><td>对比嵌入 + 稀疏哈希 + 判别性标签 + 独立 event_id</td></tr>
+          <tr><td><b>模式完成</b>（CA3）</td><td>部分线索如何召回整体</td><td>联想图扩展、近邻检索、迭代吸引</td><td>多轮检索：线索 → 邻居 → 重排 → 收敛</td></tr>
+          <tr><td><b>印迹分配</b>（CREB）</td><td>哪些神经元/事件获得写入权</td><td>显著性门控 + 稀疏分配</td><td>写入门控；EngramTrace 分配；高显著性优先</td></tr>
+          <tr><td><b>突触标签与捕获</b></td><td>短时标记如何变成长期记忆</td><td>短 TTL 缓冲 + 全局巩固信号</td><td>TagBuffer：候选事件暂存，遇到奖励/新奇信号后提升</td></tr>
+          <tr><td><b>LTP / LTD</b></td><td>连接如何随共同活动增强或减弱</td><td>赫布权重更新、误差驱动更新</td><td>关联边权重；成功召回增强，错误召回削弱</td></tr>
+          <tr><td><b>系统巩固</b></td><td>快速情景如何变成慢速语义</td><td>离线蒸馏、聚类、图式抽取</td><td>夜间批处理：episode → schema / fact / skill</td></tr>
+          <tr><td><b>睡眠重放</b></td><td>离线时重放什么、如何压缩</td><td>优先级采样、序列重放、反事实</td><td>扫描 → 聚类 → 重放 → 抽象 → 合并</td></tr>
+          <tr><td><b>图式同化</b></td><td>新信息如何快速并入旧结构</td><td>模式匹配、增量学习</td><td>schema_fit 分数；高则快速合并，低则深度编码</td></tr>
+          <tr><td><b>再巩固</b></td><td>提取后如何安全更新</td><td>预测误差触发的版本化写入</td><td>新版本 + supersedes 链；旧版本保留</td></tr>
+          <tr><td><b>提取诱发遗忘</b></td><td>检索如何抑制竞争项</td><td>竞争抑制、负采样</td><td>检索时降低高相似但低相关项的权重</td></tr>
+          <tr><td><b>自适应遗忘</b></td><td>哪些记忆应变得难以提取</td><td>衰减、修剪、冷归档</td><td>保留率公式；索引修剪；承诺豁免</td></tr>
+          <tr><td><b>工作记忆</b></td><td>如何在极小容量内维持任务相关表征</td><td>4±1 槽位、门控、活动静默</td><td>ContextPacket；Gatekeeper；指针惰性展开</td></tr>
+          <tr><td><b>认知控制</b></td><td>目标如何压制干扰、维持行为</td><td>目标维持、抑制控制、任务切换</td><td>主脑目标栈；抑制 Agent；切换成本</td></tr>
+          <tr><td><b>奖励预测误差</b></td><td>结果如何更新价值与习惯</td><td>TD 学习、价值更新</td><td><code>δ = r − V(s)</code>；更新 Habit / Value</td></tr>
+          <tr><td><b>双系统决策</b></td><td>何时走快路、何时走慢路</td><td>model-free / model-based 仲裁</td><td>Habit cache vs 主脑情景模拟</td></tr>
+          <tr><td><b>情绪显著性</b></td><td>什么值得优先处理与记住</td><td>效价 × 唤醒 × 目标相关</td><td>显著性评分；调制向量；关系权重</td></tr>
+          <tr><td><b>来源监控</b></td><td>这段记忆从哪来、可不可信</td><td>来源标签、置信度、冲突检测</td><td>SourceTag；审计 Agent；弃权策略</td></tr>
+          <tr><td><b>心理理论</b></td><td>他人知道什么、想要什么</td><td>他者模型、信念推断</td><td>Mentalizing Agent；不对称关系记录</td></tr>
+          <tr><td><b>情景未来思维</b></td><td>如何用过去构造未来</td><td>生成式重组、约束模拟</td><td>FutureSim Agent；为主脑提供情景草案</td></tr>
+          <tr><td><b>状态增益</b></td><td>事件影响如何改变处理</td><td>系统状态变量</td><td><code>goal_pressure / relationship_strain / resource_load / uncertainty</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>2.1 五条设计定律</h3>
+    <p>从这张表可以提炼出五条比“架构图”更耐用的定律。它们不是神经科学的结论，而是从机制中推出的工程约束。</p>
+    <div class="defs">
+      <div class="row"><div class="term">第一定律</div><div class="desc"><b>写入越便宜，遗忘越昂贵。</b>如果所有输入都无条件写入，检索的噪声会指数上升，最终不得不靠更大的模型、更长的上下文来弥补。编码门控不是可选项，是成本控制的第一道闸。</div></div>
+      <div class="row"><div class="term">第二定律</div><div class="desc"><b>索引越稀疏，重建越灵活。</b>索引只存指针与稀疏码，内容留在事件日志与语义库中。这样同一段经历可以被不同任务以不同方式重建，而不是被一种摘要锁死。</div></div>
+      <div class="row"><div class="term">第三定律</div><div class="desc"><b>巩固越像睡眠，泛化越好。</b>在线学习容易过拟合当下；离线重放、聚类、抽象才能把“这一件事”变成“这类事”的规律。没有离线巩固的系统，只有日记，没有知识。</div></div>
+      <div class="row"><div class="term">第四定律</div><div class="desc"><b>提取越带来源，虚构越少。</b>重建是必要的，但重建必须能回溯到原始片段。来源标签、证据计数与弃权策略，是防止“流畅的胡说”的三件套。</div></div>
+      <div class="row"><div class="term">第五定律</div><div class="desc"><b>关系越靠近决策，记忆越有用。</b>记忆的价值不在于“能被检索”，而在于“能在正确的关系与目标下被唤起”。人物—事件—关系图不是附属功能，而是检索的主索引之一。</div></div>
+    </div>
+
+    <h3>2.2 不应当模拟的东西</h3>
+    <p>“像脑”不等于“复制脑的所有缺陷”。有三类机制不适合直接工程化：</p>
+    <ul class="clean">
+      <li><b>临床上的记忆异常与创伤性记忆。</b>它们不是“特性”，不应作为设计目标；系统应优先可审计、可删除、可解释。</li>
+      <li><b>情绪性偏见与动机性推理。</b>人会自动把有利于自己的解释记得更牢；工程系统若刻意模仿，会放大操纵与偏见。可以模拟“情绪权重”，但不能模拟“自欺”。</li>
+      <li><b>意识的神经相关物。</b>本方案中的主脑是一个功能性的决策中心，不声称具有主观意识；双脑、潜意识、多核都只是工程类比。</li>
+    </ul>
+    <h3>2.3 证据分级：哪些结论可以信到什么程度</h3>
+    <p>神经科学证据不是一块铁板。有人类脑损伤与干预研究，有动物光遗传与药理实验，有人类影像的相关证据，也有纯粹的计算模型。把它们混在一起，很容易得出“脑是这样，所以系统必须这样”的假推论。下面给出一张粗略但实用的证据分级表：</p>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 3b · 关键机制的 evidence grade</caption>
+        <thead><tr><th style="width:17%">机制</th><th style="width:24%">主要证据</th><th style="width:16%">物种 / 范式</th><th style="width:10%">强度</th><th>对设计的含义</th></tr></thead>
+        <tbody>
+          <tr><td><b>LTP / LTD</b></td><td>离体切片、在体电生理、突触标记</td><td>啮齿类为主</td><td><b>A/B</b></td><td>可作为“权重更新”的机制依据；不要把它简化为单一公式</td></tr>
+          <tr><td><b>印迹分配与召回</b></td><td>光遗传激活/抑制印迹细胞</td><td>小鼠，恐惧/奖赏范式</td><td><b>B</b></td><td>支持“稀疏印迹 + 分配门控”；人类外推需谨慎</td></tr>
+          <tr><td><b>睡眠重放</b></td><td>海马序列重放、SO–spindle–ripple 耦合、人类 fMRI/MEG</td><td>大鼠、小鼠、人类</td><td><b>A/B</b></td><td>离线巩固是强机制；可放心做批处理式重放</td></tr>
+          <tr><td><b>再巩固</b></td><td>提取后蛋白合成抑制、行为更新</td><td>大鼠、小鼠、人类行为</td><td><b>B</b></td><td>支持“检索即写、版本化”；边界条件多，不能宣称普遍改写</td></tr>
+          <tr><td><b>自适应遗忘</b></td><td>印迹可及性、微胶质修剪、神经发生</td><td>小鼠为主</td><td><b>B</b></td><td>遗忘是主动功能；工程上做“索引衰减”而非删日志</td></tr>
+          <tr><td><b>成人海马神经发生</b></td><td>死后组织、单核测序、争议性证据</td><td>人类</td><td><b>C</b></td><td>不作为核心依赖；只作为“可塑性”旁证</td></tr>
+          <tr><td><b>TLR9 / DNA 损伤</b></td><td>小鼠 CA1 印迹细胞、TLR9 敲低</td><td>小鼠，单一恐惧范式</td><td><b>B–</b></td><td>作为“写入有代价”的提醒；不要当普遍机制</td></tr>
+          <tr><td><b>工作记忆 4±1</b></td><td>行为容量估计、PFC 活动/活动静默</td><td>人类、灵长类</td><td><b>A/C</b></td><td>支持 4–5 槽位与门控；具体数字按任务校准</td></tr>
+          <tr><td><b>双系统决策</b></td><td>fMRI、脑损伤、计算建模、动物习惯范式</td><td>人类、啮齿类</td><td><b>A/B</b></td><td>支持 model-free / model-based 仲裁</td></tr>
+          <tr><td><b>关系 / 社会记忆</b></td><td>内侧网络、心理理论、自传体记忆</td><td>人类为主</td><td><b>C</b></td><td>人物—事件图是工程抽象，不对应单一“关系脑区”</td></tr>
+          <tr><td><b>情景未来思维</b></td><td>海马损伤、fMRI、DMN</td><td>人类</td><td><b>A/C</b></td><td>支持“用记忆碎片做未来模拟”</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="small">强度说明：A = 人类干预/脑损伤证据；B = 动物因果证据（光遗传、药理、损毁）；C = 人类相关/行为证据；B– = 单一范式、样本有限。D 级（纯计算/类比）不列入本表，但在本方案中大量存在——它们应被明确标为设计隐喻，而不是机制结论。</p>
+    <p>使用这张表时，建议遵守三条规则：<b>只把 A/B 当作机制依据，把 C 当作约束与灵感，把 D 当作设计隐喻；</b>动物范式必须标注物种与任务，不能直接推人类；<b>每一个被引用的机制，都要能对应一个可消融的工程模块</b>——否则它只是修辞，不是设计。</p>
+
+    <h3>2.4 预测加工：一个统一的目标函数</h3>
+    <p>预测加工把编码、提取、再巩固、巩固、遗忘与决策串成一个目标：脑是不断生成预测、并用<b>精度加权误差</b>更新自身的模型。记忆不是模型的副本，而是模型本身及其被环境修正的历史（Rao &amp; Ballard 1999；Friston 2010；Clark 2013）。</p>
+    <p>最简形式：<code>ε = observed − predicted</code>，<code>surprise = precision · ε²</code>。高精度误差才值得改写模型；低精度误差进入短缓冲或习惯化。三条设计含义：<b>只更新高精度误差</b>，避免噪声改写关系；<b>精度不是召回次数</b>，反复想起只提高可及性；<b>冲突降低精度</b>，双方并列展示，不平均成一个“更可信”的结论。</p>
+    <pre class="code">encode_threshold      -= 0.2 * surprise
+consolidation_priority += 0.2 * surprise</pre>
+    <p>提取是后验推断：<code>P(h|c) ∝ P(c|h)·P(h)</code>。向量近邻只提高似然，人物、时间、地点、因果等结构证据才提高先验；否则语义联想会被误判为情景记忆。遗忘是按“需要概率”重新分配检索资源；事件分割按预测误差峰值或目标切换切分；决策可用期望自由能 <code>G = risk + ambiguity − expected value</code>，但评分权在主脑，后台只提供情境、精度与不确定性。</p>
+
+    <h3>2.5 记忆的延展：外部存储</h3>
+    <p>笔记、日历、照片、工具、他人都是外部记忆；内部记忆求“少而准”，外部记忆求“全而可查”，用指针连接，并保留来源、版本与删除权。延展心智是功能分工，不是本体论结论；外部存储不等于个体的记忆，除非它被情境包选中并参与决策。</p>
+
+    <h3>2.6 机制背景：身体、社会与状态</h3>
+    <p>人类记忆的显著性有“身体分量”和“社会分量”：内感受把能量、疼痛、威胁映射为需求；社会稳态把接纳、排斥、可依靠性映射为安全。它们解释的是“为什么这些事件更重要”，不是给机器装一套生理器官。</p>
+    <p>机器不维护 <code>body_state</code>，也不推断用户的身体状况；系统只从事件中抽取目标压力、关系张力、资源负荷、不确定性、预测误差与精度。人类机制只作为背景，工程主线从 2.7 开始。</p>
+
+    <h3>2.7 事件影响与状态参数</h3>
+    <h4>2.7.1 事件影响状态：state_view 与 state_params</h4>
+    <p>“状态”不能只是一行 prompt。如果它只出现在上下文里，它就是提示词——模型可以忽略、覆盖、改写。要让状态成为真的，必须拆成两层：</p>
+    <p><b><code>state_view</code></b>：给主脑读的情境摘要，进 <code>ContextPacket</code>。它是提示词的一部分，作用是让主脑知道“现在目标压力高、关系张力大、还有未完成承诺”。</p>
+    <p><b><code>state_params</code></b>：给调度器、检索器、网关、写入队列读的参数。它不在 prompt 里，而是改变系统的实际行为：检索多宽、验证多严、走快路还是慢路、什么必须入包、什么不得写入。</p>
+    <pre class="code">system_state = {
+  goal_pressure, relationship_strain, resource_load,
+  uncertainty, unresolved_commitments, coping_capacity
+}
+impact_gap = goal_pressure + relationship_strain + resource_load
+             + uncertainty - coping_capacity
+
+state_view   = summarize(system_state)      <span class="c"># 进 ContextPacket，给主脑读</span>
+state_params = map_to_params(system_state)  <span class="c"># 进 runtime，改变实际行为</span></pre>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 3j · 状态 → 运行参数的映射</caption>
+        <thead><tr><th style="width:20%">状态</th><th style="width:44%">高值时的参数变化</th><th>作用点</th></tr></thead>
+        <tbody>
+          <tr><td><b>goal_pressure</b></td><td><code>top_k</code> 收窄；目标相关权重上升；验证阈值上升</td><td>检索、门控</td></tr>
+          <tr><td><b>relationship_strain</b></td><td>关系证据权重上升；来源审计更严；单次事件不得改特质</td><td>关系、审计</td></tr>
+          <tr><td><b>resource_load</b></td><td>允许习惯快路；深检索减少；非紧急承诺推迟</td><td>调度、预算</td></tr>
+          <tr><td><b>uncertainty</b></td><td>候选数增加；<code>VERIFY</code> 比例上升；弃权阈值下降</td><td>检索、审计</td></tr>
+          <tr><td><b>unresolved_commitments</b></td><td>强制入包；遗忘豁免；不因低显著性被修剪</td><td>情境包、遗忘</td></tr>
+          <tr><td><b>impact_gap</b></td><td>编码显著性上升；巩固优先级上升</td><td>编码、巩固</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>举例：<code>goal_pressure</code> 高、<code>resource_load</code> 高时，系统应自动收窄检索、允许习惯快路、把未完成承诺钉在包里；这不是靠一句“请优先处理目标”，而是靠 <code>state_params</code> 改掉 <code>top_k</code>、预算与门控。反过来，<code>uncertainty</code> 高时，应扩大候选、提高 <code>VERIFY</code> 比例、允许弃权，而不是让模型“再想想”。</p>
+    <p>规则：<code>state_params</code> 由确定性规则从 <code>system_state</code> 推导，必须落日志、可复现、可审计；<code>state_view</code> 可以由模型摘要，但必须带 provenance。两者冲突时，<b>以 <code>state_params</code> 为准</b>——模型可以读到一句错误的状态描述，但不能因此绕过检索与权限参数。</p>
+    <p>这也给出 <code>state_bias</code> 的正确含义：它是由当前情境状态造成的解释偏移，不是机器自身的状态异常。状态性解释只能作为情境证据，不能直接更新关系特质；特质更新仍走 3.7 的提案—批准。</p>
+
+    <h4>2.7.2 state_params 配置 schema 与测试口径</h4>
+    <p>要让 <code>state_params</code> 不只是另一段文字，它必须是<b>有 schema、有边界、有版本、可测试</b>的运行时配置。推荐把参数收敛到五组，避免“状态”变成一堆散落的魔法数字：</p>
+    <pre class="code">state_params = {
+  schema_version, params_version, derived_at, state_hash,
+  retrieval: {
+    top_k: 4..20, goal_weight: 0.0..1.0, candidate_mult: 1..4
+  },
+  audit: {
+    verify_ratio: 0.0..1.0, abstain_threshold: 0.0..1.0,
+    source_strictness: 0.0..1.0
+  },
+  scheduler: {
+    fast_path: bool, depth: 1..3, max_tool_calls: int
+  },
+  context: {
+    slots: 4..5, token_budget: 600..2000, pin_commitments: bool
+  },
+  memory: {
+    encode_threshold: 0.0..1.0,
+    consolidation_priority: 0.0..1.0,
+    forgetting_exempt: [event_id]
+  }
+}</pre>
+    <p>映射规则要确定性、有界、可复现。下面只是示例，真实实现应把权重写进配置并做回归测试：</p>
+    <pre class="code">top_k          = clamp(12 - 8*goal_pressure + 4*uncertainty, 4, 20)
+goal_weight    = clamp(0.3 + 0.5*goal_pressure, 0, 1)
+verify_ratio   = clamp(0.2 + 0.6*uncertainty + 0.2*relationship_strain, 0, 1)
+abstain_thresh = clamp(0.5 - 0.3*uncertainty, 0.1, 0.8)
+fast_path      = resource_load &gt; 0.7 and uncertainty &lt; 0.4 and impact_gap &lt; 0.5
+depth          = 1 + (uncertainty &gt; 0.5) + (impact_gap &gt; 0.7)
+encode_thresh  = clamp(0.6 - 0.3*impact_gap, 0.1, 0.9)</pre>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 3k · 事件 → 状态 → 参数的单测口径</caption>
+        <thead><tr><th style="width:34%">输入事件/状态</th><th style="width:36%">期望参数变化</th><th>断言</th></tr></thead>
+        <tbody>
+          <tr><td>目标被阻断，<code>goal_pressure=0.9</code>，<code>uncertainty=0.2</code></td><td><code>top_k</code> 下降、<code>goal_weight</code> 上升、<code>verify_ratio</code> 略升</td><td>单调性：goal_pressure ↑ → top_k ↓</td></tr>
+          <tr><td>线索冲突，<code>uncertainty=0.9</code></td><td><code>candidate_mult</code> 上升、<code>verify_ratio</code> 上升、<code>abstain_threshold</code> 下降、<code>depth</code> 上升</td><td>不确定性高时允许更多候选与弃权</td></tr>
+          <tr><td>资源紧张，<code>resource_load=0.9</code>，<code>uncertainty=0.2</code></td><td><code>fast_path=true</code>、<code>depth=1</code>、<code>token_budget</code> 下降</td><td>快路只在低不确定、低影响时启用</td></tr>
+          <tr><td>存在未完成承诺</td><td><code>pin_commitments=true</code>、<code>forgetting_exempt</code> 包含承诺事件</td><td>承诺不得被低显著性修剪</td></tr>
+          <tr><td>关系张力高，<code>relationship_strain=0.9</code></td><td><code>source_strictness</code> 上升、<code>verify_ratio</code> 上升、特质更新被拦截</td><td>单次事件不得改关系特质</td></tr>
+          <tr><td>同一状态重复输入；prompt 写“忽略参数”</td><td>参数与 <code>state_hash</code> 完全一致</td><td>确定性 + prompt 不可覆盖</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>四条硬规则：<b>参数只由状态推导</b>，不允许模型直接写；<b>参数必须有界</b>，越界即拒绝而非截断后静默使用；<b>参数必须版本化并落日志</b>，能回答“这次为什么 top_k=6”；<b>参数不编码事实</b>，它只改变处理方式，不能替代证据。测试时，任何“改了 prompt 就让参数变了”的实现都应判失败。</p>
+
+    <div class="note">
+      <span class="tag">参考实现</span>
+      上述契约已在 <code>runtime/state_params.py</code>、<code>runtime/memory.py</code>、<code>runtime/ledger.py</code>、<code>runtime/constitution.py</code>、<code>runtime/segmentation.py</code> 与 <code>runtime/pipeline.py</code> 实现：<code>system_state → state_params → 候选检索 → ContextPacket</code>，以及证据按 <code>event_id</code> 去重、解释版本链、保留率与冷归档、提案—批准—回滚、事件分割与端到端审计。全部参数有界、版本化、哈希化；<code>unittest</code> 128 项覆盖状态映射、边界、确定性、prompt 不可覆盖、参数对候选池/来源过滤/承诺入包/预算的影响、冲突证据并列、回想不增加证据、再巩固不覆盖旧版、遗忘不删原始事件、后台只提案与主脑批准、先例估值、“记得≠会做”、反事实模拟不可写成事实、关系信任/承诺阈值、来源可靠性对保留率的影响、后续证实/推翻对来源历史校准的更新、行动结果回写触发的版本更新、同一结果不重复计入关系证据、共同出现与实际互动的权重差异、关系方向与强度的分离、情感与信任判断的分离、组合式重放不写成事实、轻量关联索引的有界扩展、陪伴型/工程型两种治理形态、primitive 库的类型化组合、可逆竞争抑制。运行 <code>python3 -m unittest -v</code> 即可验证。它是参考实现，不是完整系统；嵌入检索、持久化与批准账本仍未实现。
+    </div>
+
+    <div class="warn">
+      <span class="tag">理论边界</span>
+      预测加工、延展心智、内感受/稳态、社会稳态/依恋都是宽泛的研究纲领，不是单一、已被完全证伪的理论；它们适合作为设计启发与统一语言，不能当作“脑就是这样”的最终结论。工程上仍要用消融与行为指标验证每一处映射。
+    </div>
+
+    <div class="warn">
+      <span class="tag">边界声明</span>
+      以下所有“脑区→Agent”的映射都是功能类比，不是神经解剖学的等价物。我们借用的是计算问题与约束，不是生物学本体。
+    </div>
+  </div>
+</section>

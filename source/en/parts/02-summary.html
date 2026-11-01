@@ -1,0 +1,110 @@
+<main>
+<section class="sec" id="s0">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">00 · Executive Summary</span>
+      <h2 class="sec-title">The One-Page Proposal</h2>
+      <p class="sec-sub">The conclusion first: what must be simulated is not “memory”, but the loop between memory and decision.</p>
+    </div>
+
+    <p class="lead">The primary purpose of this proposal is not to build another memory store, but to let multiple models divide the labor so that the context the Main Brain must read each round is compressed to a minimum, while the information that does enter the context becomes more accurate. The human brain is not one large model; it is many functional units processing separately, with a single Main Brain making the unified judgment. The reason memory exists is to help the individual see clearly its relationships and position with others. Every mechanism below serves this through-line: <b>division of labor → context → judgment → relationship and memory update</b>.</p>
+
+    <div class="key">
+      <span class="tag">THROUGH-LINE</span>
+      <p><strong>Multi-model division of labor → the Backend compiles context → the Main Brain judges → relationship and memory update.</strong> Memory is not the goal; it is the infrastructure that lets the Main Brain make better judgments within relationships.</p>
+    </div>
+
+    <div class="key">
+      <span class="tag">CORE THESES</span>
+      <p><strong>The unit of memory is the Event, not the token; the reason memory exists is social relationships; the unit of context is the few blocks needed right now, not all of memory; the KPI is not “how much was stored” but “how many fewer errors in the next judgment within a relationship”.</strong></p>
+    </div>
+
+    <div class="note">
+      <span class="tag">FIRST-PRINCIPLES ABSTRACTION</span>
+      <b>Events affect state; state affects judgment and memory.</b> Humans, machines, and large models share the same principle; they differ only in the carrier of state and the speed at which it updates. State must be split into <code>state_view</code> (enters the context, is the prompt) and <code>state_params</code> (enters the runtime, and genuinely changes retrieval, budget, gating, and writing).
+    </div>
+
+    <div class="note">
+      <span class="tag">ARTICLE 0</span>
+      <b>Division of labor, not model stacking.</b> Multiple models each handle a small slice, and a single Main Brain makes the unified judgment; otherwise you have merely traded one large context for a crowd of small contexts.
+    </div>
+
+    <h3>Ten Design Principles</h3>
+    <ol class="steps">
+      <li><b>Multiple systems, not multiple copies.</b> Episodic memory, semantic memory, procedural memory, working memory, and relationship memory are stored separately and updated separately; a single experience can produce three kinds of accumulation at once, but they share one Event source.</li>
+      <li><b>Encoding has a threshold.</b> Not every input is worth remembering. Salience, goal relevance, social impact, emotional intensity, and prediction error jointly determine whether an engram is allocated.</li>
+      <li><b>Index and content are separate.</b> The hippocampus does not store the whole film, only a sparse index; the system likewise does not stuff full text into the index, only pointers, sparse codes, and association weights.</li>
+      <li><b>Consolidation is offline distillation.</b> Encode by day, replay by night: scan—cluster—replay—abstract—merge—prune, distilling episodes into semantics and skills.</li>
+      <li><b>Retrieval is reconstruction.</b> Every answer is a narrative reassembled from fragments and must carry sources; where there is no source, abstain rather than fabricate.</li>
+      <li><b>Reconsolidation is versioning.</b> Every retrieval may rewrite memory; new versions are appended, old versions are retained, and nothing is overwritten.</li>
+      <li><b>Forgetting is a feature.</b> Decay, interference resolution, and index pruning jointly reduce noise; unfinished commitments and safety-critical information are exempt.</li>
+      <li><b>Decision-making is dual-system.</b> When familiar, low-risk, and time-pressured, take the habitual fast path; when novel, high-risk, and requiring explanation, take model-based deliberation. Arbitration belongs to the Main Brain.</li>
+      <li><b>Relationships are the master index of memory.</b> Person–Event evoke each other bidirectionally; relationships are multi-dimensional, asymmetric, evidence-bearing, and updated with time and experience.</li>
+      <li><b>There is only one integrating center — and it belongs to the whole organism.</b> The Backend only compiles context: it does not offer advice, does not act, and does not decide in place of the Main Brain. The external acting identity belongs to the organism, and the Main Brain signs on its behalf within the authorized scope.</li>
+    </ol>
+
+    <div class="note">
+      <span class="tag">ARTICLES 11 AND 12 (IMPLICIT)</span>
+      <b>Boundaries are material, not policy; the ratification right is the ownership right.</b> A constitution without runtime isolation is only a soft constraint; facts may be written by the Backend, but values/roles, goals, and habit rules are proposal-only, ratified by the Main Brain as the integrating organ, and the constitutional core requires equal co-signature by the user and the Main Brain. The execution mechanisms are in sections 3.6–3.7.
+    </div>
+
+    <div class="diagram">
+      <div class="dtitle">Figure 0 · The One-Page Architecture</div>
+      <div class="layer">
+        <div class="llabel">Perception / Expression</div>
+        <div class="lbody">
+          <span class="chip">Vision · Scenes</span><span class="chip">Speech · Voiceprint</span><span class="chip">Text · Events</span><span class="chip rust">Self / Other tags</span><span class="chip">TTS · Avatar</span><span class="chip">MCP · Tools</span>
+        </div>
+      </div>
+      <div class="layer">
+        <div class="llabel">Backend Brains</div>
+        <div class="lbody">
+          <span class="chip teal"><b>Person ID</b></span><span class="chip teal"><b>Memory Retrieval</b></span><span class="chip teal"><b>Relationship Judgment</b></span><span class="chip teal"><b>Salience</b></span><span class="chip teal"><b>Context Compilation</b></span><span class="chip teal"><b>Source Audit</b></span><span class="chip teal"><b>Consolidation / Forgetting</b></span>
+        </div>
+      </div>
+      <div class="flow">
+        <div class="node"><b>ONLINE</b>Perception → ContextPacket</div><span class="ar">→</span>
+        <div class="node"><b>MAIN</b>Main Brain (integrating organ) understands / decides</div><span class="ar">→</span>
+        <div class="node"><b>ACT</b>Expression / Action</div><span class="ar">→</span>
+        <div class="node"><b>WRITE</b>Results written back to the event log</div>
+      </div>
+      <div class="flow">
+        <div class="node"><b>OFFLINE</b>Nightly replay · distillation</div><span class="ar">→</span>
+        <div class="node"><b>MERGE</b>Semantic / skill / relationship updates</div><span class="ar">→</span>
+        <div class="node"><b>PRUNE</b>Decay · interference resolution · pruning</div><span class="ar">↺</span>
+        <div class="node"><b>SLEEP</b>A lighter context next time</div>
+      </div>
+      <div class="dnote">Solid lines are the online loop, dashed lines the offline loop. The Backend may read the memory stores and submit write candidates, but it can influence the Main Brain only through the ContextPacket; the external acting identity belongs to the organism, and the Main Brain signs on its behalf within the authorized scope.</div>
+    </div>
+
+    <h3>Relation to Versions One and Two</h3>
+    <p>Versions One and Two established the skeleton of “one integrating center, backend brains, knowledge/memory/skill, relationships and experience, dual-brain decision-making”. The current version keeps this skeleton but introduces three kinds of change: <b>retained and elaborated</b>, <b>revised</b>, and <b>added</b>. Revisions and additions must be marked, so that later discussion is not mistaken for the original formulation.</p>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>Table 0 · From Versions One and Two to the Current Version: Retained, Revised, Added</caption>
+        <thead><tr><th style="width:24%">Original formulation (v1/v2)</th><th style="width:38%">Elaboration in the current version</th><th>Engineering landing point</th></tr></thead>
+        <tbody>
+          <tr><td><b>The Main Brain has no context</b></td><td>The Main Brain is a stateless inference process, rebuilt each round from the ContextPacket; the Backend is a stateful memory system</td><td>ContextPacket as the sole cross-layer interface; the Main Brain does not persist conversation history</td></tr>
+          <tr><td><b>The Backend filters memory</b></td><td>Salience gating + hippocampal index + pattern separation/completion + context compilation</td><td>Encoding pipeline, retrieval pipeline, 4±1 slots, lazy expansion</td></tr>
+          <tr><td><b>Knowledge / memory / skill</b></td><td>Complementary Learning Systems: fast episodic store + slow semantic abstraction + procedural skill</td><td>Event log, semantic graph, skill library, sharing event_id</td></tr>
+          <tr><td><b>Relationships and experience</b></td><td>Person–Event bidirectional graph; relationships multi-dimensional, asymmetric, evidence-bearing</td><td>Three record types: Person / Participation / Relationship</td></tr>
+          <tr><td><b>Facts and interpretations kept separate</b></td><td>Source monitoring + interpretation version chain + evidence counted by event</td><td>Interpretation layer; `evidence_count = distinct event_id`</td></tr>
+          <tr><td><b>Memory fading</b></td><td>Ebbinghaus decay × relationship strength × future utility; unfinished commitments exempt</td><td>Retention formula, cold archive, index pruning</td></tr>
+          <tr><td><b>Habits like a cache</b></td><td>model-free fast path; caches only context templates and skills, never “decisions”</td><td>Habit table + Main Brain arbitration; the Backend does not exceed its authority</td></tr>
+          <tr><td><b>REVISION · Only the whole is the individual</b></td><td>The integrating center is an integrative property of the organism as a whole; the Main Brain is the integrating and signing organ, not the individual</td><td>3.1 / 3.6; the acting identity belongs to the organism, and the Main Brain signs on its behalf</td></tr>
+          <tr><td><b>REVISION · Habit rules require ratification</b></td><td>The Backend may propose by frequency, but a habit rule takes effect only with Main Brain ratification; the Backend does not directly rewrite the future self</td><td>3.7 / 6.7; Habit state candidate / ratified</td></tr>
+          <tr><td><b>ADDITION · Runtime boundaries</b></td><td>The Backend has no network, no tools, no persistent identity; the right to act belongs only to the organism</td><td>3.6; permission matrix, red-team checklist</td></tr>
+          <tr><td><b>ADDITION · Ratification ledger</b></td><td>Constitutive changes follow propose—ratify—cool down—roll back; the ledger is verifiable</td><td>3.7; Constitution / Ledger</td></tr>
+          <tr><td><b>ADDITION · Evidence ledger and simulation boundary</b></td><td>Recollection adds no evidence; conflicts are kept side by side; simulations are never written as facts</td><td>4.6 / 6.7.2; evidence_count / simulation schema</td></tr>
+          <tr><td><b>ADDITION · Compositional replay</b></td><td>Extract person/place/action/goal primitives from multiple events and compose future candidates by slot; flagged as simulation, never written as fact</td><td>6.2.1; primitives.py / simulation.py</td></tr>
+          <tr><td><b>ADDITION · Governance mode</b></td><td>Companion mode: the user and the Main Brain co-sign as equals; Engineering mode: the user holds the highest authority</td><td>3.7.1; ConstitutionStore(mode)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <span class="tag">READING PATH</span>
+      Main line: 0 → 1.9 → 3.1–3.3 → 4.2–4.4 → 5 → 6.8 → 7. Mechanistic background: 1–2, 6; engineering constraints: 3.6–3.7, 9.4, 10, which may be read later. This keeps “governance and safety” from being mistaken for the main line of memory.
+    </div>
+  </div>
+</section>

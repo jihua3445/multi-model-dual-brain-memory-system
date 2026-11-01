@@ -1,0 +1,139 @@
+<section class="sec" id="s4">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">04 · Data Model</span>
+      <h2 class="sec-title">数据模型：事件、人物、关系、解释</h2>
+      <p class="sec-sub">记忆系统的第一张表，决定了它以后能问出什么问题。</p>
+    </div>
+
+    <p class="lead">如果系统只存“对话片段 + 向量”，它只能回答“哪段话最像”。如果它存“事件 + 人物 + 参与 + 关系 + 解释”，它就能回答“上次见面他答应过什么”“个体对他的判断有没有依据”“这件事和那件事是不是同一件”。数据模型不是实现细节，它决定了系统的认知上限。</p>
+
+    <h3>4.1 事件：记忆的原子单位</h3>
+    <p>事件不是一句对话，也不是一整天。它是一段有边界、有参与者、有经过、有结果的经历。事件分段可以靠预测误差的峰值、目标切换、场景变化、对话主题的转折来检测。一个事件记录至少应包含以下字段：</p>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 6 · Event 记录</caption>
+        <thead><tr><th style="width:18%">字段</th><th style="width:32%">含义</th><th>示例 / 约束</th></tr></thead>
+        <tbody>
+          <tr><td><code>event_id</code></td><td>全局唯一、不可变</td><td>ULID；一旦写入不复用</td></tr>
+          <tr><td><code>time</code></td><td>开始/结束时间、时区、时间精度</td><td>不确定时存区间，不强行精确</td></tr>
+          <tr><td><code>scene</code></td><td>地点、活动、环境、氛围</td><td>“办公室 / 方案评审 / 下午”</td></tr>
+          <tr><td><code>participants</code></td><td>参与者、角色、身份确定度</td><td>人物 ID + confidence + candidates</td></tr>
+          <tr><td><code>actions</code></td><td>谁对谁做了什么、对方如何回应</td><td>结构化动作，不是纯文本摘要</td></tr>
+          <tr><td><code>outcome</code></td><td>实际结果、是否达成目标</td><td>与预期分开记录</td></tr>
+          <tr><td><code>source</code></td><td>亲历 / 转述 / 推断 / 想象 / 模型生成</td><td>来源标签，逐条可追溯</td></tr>
+          <tr><td><code>status</code></td><td>开放 / 已关闭 / 待跟进</td><td>未完成承诺保持开放</td></tr>
+          <tr><td><code>salience</code></td><td>显著性分数与各分项</td><td>novelty / goal / social / affect / PE</td></tr>
+          <tr><td><code>links</code></td><td>相关事件、前因、后果、矛盾</td><td>因果边、时间边、<code>contradicts</code> 边</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>4.2 人物、参与、关系：三张表，不是一张表</h3>
+    <p>人物档案回答“他是谁”；参与记录回答“他在这件事里做了什么”；关系摘要回答“双方现在是什么关系”。三张表分开，理由很简单：<b>一个人可以参加很多事，一段关系可以被很多事支持，但一次互动不能直接等于关系。</b></p>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 7 · 人物 / 参与 / 关系</caption>
+        <thead><tr><th style="width:16%">对象</th><th style="width:38%">关键字段</th><th>设计要点</th></tr></thead>
+        <tbody>
+          <tr><td><b>Person</b></td><td>person_id、称呼/别名、识别线索（人脸/声纹/称呼）、已知特点、首次/最近出现</td><td>身份不确定时保留候选，不强行合并</td></tr>
+          <tr><td><b>Participation</b></td><td>person_id、event_id、角色、动作、回应、共同出现还是实际互动、来源、置信度</td><td>“同框”不等于“互动”；“他说”不等于“他做”</td></tr>
+          <tr><td><b>Relationship</b></td><td>熟悉、亲近、信任范围、合作、承诺、边界、社会角色；每维带 value、evidence_event_ids、scope、confidence、updated_at</td><td>“个体信任他”与“他信任个体”分开；判断带依据</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>关系是多维的，不是“好/坏”一根轴。一个人可能“工作信任高、私人亲近低、承诺记录好、边界感强”；另一个人可能“亲近高、信任低、合作一般”。把关系压成一个分数，会丢失最有用的信息。每个维度都要有<b>证据事件</b>、<b>适用范围</b>（工作/家庭/公共）与<b>更新时间</b>；没有证据的判断只能标为推测。</p>
+
+    <h3>4.3 解释层：事实与解释分开，解释可修正</h3>
+    <p>“他没有回复请求”是事件；“他不在乎”是解释。两者混在一起，系统就会把一次行为固化成一个人的本质。解释层单独存储，至少包含：</p>
+    <pre class="code">Interpretation {
+  interpretation_id,
+  target_event_id,
+  perspective: self | other,
+  type: feeling | speculation | attribution | evaluation,
+  content,
+  confidence,              <span class="c">// 0–1，不是“真/假”二元</span>
+  basis_event_ids: [],     <span class="c">// 这条解释由哪些事件支持</span>
+  created_at, updated_at,
+  supersedes: interpretation_id | null,
+  status: active | revised | retracted
+}</pre>
+    <p>关键规则：<b>解释可以修正，但不能覆盖历史</b>。当新信息到来时，创建新版本并指向被修正的旧版本；旧版本保留，用于审计“当时为什么这么想”。这不仅更诚实，也更有用：它让系统能解释自己的判断变化，而不是假装一直很聪明。</p>
+
+    <h3>4.4 知识、记忆、技能：同一事件的三类积累</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 8 · 三类积累与习惯缓存</caption>
+        <thead><tr><th style="width:14%">类型</th><th style="width:30%">回答</th><th style="width:30%">字段</th><th>晋升条件</th></tr></thead>
+        <tbody>
+          <tr><td><b>Memory</b></td><td>一个人经历过什么</td><td>事件日志 + 人物/参与/关系 + 解释版本；共享 <code>event_id</code></td><td>事件写入即成立；不晋升为“知识”</td></tr>
+          <tr><td><b>Knowledge</b></td><td>一个人知道什么</td><td>概念/关系/规则、来源 event_ids、置信度、适用域</td><td>至少 2–3 个独立事件支持；与既有图式不矛盾</td></tr>
+          <tr><td><b>Skill</b></td><td>一个人知道怎么做</td><td>步骤、前置条件、后置条件、注意事项、成功率、来源</td><td>至少 2 次成功 + 1 次失败/修正，或专家确认</td></tr>
+          <tr><td><b>Habit</b></td><td>类似情境下上次怎么做</td><td>情境签名、缓存模板/技能 ID、状态（candidate / ratified / revoked）、proposed_by、ratified_by、频次、成功率、最近使用、rollback_to</td><td>高频重复 + 结果稳定；<b>后台只提案，主脑批准</b>；只缓存模板，不缓存决定</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><b>记忆</b>是事件与关系的直接记录；<b>知识</b>是从多个事件抽象出的规则；<b>技能</b>是程序化步骤。三者共享同一个 <code>event_id</code>，但分别更新。习惯不是第四类积累，而是高频路径的缓存；它只加速情境组装，不替代记忆、知识或技能。</p>
+    <p>“一次成功不足以形成稳定技能，一次主观判断不应直接变成确定知识。”这条来自版本一的约束，应该写进晋升规则，而不是靠模型自觉。它也是防止系统把偶然当规律的最后一道闸。</p>
+
+    <h3>4.5 情境包：唯一跨层接口</h3>
+    <p>情境包不是“摘要”，而是<b>为当前决策裁剪过的最小情境</b>。它的槽位数量硬性限制在 4±1，每个槽位有类型、内容、来源、置信度与 TTL。推荐 schema：</p>
+    <pre class="code">ContextPacket {
+  packet_id, turn_id, created_at, expires_at,
+  governance_mode: companion | engineering,
+  self: {
+    ratified: { values[], role, long_term_goals[], active_commitments[] },
+    pending: [ { proposal_id, type, summary, evidence_count, expires_at } ]
+  },
+  who: { person_id, name, identity_confidence, candidates[] },
+  relationship: {
+    dimensions: { familiarity, closeness, trust_scope, cooperation,
+                  commitment, boundaries, social_role,
+                  social_safety, belonging_need },
+    basis_event_ids[], scope, confidence, updated_at
+  },
+  experiences: [
+    { event_id, one_line, why_relevant, source, confidence }
+  ],
+  omitted: { count, topics[], event_ids[] },   <span class="c">// 被筛掉的候选</span>
+  scene: { place, activity, time, atmosphere },
+  goal: {
+    current, priority, success_criteria,
+    scope: turn | constitutional,   <span class="c">// 只有 constitutional 需要批准</span>
+    provenance: { proposed_by, ratified_by, ratified_at, proposal_id },
+    lock: none | dual_ratified | user_sovereign | constitutional   <span class="c">// 仅对 constitutional 生效</span>
+  },
+}</pre>
+    <pre class="code"><span class="c">// 构成性只读指针与其余槽位</span>
+ContextPacket (续) {
+  constitution_ref: { version, ledger_head },
+  commitments: [ { content, due, status, counterpart } ],
+  changes: [ { what_changed, since_when, source } ],
+  uncertainties: [ { question, candidates[], evidence_needed } ],
+  affect: { valence, arousal, confidence },
+  state_view: {
+    goal_pressure, relationship_strain, resource_load, uncertainty,
+    unresolved_commitments, impact_gap
+  },
+  state_params_ref: { schema_version, params_version, state_hash },   <span class="c">// 参数在 runtime，不进上下文</span>
+  budget: {
+    slots: 4, header_tokens: 300, slot_tokens: 600,
+    tokens: 900, detail_level: brief|standard|deep
+  }
+}</pre>
+    <p>这个 schema 里没有 <code>advice</code>、没有 <code>recommendation</code>、没有 <code>action</code>。它不是“给主脑出主意”，而是“把主脑需要知道的事实、关系、目标与不确定性准备好”。主脑可以要求 <code>EXPAND(event_id)</code> 展开细节，也可以要求 <code>VERIFY(claim)</code> 核查来源；但它不能要求后台“代替它决定”。</p>
+
+    <h3>4.6 证据账本：反复回想不等于多次证据</h3>
+    <p>大模型记忆系统最容易犯的错误，是“自我强化”：同一段摘要被反复检索、反复改写，最后系统以为它被很多独立来源支持。人脑也有类似问题：反复回想一件事，会提高它的可及性，但不会把它变成多次独立经历。解决方法是<b>证据账本</b>：</p>
+    <ul class="clean">
+      <li><b>证据按 <code>event_id</code> 计数，不按检索次数计数。</b><code>evidence_count = distinct(event_id)</code>；同一事件被召回一百次，仍然只是一条证据。</li>
+      <li><b>来源分层：</b>亲历 &gt; 一手文档 &gt; 他人转述 &gt; 推断 &gt; 模型生成。高一层可以覆盖低一层，但必须保留原始来源。</li>
+      <li><b>解释与事实分账：</b>解释的置信度不能因为“被多次引用”而上升，只能因为“出现新的独立事件”而上升。</li>
+      <li><b>矛盾不平均：</b>两条冲突记录都保留，标 <code>contradicts</code>；检索时同时返回，由主脑看到冲突，而不是系统偷偷选一个。</li>
+    </ul>
+    <div class="note">
+      <span class="tag">一句话</span>
+      记忆系统的可信度，不取决于它记得多流畅，而取决于它能否在每一次断言后面放上一个可核对的事件编号。
+    </div>
+  </div>
+</section>

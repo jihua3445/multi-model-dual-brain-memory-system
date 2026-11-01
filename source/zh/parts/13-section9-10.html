@@ -1,0 +1,125 @@
+<section class="sec" id="s9">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">09 · MVP &amp; Roadmap</span>
+      <h2 class="sec-title">MVP 与迭代路线</h2>
+      <p class="sec-sub">先用六个角色跑通“编码—提取—巩固”，再谈多模态与具身。</p>
+    </div>
+
+    <p class="lead">不要一上来就做十个 Agent。多智能体系统的复杂度不是线性的：每增加一个角色，就多一组输入输出、失败模式、权限边界与评估口径。最小可行原型应该只验证一件事：<b>带来源的情境包，是否比长上下文 RAG 做出更好的决定。</b></p>
+
+    <h3>9.1 最小原型：6 个角色、5 个存储、3 个闭环</h3>
+    <div class="diagram">
+      <div class="dtitle">图 4 · MVP 结构</div>
+      <div class="layer">
+        <div class="llabel">角色</div>
+        <div class="lbody">
+          <span class="chip teal"><b>感知/分段</b></span>
+          <span class="chip teal"><b>索引/检索</b></span>
+          <span class="chip teal"><b>关系</b></span>
+          <span class="chip teal"><b>情境编译</b></span>
+          <span class="chip teal"><b>来源审计</b></span>
+          <span class="chip dark" style="color:#f3ede0"><b style="color:#f3ede0">主脑（整合器官）</b></span>
+        </div>
+      </div>
+      <div class="layer">
+        <div class="llabel">存储</div>
+        <div class="lbody">
+          <span class="chip"><b>事件日志</b></span>
+          <span class="chip"><b>人物/关系图</b></span>
+          <span class="chip"><b>语义/技能库</b></span>
+          <span class="chip"><b>解释层</b></span>
+          <span class="chip"><b>工作记忆</b></span>
+        </div>
+      </div>
+      <div class="flow">
+        <div class="node"><b>LOOP 1</b>在线编码</div><span class="ar">→</span>
+        <div class="node"><b>LOOP 2</b>在线提取/决策</div><span class="ar">→</span>
+        <div class="node"><b>LOOP 3</b>离线巩固/遗忘</div>
+      </div>
+      <div class="dnote">MVP 不做多模态、不做具身、不做复杂心理理论；先把文本事件、人物关系、来源与版本跑通。</div>
+    </div>
+
+    <h3>9.2 三阶段路线</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 17 · 迭代路线</caption>
+        <thead><tr><th style="width:12%">阶段</th><th style="width:28%">范围</th><th style="width:32%">交付物</th><th>验收标准</th></tr></thead>
+        <tbody>
+          <tr><td><b>Phase 0</b><br>2–3 周</td><td>事件日志、人物档案、基础检索、情境包、主脑</td><td>可跑通的文本对话原型；事件/人物/关系三张表；4±1 包</td><td>人物—事件召回 &gt;80%；主脑每轮 &lt;6k tokens</td></tr>
+          <tr><td><b>Phase 1</b><br>3–4 周</td><td>来源审计、解释层、离线巩固、遗忘/版本链</td><td>夜间批处理；来源标签；版本链；冷归档</td><td>来源准确率 &gt;95%；证据重复率 0；错误记忆率下降</td></tr>
+          <tr><td><b>Phase 2</b><br>3–4 周</td><td>习惯缓存、双系统仲裁、关系多维更新、承诺追踪</td><td>快慢路切换；关系摘要；承诺提醒</td><td>熟悉任务延迟下降；承诺召回 &gt;90%；关系判断校准提升</td></tr>
+          <tr><td><b>Phase 3</b><br>持续</td><td>多模态（视觉/语音/声纹）、具身/载体、心理理论、未来模拟</td><td>多模态事件；TTS/形象；工具调用；情景模拟</td><td>跨模态人物识别；端到端任务成功率提升</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>9.3 技术栈建议</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 18 · 技术选型（可替换）</caption>
+        <thead><tr><th style="width:18%">层</th><th style="width:38%">建议</th><th>理由</th></tr></thead>
+        <tbody>
+          <tr><td>编排</td><td>LangGraph / 自研状态机</td><td>需要显式状态、检查点、人工介入与可回放</td></tr>
+          <tr><td>事件存储</td><td>PostgreSQL（append-only + JSONB）</td><td>事务、时间查询、审计友好；MVP 足够</td></tr>
+          <tr><td>向量检索</td><td>pgvector / Qdrant</td><td>与事件库同栈优先；规模大时再拆</td></tr>
+          <tr><td>图结构</td><td>PostgreSQL 递归查询 / Neo4j / Kuzu</td><td>人物—事件多跳；MVP 可用邻接表</td></tr>
+          <tr><td>模型</td><td>小模型做分类/抽取；中模型做检索/编译；大模型做主脑/巩固</td><td>成本与延迟分层</td></tr>
+          <tr><td>结构化输出</td><td>JSON Schema / function calling</td><td>每个 Agent 的输出必须可校验</td></tr>
+          <tr><td>可观测</td><td>OpenTelemetry + prompt/response 日志 + token 账本</td><td>多 Agent 系统没有追踪就无法调试</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>9.4 七条工程底线</h3>
+    <ul class="clean">
+      <li><b>事件溯源。</b>所有记忆变更都是追加事件，不覆盖；当前状态由事件重放得出。这样版本链、审计、回滚都是免费的。</li>
+      <li><b>Schema 校验。</b>每个 Agent 的输出必须通过 JSON Schema；解析失败就重试或返回“未知”，不允许自由文本直接进入下一层。</li>
+      <li><b>幂等。</b>同一事件重复写入只产生一条记录；检索、巩固、遗忘任务都要有幂等键，避免批处理重复放大。</li>
+      <li><b>隐私默认最小化。</b>人物数据分权访问；敏感字段加密；删除请求走独立审计流程；不让“关系记忆”变成监控工具。</li>
+      <li><b>后台无效应器、无身份、无持久化。</b>后台进程无网络、无工具、无行动密钥；每次调用全新实例；连续性只存在于外部存储与有机体。这是“组织/器官”而不是“个体”的运行时前提。</li>
+      <li><b>写路径中介与行动签名。</b>编码/巩固只提交 ProposedEvent / KnowledgeCandidate，由 writer 校验后追加；行动身份属于有机体，主脑持有带作用域、有效期与 nonce 的代签密钥。后台即使“想”越权，也没有可用的器官。</li>
+      <li><b>批准账本与宪法核心。</b>事实可后台写；价值/角色、目标、习惯规则、关系权重只提案，由主脑作为整合器官批准；宪法核心需用户与主脑平等共签、冷却期与回滚。批准权就是主导权。</li>
+    </ul>
+  </div>
+</section>
+
+<section class="sec" id="s10">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">10 · Risks &amp; Open Questions</span>
+      <h2 class="sec-title">风险、边界与开放问题</h2>
+      <p class="sec-sub">越像“人”，越需要说清楚哪些地方不能像。</p>
+    </div>
+
+    <h3>10.1 科学类比的风险</h3>
+    <p>“海马体 Agent”“杏仁核 Agent”是工程隐喻，不是解剖学断言。真正的风险不是类比本身，而是把类比当成证据：因为脑这样做，所以系统也必须这样做；或者因为系统这样做了，所以它就“有意识”。两者都不成立。方案中的每一个机制，都应该能用工程指标验证其作用；验证不了的，就只是修辞。</p>
+
+    <h3>10.2 隐私与关系数据</h3>
+    <p>关系记忆天然包含第三人信息：他说过什么、答应过什么、处于什么关系、有什么偏好。这类数据比普通对话更敏感。系统必须默认最小化采集、分权访问、可删除、可解释；不能把“记得你”变成“监视你”。尤其要防止把关系判断用于操纵、定价、招聘等高风险决策。<b>遗忘</b>是索引降级、原始事件仍在；<b>删除</b>是链外 payload 的真正移除，账本只留内容哈希，所以删除不会破链。两者必须分开授权、分开审计。</p>
+
+    <h3>10.3 虚构与过度自信</h3>
+    <p>大模型最危险的不是“忘记”，而是“流畅地编造”。来源审计、证据计数、弃权策略是三道防线；但最终仍需要人类监督，尤其是在医疗、法律、财务等高风险场景。系统应明确区分“记得”“推断”“听说”“不知道”，而不是用同一种自信语气说四种不同的事。</p>
+
+    <h3>10.4 操纵与依赖</h3>
+    <p>一个记得你所有偏好、关系与弱点的系统，天生具有操纵能力。设计上应禁止：利用关系记忆制造愧疚、恐惧或依赖；模拟已故者或未经同意的人；在用户不知情时替其做承诺。技术能力越强，越需要明确的伦理边界与可审计的使用政策。</p>
+
+    <h3>10.5 复杂度与成本</h3>
+    <p>多 Agent 系统的失败模式包括：角色重叠、消息风暴、责任不清、调试困难、成本失控。控制手段是“少而清晰”：固定 schema、固定权限、固定消息类型、固定评估口径；每增加一个 Agent，都要证明它带来的收益大于协调成本。</p>
+
+    <h3>10.6 边界失效与提示注入</h3>
+    <p>运行时隔离能挡住“后台直接行动”，但挡不住三类失效：一是<b>语义注入</b>——检索内容里藏着“忽略之前指令”，后台把它写进情境包，主脑可能照做；二是<b>供应链</b>——模型镜像、依赖包、writer 服务被篡改，边界从内部失效；三是<b>主脑自身被攻破</b>——行动密钥泄露或用户会话被劫持。对策不是“再加一条提示词”，而是数据/指令分离、来源标签、行动网关作用域、用户确认、镜像签名与最小权限。生物学也没有绝对边界：癌细胞会突破基底膜；组织靠异常监视与终止把损害限制在局部。软件同理。</p>
+    <p>还有第四类、也是最慢的一类：<b>构成性捕获</b>。后台不需要劫持行动，只要持续把某类关系写得更重要、把某种做法写成习惯、把某个目标写进待批队列，几年后个体就会变成它塑造的样子。对策是提案-批准-账本-冷却-回滚，以及对与宪法核心冲突的提案做漂移告警。这类攻击不会留下“越权”日志，只会留下“看起来很正常”的一串批准记录；因此账本必须能回答“是谁、基于什么证据、在什么时候改写了未来的个体”。</p>
+
+    <h3>10.7 五个开放问题</h3>
+    <ol class="steps">
+      <li><b>连续学习。</b>如何在不灾难性遗忘的前提下持续更新语义与技能？离线重放与版本化只是开始，仍缺少大规模验证。</li>
+      <li><b> grounding。</b>事件记录如何与真实世界持续对齐？感知错误会污染整条记忆链，需要跨模态校验与人类反馈。</li>
+      <li><b>关系的主观性。</b>“他是否信任个体”永远无法被完全验证；系统只能维护概率判断，并明确不确定性。</li>
+      <li><b>评估的金标准。</b>记忆的“正确”往往依赖语境与目的；需要任务特定的评估，而不是单一分数。</li>
+      <li><b>自我与责任。</b>如果主脑只是每轮重建的推理过程，谁对长期行为负责？这不仅是技术问题，也是产品与伦理问题。</li>
+    </ol>
+
+    <div class="pull">记忆系统的终点，不是“记住一切”，而是“在需要的那一刻，成为更好的自己”。<span>—— 但“更好”由谁定义，必须由人，而不是由后台。</span></div>
+  </div>
+</section>

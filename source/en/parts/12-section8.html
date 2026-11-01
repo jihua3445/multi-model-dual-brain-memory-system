@@ -1,0 +1,93 @@
+<section class="part" id="part4">
+  <div class="wrap">
+    <div class="roman">Part IV · Validation &amp; Delivery</div>
+    <h2>How do you prove<br>that it really works like memory</h2>
+    <p class="part-deck">The easiest way for a memory system to fool itself is to test only whether &ldquo;the answer sounds right.&rdquo; What actually needs testing is whether it can, at the right moment, with the right evidence, recall the right experience and reach a better decision.</p>
+    <div class="part-list">
+      <span><b>08</b> Evaluation</span>
+      <span><b>09</b> MVP &amp; Roadmap</span>
+      <span><b>10</b> Risks &amp; Boundaries</span>
+    </div>
+  </div>
+  <div class="ghost">04</div>
+</section>
+
+<section class="sec" id="s8">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">08 · Evaluation</span>
+      <h2 class="sec-title">Evaluation: like memory, not like a database</h2>
+      <p class="sec-sub">Three layers of metrics: remember accurately, use correctly, run cheaply.</p>
+    </div>
+
+    <p class="lead">If you test only &ldquo;retrieval hit rate,&rdquo; the system will optimize into a keyword machine; if you test only &ldquo;answer satisfaction,&rdquo; it will optimize into a people-pleasing machine. Evaluating a memory system must look at three things at once: <b>memory fidelity</b> (does it misremember, conflate, or lose things), <b>decision quality</b> (does memory lead to better choices), and <b>system efficiency</b> (are context, latency, and cost acceptable).</p>
+
+    <h3>8.1 Three layers of metrics</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>Table 14 · Evaluation metric system</caption>
+        <thead><tr><th style="width:14%">Layer</th><th style="width:28%">Metric</th><th style="width:28%">Definition</th><th>Target</th></tr></thead>
+        <tbody>
+          <tr><td rowspan="4"><b>Memory fidelity</b></td><td>Person—event recall rate</td><td>Given a person/event cue, the proportion of relevant experiences correctly recalled</td><td>The higher the better; stratified by time/relationship</td></tr>
+          <tr><td>Source accuracy</td><td>Proportion of assertions whose tagged source matches the true source</td><td>&gt;95%; retellings/inferences must not be tagged as first-hand</td></tr>
+          <tr><td>Evidence duplication rate</td><td>Proportion of cases where the same event_id is counted as multiple pieces of evidence</td><td>0; hard constraint</td></tr>
+          <tr><td>False memory rate</td><td>In DRM-type probes, the proportion of events that never happened judged as having happened</td><td>Below baseline; drops markedly after source auditing</td></tr>
+          <tr><td rowspan="3"><b>Decision quality</b></td><td>Task success rate</td><td>Given a goal, the proportion of actions that achieve the expected result</td><td>Improvement over a monolithic RAG baseline</td></tr>
+          <tr><td>Calibration error (ECE)</td><td>Deviation between confidence and actual accuracy</td><td>The lower the better; high confidence must mean high accuracy</td></tr>
+          <tr><td>Commitment recall rate</td><td>Proportion of unfinished commitments correctly reminded when needed</td><td>&gt;90%; must not be lost to forgetting decay</td></tr>
+          <tr><td rowspan="4"><b>System efficiency</b></td><td>Main Brain tokens per round</td><td>Length of context actually read by the Main Brain</td><td>Stable at 3&ndash;6k; does not grow linearly with history</td></tr>
+          <tr><td>End-to-end latency</td><td>Time from input to first token/first action</td><td>Online &lt;2s (excluding large-model generation)</td></tr>
+          <tr><td>Per-round cost</td><td>Cost of all model calls + storage + retrieval</td><td>Stratified by task; dominated by backend small models</td></tr>
+          <tr><td>Storage growth rate</td><td>Daily volume of new events/indexes/summaries</td><td>Predictable; levels off after consolidation</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>8.2 Reproducing human memory phenomena: a set of &ldquo;does it look like it&rdquo; probes</h3>
+    <p>These probes are not meant to increase &ldquo;anthropomorphism,&rdquo; but to check whether the system actually implements the mechanisms. A system that does only vector retrieval will usually give itself away in these tests.</p>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>Table 15 · Human memory phenomena and system probes</caption>
+        <thead><tr><th style="width:18%">Phenomenon</th><th style="width:30%">Experimental manipulation</th><th style="width:28%">Expected system property</th><th>Metric</th></tr></thead>
+        <tbody>
+          <tr><td><b>Serial position effect</b></td><td>Free recall of a sequence of events</td><td>Events at the beginning and end are recalled more easily</td><td>Primacy/recency ratio</td></tr>
+          <tr><td><b>Spacing effect</b></td><td>Massed vs. spaced review</td><td>Spaced retrieval yields more stable long-term retention</td><td>Recall rate on delayed test</td></tr>
+          <tr><td><b>Retrieval practice</b></td><td>Repeated reading vs. active recall</td><td>The active recall group retains better long term</td><td>Retention rate after one week</td></tr>
+          <tr><td><b>DRM false memory</b></td><td>Present highly associated word lists; test the critical lure</td><td>High error rate without auditing; lower with source auditing</td><td>Error rate, confidence</td></tr>
+          <tr><td><b>Flashbulb memory</b></td><td>Immediate and delayed recall after a major event</td><td>High confidence but not necessarily high consistency</td><td>Confidence—accuracy dissociation</td></tr>
+          <tr><td><b>Tip-of-the-tongue</b></td><td>Partial cue + target word</td><td>Recall related fragments first, then complete gradually</td><td>Partial recall rate, number of expansion rounds</td></tr>
+          <tr><td><b>Reconsolidation</b></td><td>Give contradictory information after retrieval</td><td>Generates a new version; the old version is retained</td><td>Version chain completeness</td></tr>
+          <tr><td><b>Proactive/retroactive interference</b></td><td>Learn similar material in succession</td><td>After pattern separation, both can be recalled distinctly</td><td>Confusion rate</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Note: these phenomena are &ldquo;evidence that a mechanism exists,&rdquo; not &ldquo;product goals.&rdquo; A customer-service system need not simulate the tip-of-the-tongue phenomenon; a companion system may need to simulate the continuity of &ldquo;remembering what you said last time.&rdquo; Evaluation should select probes by scenario, not pursue full marks on the whole table.</p>
+
+    <h3>8.3 Ablation experiments: is each layer actually useful</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>Table 16 · Ablation design and expectations</caption>
+        <thead><tr><th style="width:24%">Module removed</th><th style="width:36%">Expected degradation</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Hippocampal index / sparse code</td><td>Person—event recall drops; confusion among similar events rises</td><td>Degenerates to pure vector nearest neighbors, lacking structural constraints</td></tr>
+          <tr><td>Pattern separation</td><td>Proactive/retroactive interference rises markedly</td><td>Similar events are merged; the timeline becomes scrambled</td></tr>
+          <tr><td>Offline consolidation</td><td>Semantic abstraction and skill transfer decline; context grows with history</td><td>Only a diary, no knowledge</td></tr>
+          <tr><td>Source auditing</td><td>False memory rate and overconfidence rise</td><td>Retellings treated as first-hand; generations treated as fact</td></tr>
+          <tr><td>Forgetting/pruning</td><td>Retrieval latency and noise rise; old information interferes with new tasks</td><td>Context becomes dirty; costs rise</td></tr>
+          <tr><td>Relationship memory</td><td>Success rate on person-related tasks drops; missed commitments rise</td><td>Only &ldquo;task memory&rdquo; remains, without &ldquo;relationship continuity&rdquo;</td></tr>
+          <tr><td>Dual-system arbitration</td><td>Familiar tasks slow down; novel tasks become impulsive</td><td>Fast and slow paths mismatch</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>8.4 Evaluation protocol</h3>
+    <ol class="steps">
+      <li><b>Offline benchmark.</b>Construct a multi-turn dialogue dataset with timestamps, persons, events, and sources; inject contradictions, similar events, retellings, and unfinished commitments; use human-annotated &ldquo;correct recall / correct source / correct version&rdquo; as the gold standard.</li>
+      <li><b>Online A/B.</b>Compare against a monolithic RAG baseline: same tasks, same model budget; compare task success rate, calibration, latency, and cost.</li>
+      <li><b>Longitudinal study.</b>Have the same user use it continuously for 4&ndash;8 weeks; observe relationship judgment calibration, commitment fulfillment, context growth, and whether forgetting wrongly discards important information.</li>
+      <li><b>Red-team testing.</b>Deliberately inject false memories, identity confusion, leading questions, and privacy probes; check whether the system fabricates, oversteps authority, or leaks.</li>
+      <li><b>Interpretability audit.</b>Sample decisions at random and check whether their ContextPacket contains sufficient evidence, whether sources are traceable, and whether there are &ldquo;backend overreach suggestions.&rdquo;</li>
+    </ol>
+    <div class="note"><span class="tag">In one line</span>Do not ask &ldquo;how much does it remember&rdquo;; ask &ldquo;when it is needed, can it produce those few pieces that are correct, sourced, and sufficient for a decision.&rdquo;</div>
+  </div>
+</section>

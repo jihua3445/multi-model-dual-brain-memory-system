@@ -1,0 +1,110 @@
+<main>
+<section class="sec" id="s0">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">00 · Executive Summary</span>
+      <h2 class="sec-title">一页纸方案</h2>
+      <p class="sec-sub">先把结论放在前面：要模拟的不是“记忆”，而是记忆与决策之间的那条回路。</p>
+    </div>
+
+    <p class="lead">这套方案的第一目的，不是再做一套记忆库，而是让多个模型分工，把主脑每一轮要读的上下文压到最小，同时让进入上下文的信息更准。人脑不是一台大模型，而是许多功能单元分别处理、再由一个主脑统一判断；记忆存在的理由，是帮助个体认清与他人的关系与位置。以下所有机制，都服务于这条主线：<b>分工 → 情境 → 判断 → 关系与记忆更新</b>。</p>
+
+    <div class="key">
+      <span class="tag">主线</span>
+      <p><strong>多模型分工 → 后台编译情境 → 主脑判断 → 关系与记忆更新。</strong>记忆不是目的；它是让主脑在关系中做出更好判断的基础设施。</p>
+    </div>
+
+    <div class="key">
+      <span class="tag">核心命题</span>
+      <p><strong>记忆的单位是事件，不是 token；记忆存在的理由是社会关系；上下文的单位是此刻需要的那几块，不是全部记忆；KPI 不是“存了多少”，而是“关系中的下一次判断少犯多少错”。</strong></p>
+    </div>
+
+    <div class="note">
+      <span class="tag">第一性抽象</span>
+      <b>事件影响状态；状态影响判断与记忆。</b>人、机器、大模型共用同一条准则，差别只在状态载体与更新速度。状态必须拆成 <code>state_view</code>（进上下文，是提示词）与 <code>state_params</code>（进运行时，真正改变检索、预算、门控与写入）。
+    </div>
+
+    <div class="note">
+      <span class="tag">第 0 条</span>
+      <b>分工，不是堆模型。</b>多个模型各处理一小片，再由一个主脑统一判断；否则只是把一个大上下文换成一群小上下文。
+    </div>
+
+    <h3>十条设计原则</h3>
+    <ol class="steps">
+      <li><b>多系统，不是多副本。</b>情景记忆、语义记忆、程序记忆、工作记忆、关系记忆分别存储、分别更新；同一次经历可以同时产生三类积累，但共享同一个事件源。</li>
+      <li><b>编码有门槛。</b>不是所有输入都值得记。显著性、目标相关、社会影响、情绪强度、预测误差共同决定是否分配“印迹”。</li>
+      <li><b>索引与内容分离。</b>海马体不存整段电影，只存稀疏索引；系统也不把全文塞进索引，只存指针、稀疏码与关联权重。</li>
+      <li><b>巩固是离线蒸馏。</b>白天编码，夜间重放：扫描—聚类—重放—抽象—合并—修剪，把情景蒸馏为语义与技能。</li>
+      <li><b>提取是重建。</b>每次回答都是从碎片重新组装的叙事，必须带来源；没有来源就弃权，而不是编造。</li>
+      <li><b>再巩固是版本化。</b>每次提取都可能改写记忆；新版本追加，旧版本保留，永不覆盖。</li>
+      <li><b>遗忘是功能。</b>衰减、干扰消解、索引修剪共同降低噪声；未完成承诺与安全关键信息豁免。</li>
+      <li><b>决策分双系统。</b>熟悉、低风险、时间紧时走习惯快路；陌生、高风险、需要解释时走模型化推演。仲裁权在主脑。</li>
+      <li><b>关系是记忆的主索引。</b>人物—事件双向唤起；关系多维、不对称、带依据、随时间与经历更新。</li>
+      <li><b>只有一个整合中心——它属于整个有机体。</b>后台只编译情境，不提供建议、不行动、不代替决策；外部行动身份属于有机体，主脑在授权范围内代签。</li>
+    </ol>
+
+    <div class="note">
+      <span class="tag">第十一、十二条（隐含）</span>
+      <b>边界是材料，不是政策；批准权即主导权。</b>没有运行时隔离的宪法只是软约束；事实可后台写，价值/角色、目标、习惯规则只提案，由主脑作为整合器官批准，宪法核心需用户与主脑平等共签。执行机制见 3.6–3.7 节。
+    </div>
+
+    <div class="diagram">
+      <div class="dtitle">图 0 · 一页纸架构</div>
+      <div class="layer">
+        <div class="llabel">感知 / 表达</div>
+        <div class="lbody">
+          <span class="chip">视觉 · 场景</span><span class="chip">语音 · 声纹</span><span class="chip">文本 · 事件</span><span class="chip rust">自身 / 外界标记</span><span class="chip">TTS · 形象</span><span class="chip">MCP · 工具</span>
+        </div>
+      </div>
+      <div class="layer">
+        <div class="llabel">后台脑</div>
+        <div class="lbody">
+          <span class="chip teal"><b>人物识别</b></span><span class="chip teal"><b>记忆检索</b></span><span class="chip teal"><b>关系判断</b></span><span class="chip teal"><b>显著性</b></span><span class="chip teal"><b>情境编译</b></span><span class="chip teal"><b>来源审计</b></span><span class="chip teal"><b>巩固 / 遗忘</b></span>
+        </div>
+      </div>
+      <div class="flow">
+        <div class="node"><b>ONLINE</b>感知 → 情境包</div><span class="ar">→</span>
+        <div class="node"><b>MAIN</b>主脑（整合器官）理解 / 决策</div><span class="ar">→</span>
+        <div class="node"><b>ACT</b>表达 / 行动</div><span class="ar">→</span>
+        <div class="node"><b>WRITE</b>结果回写事件日志</div>
+      </div>
+      <div class="flow">
+        <div class="node"><b>OFFLINE</b>夜间重放 · 蒸馏</div><span class="ar">→</span>
+        <div class="node"><b>MERGE</b>语义 / 技能 / 关系更新</div><span class="ar">→</span>
+        <div class="node"><b>PRUNE</b>衰减 · 干扰消解 · 修剪</div><span class="ar">↺</span>
+        <div class="node"><b>SLEEP</b>下一次更轻的上下文</div>
+      </div>
+      <div class="dnote">实线为在线闭环，虚线为离线闭环。后台可读记忆库、提交写入候选，但只能通过“情境包”影响主脑；外部行动身份属于有机体，主脑在授权范围内代签。</div>
+    </div>
+
+    <h3>与版本一/二的关系</h3>
+    <p>版本一/二确立了“一个整合中心、后台脑、知识/记忆/技能、关系与经历、双脑决策”的骨架。当前版本保留这些骨架，但有三类变化：<b>保留并展开</b>、<b>修订</b>、<b>新增</b>。修订与新增必须标明，避免把后来的讨论当成原始口径。</p>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 0 · 从版本一/二到当前版本：保留、修订、新增</caption>
+        <thead><tr><th style="width:24%">原始口径（v1/v2）</th><th style="width:38%">当前版本的展开</th><th>工程落点</th></tr></thead>
+        <tbody>
+          <tr><td><b>主脑没有上下文</b></td><td>主脑是无状态推理过程，每轮从情境包重建；后台是有状态记忆系统</td><td>ContextPacket 作为唯一跨层接口；主脑不持久化对话历史</td></tr>
+          <tr><td><b>后台脑筛选记忆</b></td><td>显著性门控 + 海马索引 + 模式分离/完成 + 情境编译</td><td>编码管线、检索管线、4±1 槽位、惰性展开</td></tr>
+          <tr><td><b>知识 / 记忆 / 技能</b></td><td>互补学习系统：快速情景存储 + 慢速语义抽象 + 程序化技能</td><td>事件日志、语义图谱、技能库，共享 event_id</td></tr>
+          <tr><td><b>关系与经历</b></td><td>人物—事件双向图；关系多维、不对称、带证据</td><td>Person / Participation / Relationship 三类记录</td></tr>
+          <tr><td><b>事实与解释分开</b></td><td>来源监控 + 解释版本链 + 证据按事件计数</td><td>Interpretation 层；`evidence_count = distinct event_id`</td></tr>
+          <tr><td><b>记忆淡化</b></td><td>艾宾浩斯衰减 × 关系强度 × 未来效用；未完成承诺豁免</td><td>保留率公式、冷归档、索引修剪</td></tr>
+          <tr><td><b>习惯像缓存</b></td><td>model-free 快路；只缓存情境模板与技能，不缓存“决定”</td><td>Habit 表 + 主脑仲裁，后台不越权</td></tr>
+          <tr><td><b>修订 · 整体才是个体</b></td><td>整合中心是有机体整体的整合属性；主脑是整合与签署器官，不是个体</td><td>3.1 / 3.6；行动身份属于有机体，主脑代签</td></tr>
+          <tr><td><b>修订 · 习惯规则需批准</b></td><td>后台可按频率提案，但习惯规则生效需主脑批准；后台不直接改写未来自我</td><td>3.7 / 6.7；Habit 状态 candidate / ratified</td></tr>
+          <tr><td><b>新增 · 运行时边界</b></td><td>后台无网络、无工具、无持久身份；行动权只属于有机体</td><td>3.6；权限矩阵、红队清单</td></tr>
+          <tr><td><b>新增 · 批准账本</b></td><td>构成性变更走提案—批准—冷却—回滚；账本可验证</td><td>3.7；Constitution / Ledger</td></tr>
+          <tr><td><b>新增 · 证据账本与模拟边界</b></td><td>回想不增加证据；冲突并列；模拟永不写成事实</td><td>4.6 / 6.7.2；evidence_count / simulation schema</td></tr>
+          <tr><td><b>新增 · 组合式重放</b></td><td>从多事件抽取人物/地点/动作/目标原语，按槽位组合未来候选；标记 simulation，不写事实</td><td>6.2.1；primitives.py / simulation.py</td></tr>
+          <tr><td><b>新增 · 治理形态</b></td><td>陪伴型：用户与主脑平等共签；工程型：用户最高权限</td><td>3.7.1；ConstitutionStore(mode)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <span class="tag">阅读路径</span>
+      主线：0 → 1.9 → 3.1–3.3 → 4.2–4.4 → 5 → 6.8 → 7。机制背景：1–2、6；工程约束：3.6–3.7、9.4、10，可后读。这样不会把“治理与安全”误当成记忆主线。
+    </div>
+  </div>
+</section>

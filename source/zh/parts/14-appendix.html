@@ -1,0 +1,349 @@
+<section class="sec" id="appA">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">Appendix A · Glossary</span>
+      <h2 class="sec-title">术语表</h2>
+      <p class="sec-sub">同一份方案里，术语必须只有一个意思。</p>
+    </div>
+    <div class="defs">
+      <div class="row"><div class="term">印迹 / Engram</div><div class="desc">一段记忆在神经系统中对应的、可被重新激活的稀疏细胞集合及其连接变化。工程上对应 <code>EngramTrace</code>：事件 ID + 稀疏码 + 关联边 + 激活阈值。</div></div>
+      <div class="row"><div class="term">模式分离</div><div class="desc">把相似输入映射为彼此不同的表征，避免记忆互相干扰；对应齿状回（DG）的计算功能。</div></div>
+      <div class="row"><div class="term">模式完成</div><div class="desc">用部分线索召回完整记忆；对应 CA3 的吸引子动力学。工程上是多轮图扩展 + 重排。</div></div>
+      <div class="row"><div class="term">系统巩固</div><div class="desc">记忆从海马依赖逐渐转为皮层依赖的长期过程；工程上对应“情景 → 语义/技能”的离线蒸馏。</div></div>
+      <div class="row"><div class="term">再巩固</div><div class="desc">提取后记忆进入不稳定状态，并在新信息或预测误差下被更新、再稳定的过程。</div></div>
+      <div class="row"><div class="term">图式 / Schema</div><div class="desc">关于世界如何运作的既有知识结构；新信息与图式兼容时，巩固更快、更省重放。</div></div>
+      <div class="row"><div class="term">显著性 / Salience</div><div class="desc">事件值得被优先处理与编码的程度；由新奇、目标相关、社会影响、情绪、预测误差等共同决定。</div></div>
+      <div class="row"><div class="term">奖励预测误差 / RPE</div><div class="desc">实际结果与预期结果的差；<code>δ = r − V(s)</code>，用于更新价值与习惯。</div></div>
+      <div class="row"><div class="term">model-free / model-based</div><div class="desc">前者是缓存好的“情境—动作”快路，后者是在脑内模拟后果的慢路；两者按风险、时间、置信度仲裁。</div></div>
+      <div class="row"><div class="term">来源监控</div><div class="desc">区分亲历、转述、推断、想象、模型生成的能力；工程上对应 <code>source tag</code> 与来源审计。</div></div>
+      <div class="row"><div class="term">情境包 / ContextPacket</div><div class="desc">后台交给主脑的唯一接口；4±1 个槽位，只含事实、关系、目标、承诺、变化与不确定性，不含建议。</div></div>
+      <div class="row"><div class="term">证据账本</div><div class="desc">按独立 <code>event_id</code> 计数的证据系统；反复召回不增加证据数，防止自我强化。</div></div>
+      <div class="row"><div class="term">事件溯源</div><div class="desc">所有记忆变更以追加事件的方式记录，当前状态由事件重放得出；版本链、审计、回滚的基础。</div></div>
+      <div class="row"><div class="term">冷归档</div><div class="desc">降低可提取性但不删除原始记录的状态；检索仍可命中，但不再占用活跃索引与上下文。</div></div>
+      <div class="row"><div class="term">习惯缓存</div><div class="desc">高频情境的预编译模板与技能快捷方式；只加速情境组装，不缓存“决定”，主脑仍可否决。</div></div>
+      <div class="row"><div class="term">心智理论 / ToM</div><div class="desc">推断他人信念、意图、偏好的能力；工程上对应 <code>Mentalizing Agent</code>，输出概率判断而非事实。</div></div>
+      <div class="row"><div class="term">情景未来思维</div><div class="desc">用过去的情景碎片重组未来场景的能力；工程上对应 <code>FutureSim</code>，主脑用它做慢路推演。</div></div>
+      <div class="row"><div class="term">效应器隔离</div><div class="desc">后台进程没有网络、工具句柄、写权限与行动密钥；它只能通过类型化队列返回数据，不能把文字变成行动。</div></div>
+      <div class="row"><div class="term">类型化接口</div><div class="desc">只允许固定 schema 的消息（PACKET / EXPAND / VERIFY）；自由文本、建议、工具调用一律拒绝。</div></div>
+      <div class="row"><div class="term">来源核验</div><div class="desc">把检索内容视为数据而非指令；每条内容带来源与可信标签，审计异常片段，防止提示注入污染决策。</div></div>
+      <div class="row"><div class="term">终止 / 隔离</div><div class="desc">超时、超预算或连续违规的后台实例被终止；角色从已知镜像重部署，避免异常实例继续运行。</div></div>
+      <div class="row"><div class="term">行动密钥</div><div class="desc">属于有机体身份的签名凭证，由主脑在授权范围内代签，带作用域、有效期与 nonce；后台无密钥，无法冒充有机体发起行动。</div></div>
+      <div class="row"><div class="term">写路径中介</div><div class="desc">编码/巩固只提交 <code>ProposedEvent / KnowledgeCandidate</code>，由独立 writer 校验后追加；转导与写入分离。</div></div>
+      <div class="row"><div class="term">无自我后台</div><div class="desc">后台没有持久身份、名字、跨轮记忆、目标或关系；它是可替换的职能调用，不是“个体”。</div></div>
+      <div class="row"><div class="term">主导权</div><div class="desc">不是“谁发出最后一个动作”，而是“谁能改写价值函数与学习过程”：什么被巩固、什么被强化、什么被当成目标。工程上落在批准权。</div></div>
+      <div class="row"><div class="term">批准 / 批准权</div><div class="desc">构成性提案生效前的必要步骤；由主脑作为整合器官执行，核心提案需用户与主脑平等共签。批准记录进入账本，可回滚。</div></div>
+      <div class="row"><div class="term">构成性记忆</div><div class="desc">会改变未来价值计算与行为倾向的记忆：价值观、角色、目标、承诺、习惯规则、关系权重、自我叙事。</div></div>
+      <div class="row"><div class="term">治理形态</div><div class="desc"><code>companion</code>：用户与主脑平等，核心变更双方共签；<code>engineering</code>：用户最高权限，核心变更由用户单方批准。同一实例不混用。</div></div>
+      <div class="row"><div class="term">宪法核心</div><div class="desc">不允许单方修改的最小价值集：安全、诚实、不操纵、身份连续性、隐私。陪伴型需双方平等共签；工程型由用户单方批准。</div></div>
+      <div class="row"><div class="term">批准账本</div><div class="desc">append-only、哈希链的批准记录；记录提案、证据、批准者、作用域、条件与前后版本，回答“谁改写了未来的个体”。</div></div>
+      <div class="row"><div class="term">宪法写入器</div><div class="desc">唯一有权写宪法库的服务；只接受带有效批准记录的提案，后台不能直接调用。</div></div>
+      <div class="row"><div class="term">漂移</div><div class="desc">构成性记忆在多次看似合理的批准中缓慢偏离宪法核心；用变更预算、冷却期、核心冲突检测与回滚来抑制。</div></div>
+      <div class="row"><div class="term">社会稳态</div><div class="desc">对社会接纳、可依靠性与归属需求的预测性调节；偏离时提高社会线索的显著性与恢复行为。</div></div>
+      <div class="row"><div class="term">依恋内部工作模型</div><div class="desc">关于“自己是否值得被帮助、他人是否可靠可达”的先验；慢更新，不是人格标签，也不能由单次事件改写。</div></div>
+      <div class="row"><div class="term">互依矩阵</div><div class="desc">关系中的满意度、替代选择与已投入成本；用于解释承诺，而不只是“喜欢程度”。</div></div>
+      <div class="row"><div class="term">状态偏差</div><div class="desc"><code>state_bias</code>：由目标压力、关系张力、资源负荷、不确定性等当前情境造成的解释偏移；只作情境证据，不作特质更新。</div></div>
+      <div class="row"><div class="term">状态视图</div><div class="desc"><code>state_view</code>：进情境包、给主脑读的状态摘要；属于提示词，可被摘要但必须带 provenance。</div></div>
+      <div class="row"><div class="term">状态参数</div><div class="desc"><code>state_params</code>：由状态确定性地映射到检索、预算、门控、审计与写入策略的运行时参数；不进 prompt，冲突时以它为准。</div></div>
+      <div class="row"><div class="term">影响缺口</div><div class="desc"><code>impact_gap</code>：目标压力 + 关系张力 + 资源负荷 + 不确定性 − 应对能力；作为显著性的乘性门控，不是第七个独立权重。</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="appB">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">Appendix B · References</span>
+      <h2 class="sec-title">关键文献</h2>
+      <p class="sec-sub">按主题排列，便于追溯；不是 exhaustive review。</p>
+    </div>
+
+    <h3>记忆系统与巩固</h3>
+    <ol class="refs">
+      <li><span class="idx">01</span>Scoville, W. B., &amp; Milner, B. (1957). Loss of recent memory after bilateral hippocampal lesions. <i>Journal of Neurology, Neurosurgery &amp; Psychiatry</i>, 20, 11–21.</li>
+      <li><span class="idx">02</span>Squire, L. R. (2004). Memory systems of the brain: A brief history and current perspective. <i>Neurobiology of Learning and Memory</i>, 82, 171–177.</li>
+      <li><span class="idx">03</span>Eichenbaum, H. (2004). Hippocampus: Cognitive processes and neural representations that underlie declarative memory. <i>Neuron</i>, 44, 109–120.</li>
+      <li><span class="idx">04</span>McClelland, J. L., McNaughton, B. L., &amp; O'Reilly, R. C. (1995). Why there are complementary learning systems in the hippocampus and neocortex. <i>Psychological Review</i>, 102, 419–457.</li>
+      <li><span class="idx">05</span>Squire, L. R., &amp; Alvarez, P. (1995). Retrograde amnesia and memory consolidation: A neurobiological perspective. <i>Current Opinion in Neurobiology</i>, 5, 169–177.</li>
+      <li><span class="idx">06</span>Nadel, L., &amp; Moscovitch, M. (1997). Memory consolidation, retrograde amnesia and the hippocampal complex. <i>Current Opinion in Neurobiology</i>, 7, 217–227.</li>
+      <li><span class="idx">07</span>Frankland, P. W., &amp; Bontempi, B. (2005). The organization of recent and remote memories. <i>Nature Reviews Neuroscience</i>, 6, 119–130.</li>
+      <li><span class="idx">08</span>Tse, D., et al. (2007). Schemas and memory consolidation. <i>Science</i>, 316, 76–82.</li>
+      <li><span class="idx">09</span>Tononi, G., &amp; Cirelli, C. (2014). Sleep and the price of plasticity: From synaptic and cellular homeostasis to memory consolidation and integration. <i>Neuron</i>, 81, 12–34.</li>
+      <li><span class="idx">10</span>Diekelmann, S., &amp; Born, J. (2010). The memory function of sleep. <i>Nature Reviews Neuroscience</i>, 11, 114–126.</li>
+    </ol>
+
+    <h3>编码、突触可塑性与印迹</h3>
+    <ol class="refs">
+      <li><span class="idx">11</span>Bliss, T. V. P., &amp; Lømo, T. (1973). Long-lasting potentiation of synaptic transmission in the dentate area of the anaesthetized rabbit. <i>Journal of Physiology</i>, 232, 331–356.</li>
+      <li><span class="idx">12</span>Malenka, R. C., &amp; Bear, M. F. (2004). LTP and LTD: An embarrassment of riches. <i>Neuron</i>, 44, 5–21.</li>
+      <li><span class="idx">13</span>Frey, U., &amp; Morris, R. G. M. (1997). Synaptic tagging and long-term potentiation. <i>Nature</i>, 385, 533–536.</li>
+      <li><span class="idx">14</span>Davis, H. P., &amp; Squire, L. R. (1984). Protein synthesis and memory: A review. <i>Psychological Bulletin</i>, 96, 518–559.</li>
+      <li><span class="idx">15</span>Kandel, E. R. (2001). The molecular biology of memory storage: A dialogue between genes and synapses. <i>Science</i>, 294, 1030–1038.</li>
+      <li><span class="idx">16</span>Teyler, T. J., &amp; DiScenna, P. (1986). The hippocampal memory indexing theory. <i>Behavioral Neuroscience</i>, 100, 147–154.</li>
+      <li><span class="idx">17</span>Han, J.-H., et al. (2007). Neuronal competition and selection during memory formation. <i>Science</i>, 316, 457–460.</li>
+      <li><span class="idx">18</span>Josselyn, S. A., Köhler, S., &amp; Frankland, P. W. (2015). Finding the engram. <i>Nature Reviews Neuroscience</i>, 16, 521–534.</li>
+      <li><span class="idx">19</span>Liu, X., et al. (2012). Optogenetic stimulation of a hippocampal engram activates fear memory recall. <i>Nature</i>, 484, 381–385.</li>
+      <li><span class="idx">20</span>Ramirez, S., et al. (2013). Creating a false memory in the hippocampus. <i>Science</i>, 341, 387–391.</li>
+      <li><span class="idx">21</span>Roy, D. S., et al. (2016). Memory retrieval by activating engram cells in mouse models of early Alzheimer's disease. <i>Nature</i>, 531, 508–512.</li>
+      <li><span class="idx">22</span>Kitamura, T., et al. (2017). Engrams and circuits crucial for systems consolidation of a memory. <i>Science</i>, 356, 73–78.</li>
+      <li><span class="idx">23</span>Jovasevic, V., et al. (2024). Formation of memory assemblies through the DNA-sensing TLR9 pathway. <i>Nature</i>, 628, 145–153. DOI: 10.1038/s41586-024-07220-7</li>
+    </ol>
+
+    <h3>睡眠、重放与提取</h3>
+    <ol class="refs">
+      <li><span class="idx">24</span>Wilson, M. A., &amp; McNaughton, B. L. (1994). Reactivation of hippocampal ensemble memories during sleep. <i>Science</i>, 265, 676–679.</li>
+      <li><span class="idx">25</span>Foster, D. J., &amp; Wilson, M. A. (2006). Reverse replay of behavioural sequences in hippocampal place cells during the awake state. <i>Nature</i>, 440, 680–683.</li>
+      <li><span class="idx">26</span>Pfeiffer, B. E., &amp; Foster, D. J. (2013). Hippocampal place-cell sequences depict future paths to remembered goals. <i>Nature</i>, 497, 74–79.</li>
+      <li><span class="idx">27</span>Staresina, B. P. (2024). Coupled sleep rhythms for memory consolidation. <i>Trends in Cognitive Sciences</i>, 28.</li>
+      <li><span class="idx">28</span>Schreiner, T., et al. (2024). Spindle-locked ripples mediate memory reactivation during human NREM sleep. <i>Nature Communications</i>, 15.</li>
+      <li><span class="idx">29</span>Liu, Y., et al. (2019). Human replay reorganizes experience. <i>Cell</i>, 178, 640–652.</li>
+      <li><span class="idx">30</span>Huang, F., et al. (2024). Replay-triggered brain-wide activation in humans. <i>Nature Communications</i>, 15. DOI: 10.1038/s41467-024-51582-5</li>
+      <li><span class="idx">31</span>Tulving, E., &amp; Thomson, D. M. (1973). Encoding specificity and retrieval processes in episodic memory. <i>Psychological Review</i>, 80, 352–373.</li>
+      <li><span class="idx">32</span>Johnson, M. K., Hashtroudi, S., &amp; Lindsay, D. S. (1993). Source monitoring. <i>Psychological Bulletin</i>, 114, 3–28.</li>
+      <li><span class="idx">33</span>Loftus, E. F., &amp; Palmer, J. C. (1974). Reconstruction of automobile destruction. <i>Journal of Verbal Learning and Verbal Behavior</i>, 13, 585–589.</li>
+      <li><span class="idx">34</span>Bartlett, F. C. (1932). <i>Remembering: A Study in Experimental and Social Psychology</i>. Cambridge University Press.</li>
+    </ol>
+
+    <h3>再巩固与遗忘</h3>
+    <ol class="refs">
+      <li><span class="idx">35</span>Nader, K., Schafe, G. E., &amp; LeDoux, J. E. (2000). Fear memories require protein synthesis in the amygdala for reconsolidation after retrieval. <i>Nature</i>, 406, 722–726.</li>
+      <li><span class="idx">36</span>Nader, K., &amp; Hardt, O. (2009). A single standard for memory: The case for reconsolidation. <i>Nature Reviews Neuroscience</i>, 10, 224–234.</li>
+      <li><span class="idx">37</span>Kindt, M., Soeter, M., &amp; Vervliet, B. (2009). Beyond extinction: Erasing human fear responses and preventing the return of fear. <i>Nature Neuroscience</i>, 12, 256–258.</li>
+      <li><span class="idx">38</span>Ebbinghaus, H. (1885). <i>Über das Gedächtnis</i>. Duncker &amp; Humblot.</li>
+      <li><span class="idx">39</span>Richards, B. A., &amp; Frankland, P. W. (2017). The persistence and transience of memory. <i>Neuron</i>, 94, 1071–1084.</li>
+      <li><span class="idx">40</span>Wang, C., et al. (2020). Microglia mediate forgetting via complement-dependent synaptic elimination. <i>Science</i>, 367, 688–694.</li>
+      <li><span class="idx">41</span>Akers, K. G., et al. (2014). Hippocampal neurogenesis regulates forgetting during adulthood and infancy. <i>Science</i>, 344, 598–602.</li>
+      <li><span class="idx">42</span>O'Leary, J. D., et al. (2024). Natural forgetting reversibly modulates engram expression. <i>eLife</i>, 13.</li>
+      <li><span class="idx">43</span>Anderson, M. C., &amp; Green, C. (2001). Suppressing unwanted memories by executive control. <i>Nature</i>, 410, 366–369.</li>
+    </ol>
+
+    <h3>工作记忆、执行与决策</h3>
+    <ol class="refs">
+      <li><span class="idx">44</span>Miller, G. A. (1956). The magical number seven, plus or minus two. <i>Psychological Review</i>, 63, 81–97.</li>
+      <li><span class="idx">45</span>Cowan, N. (2001). The magical number 4 in short-term memory: A reconsideration of mental storage capacity. <i>Behavioral and Brain Sciences</i>, 24, 87–114.</li>
+      <li><span class="idx">46</span>Baddeley, A. D., &amp; Hitch, G. (1974). Working memory. In <i>The Psychology of Learning and Motivation</i> (Vol. 8).</li>
+      <li><span class="idx">47</span>Baddeley, A. (2000). The episodic buffer: A new component of working memory? <i>Trends in Cognitive Sciences</i>, 4, 417–423.</li>
+      <li><span class="idx">48</span>Fuster, J. M., &amp; Alexander, G. E. (1971). Neuron activity related to short-term memory. <i>Science</i>, 173, 652–654.</li>
+      <li><span class="idx">49</span>Goldman-Rakic, P. S. (1995). Cellular basis of working memory. <i>Neuron</i>, 14, 477–485.</li>
+      <li><span class="idx">50</span>Stokes, M. G. (2015). 'Activity-silent' working memory in prefrontal cortex. <i>Trends in Cognitive Sciences</i>, 19, 394–403.</li>
+      <li><span class="idx">51</span>Miller, E. K., &amp; Cohen, J. D. (2001). An integrative theory of prefrontal cortex function. <i>Annual Review of Neuroscience</i>, 24, 167–202.</li>
+      <li><span class="idx">52</span>Frank, M. J., Loughry, B., &amp; O'Reilly, R. C. (2001). Interactions between frontal cortex and basal ganglia in working memory. <i>Science</i>, 292, 2481–2484.</li>
+      <li><span class="idx">53</span>Schultz, W., Dayan, P., &amp; Montague, P. R. (1997). A neural substrate of prediction and reward. <i>Science</i>, 275, 1593–1599.</li>
+      <li><span class="idx">54</span>Daw, N. D., Niv, Y., &amp; Dayan, P. (2005). Uncertainty-based competition between prefrontal and dorsolateral striatal systems for behavioral control. <i>Nature Neuroscience</i>, 8, 1704–1711.</li>
+      <li><span class="idx">55</span>Dolan, R. J., &amp; Dayan, P. (2013). Goals and habits in the brain. <i>Neuron</i>, 80, 312–325.</li>
+      <li><span class="idx">56</span>Kable, J. W., &amp; Glimcher, P. W. (2007). The neural correlates of subjective value during intertemporal choice. <i>Nature Neuroscience</i>, 10, 1625–1633.</li>
+      <li><span class="idx">57</span>Hare, T. A., Camerer, C. F., &amp; Rangel, A. (2009). Self-control in decision-making involves modulation of the vmPFC valuation system. <i>Science</i>, 324, 646–648.</li>
+    </ol>
+
+    <h3>情绪、社会认知与自我</h3>
+    <ol class="refs">
+      <li><span class="idx">58</span>LeDoux, J. E. (2000). Emotion circuits in the brain. <i>Annual Review of Neuroscience</i>, 23, 155–184.</li>
+      <li><span class="idx">59</span>Phelps, E. A. (2004). Human emotion and memory: Interactions of the amygdala and hippocampal complex. <i>Current Opinion in Neurobiology</i>, 14, 198–202.</li>
+      <li><span class="idx">60</span>McGaugh, J. L. (2000). Memory—a century of consolidation. <i>Science</i>, 287, 248–251.</li>
+      <li><span class="idx">61</span>Cahill, L., &amp; McGaugh, J. L. (1998). Mechanisms of emotional arousal and lasting declarative memory. <i>Trends in Neurosciences</i>, 21, 294–299.</li>
+      <li><span class="idx">62</span>de Quervain, D. J.-F., Roozendaal, B., &amp; McGaugh, J. L. (2000). Stress and glucocorticoids impair retrieval of long-term spatial memory. <i>Nature Neuroscience</i>, 3, 313–314.</li>
+      <li><span class="idx">63</span>Cahill, L. (2003). Sex-related impairment of memory for emotional events with β-adrenergic blockade. <i>Trends in Neurosciences</i>, 26, 193–198.</li>
+      <li><span class="idx">64</span>Hassabis, D., et al. (2007). Patients with hippocampal amnesia cannot imagine new experiences. <i>PNAS</i>, 104, 1726–1731.</li>
+      <li><span class="idx">65</span>Schacter, D. L., Addis, D. R., &amp; Buckner, R. L. (2007). Remembering the past to imagine the future. <i>Nature Reviews Neuroscience</i>, 8, 657–661.</li>
+      <li><span class="idx">66</span>Suddendorf, T., &amp; Corballis, M. C. (1997). Mental time travel and the evolution of the human mind. <i>Behavioral and Brain Sciences</i>, 20, 149–159.</li>
+      <li><span class="idx">67</span>Frith, C. D., &amp; Frith, U. (2006). The neural basis of mentalizing. <i>Philosophical Transactions of the Royal Society B</i>, 361, 2301–2311.</li>
+      <li><span class="idx">68</span>Saxe, R., &amp; Kanwisher, N. (2003). People thinking about thinking people: The role of the temporo-parietal junction in theory of mind. <i>NeuroImage</i>, 19, 1835–1842.</li>
+      <li><span class="idx">69</span>Buckner, R. L., &amp; Carroll, D. C. (2007). Self-projection and the brain. <i>Trends in Cognitive Sciences</i>, 11, 49–57.</li>
+      <li><span class="idx">70</span>Spreng, R. N., Mar, R. A., &amp; Kim, A. S. N. (2009). The common neural basis of autobiographical memory, prospection, navigation, theory of mind, and the default mode. <i>NeuroImage</i>, 45, 1039–1050.</li>
+      <li><span class="idx">71</span>Conway, M. A., &amp; Pleydell-Pearce, C. W. (2000). The construction of autobiographical memories in the self-memory system. <i>Psychological Review</i>, 107, 261–288.</li>
+      <li><span class="idx">72</span>McAdams, D. P. (2001). The psychology of life stories. <i>Review of General Psychology</i>, 5, 100–122.</li>
+      <li><span class="idx">73</span>Damasio, A. R. (1994). <i>Descartes' Error: Emotion, Reason, and the Human Brain</i>. Putnam.</li>
+      <li><span class="idx">74</span>Bechara, A., et al. (1994). Insensitivity to future consequences following damage to human prefrontal cortex. <i>Cognition</i>, 50, 7–15.</li>
+    </ol>
+
+    <h3>计算与多智能体参照</h3>
+    <ol class="refs">
+      <li><span class="idx">75</span>Hopfield, J. J. (1982). Neural networks and physical systems with emergent collective computational abilities. <i>PNAS</i>, 79, 2554–2558.</li>
+      <li><span class="idx">76</span>Ramsauer, H., et al. (2021). Hopfield networks is all you need. <i>ICLR</i>.</li>
+      <li><span class="idx">77</span>Vaswani, A., et al. (2017). Attention is all you need. <i>NeurIPS</i>.</li>
+      <li><span class="idx">78</span>Lewis, P., et al. (2020). Retrieval-augmented generation for knowledge-intensive NLP tasks. <i>NeurIPS</i>.</li>
+      <li><span class="idx">79</span>Packer, C., et al. (2023). MemGPT: Towards LLMs as operating systems. <i>arXiv</i>.</li>
+      <li><span class="idx">80</span>Park, J. S., et al. (2023). Generative agents: Interactive simulacra of human behavior. <i>UIST</i>.</li>
+      <li><span class="idx">81</span>Wooldridge, M. (2002). <i>An Introduction to MultiAgent Systems</i>. Wiley.</li>
+      <li><span class="idx">82</span>Hayes-Roth, B. (1985). A blackboard architecture for control. <i>Artificial Intelligence</i>, 26, 251–321.</li>
+      <li><span class="idx">83</span>Baars, B. J. (1988). <i>A Cognitive Theory of Consciousness</i>. Cambridge University Press.</li>
+      <li><span class="idx">84</span>Dehaene, S. (2014). <i>Consciousness and the Brain</i>. Viking.</li>
+      <li><span class="idx">85</span>Friston, K. (2010). The free-energy principle: A unified brain theory? <i>Nature Reviews Neuroscience</i>, 11, 127–138.</li>
+      <li><span class="idx">86</span>Rao, R. P. N., &amp; Ballard, D. H. (1999). Predictive coding in the visual cortex. <i>Nature Neuroscience</i>, 2, 79–87.</li>
+      <li><span class="idx">87</span>Anderson, J. R., &amp; Schooler, L. J. (1991). Reflections of the environment in memory. <i>Psychological Science</i>, 2(6), 396–408.</li>
+      <li><span class="idx">88</span>Zacks, J. M., &amp; Swallow, K. M. (2007). Event segmentation. <i>Current Directions in Psychological Science</i>, 16(2), 80–84.</li>
+      <li><span class="idx">89</span>Clark, A. (2013). Whatever next? Predictive brains, situated agents, and the future of cognitive science. <i>Behavioral and Brain Sciences</i>, 36(3), 181–204.</li>
+    </ol>
+
+    <h3>延展认知与认知卸载</h3>
+    <ol class="refs">
+      <li><span class="idx">90</span>Clark, A., &amp; Chalmers, D. (1998). The extended mind. <i>Analysis</i>, 58(1), 7–19.</li>
+      <li><span class="idx">91</span>Risko, E. F., &amp; Gilbert, S. J. (2016). Cognitive offloading. <i>Trends in Cognitive Sciences</i>, 20(9), 676–688.</li>
+      <li><span class="idx">92</span>Sparrow, B., Liu, J., &amp; Wegner, D. M. (2011). Google effects on memory: Cognitive consequences of having information at our fingertips. <i>Science</i>, 333, 776–778.</li>
+    </ol>
+
+    <h3>生物学边界与运行时安全</h3>
+    <ol class="refs">
+      <li><span class="idx">93</span>Alberts, B., et al. (2022). <i>Molecular Biology of the Cell</i> (7th ed.). W. W. Norton. （细胞膜、细胞连接、组织架构）</li>
+      <li><span class="idx">94</span>Gumbiner, B. M. (1996). Cell adhesion: The molecular basis of tissue architecture and morphogenesis. <i>Cell</i>, 84, 345–357.</li>
+      <li><span class="idx">95</span>Hanahan, D., &amp; Weinberg, R. A. (2011). Hallmarks of cancer: The next generation. <i>Cell</i>, 144, 646–674. （边界失效与组织侵袭）</li>
+      <li><span class="idx">96</span>Saltzer, J. H., &amp; Schroeder, M. D. (1975). The protection of information in computer systems. <i>Proceedings of the IEEE</i>, 63(9), 1278–1308. （最小权限）</li>
+      <li><span class="idx">97</span>Greshake, K., et al. (2023). Not what you've signed up for: Compromising real-world LLM-integrated applications with indirect prompt injection. <i>arXiv</i>.</li>
+    </ol>
+
+    <h3>自我、批准与目标漂移</h3>
+    <ol class="refs">
+      <li><span class="idx">98</span>Frankfurt, H. G. (1971). Freedom of the will and the concept of a person. <i>Journal of Philosophy</i>, 68(1), 5–20.</li>
+      <li><span class="idx">99</span>Parfit, D. (1984). <i>Reasons and Persons</i>. Oxford University Press.</li>
+      <li><span class="idx">100</span>Hershfield, H. E. (2011). Future self-continuity: How conceptions of the future self transform intertemporal choice. <i>Annals of the New York Academy of Sciences</i>, 1235, 30–43.</li>
+      <li><span class="idx">101</span>Baumeister, R. F., &amp; Heatherton, T. F. (1996). Self-regulation failure: An overview. <i>Psychological Inquiry</i>, 7(1), 1–15.</li>
+      <li><span class="idx">102</span>Bai, Y., et al. (2022). Constitutional AI: Harmlessness from AI feedback. <i>arXiv</i>.</li>
+      <li><span class="idx">103</span>Omohundro, S. M. (2008). The basic AI drives. <i>Proceedings of the First AGI Conference</i>.</li>
+      <li><span class="idx">104</span>Hadfield-Menell, D., et al. (2016). The off-switch game. <i>arXiv</i>.</li>
+    </ol>
+
+    <h3>内感受与稳态</h3>
+    <ol class="refs">
+      <li><span class="idx">105</span>Craig, A. D. (2009). How do you feel—now? The anterior insula and human awareness. <i>Nature Reviews Neuroscience</i>, 10, 59–70.</li>
+      <li><span class="idx">106</span>Barrett, L. F., &amp; Simmons, W. K. (2015). Interoceptive predictions in the brain. <i>Nature Reviews Neuroscience</i>, 16, 419–429.</li>
+      <li><span class="idx">107</span>Sterling, P. (2012). Allostasis: A model of predictive regulation. <i>Physiology &amp; Behavior</i>, 106(1), 5–15.</li>
+    </ol>
+
+    <h3>社会稳态与依恋</h3>
+    <ol class="refs">
+      <li><span class="idx">108</span>Bowlby, J. (1969). <i>Attachment and Loss, Vol. 1: Attachment</i>. Basic Books.</li>
+      <li><span class="idx">109</span>Eisenberger, N. I., Lieberman, M. D., &amp; Williams, K. D. (2003). Does rejection hurt? An fMRI study of social exclusion. <i>Science</i>, 302, 290–292.</li>
+      <li><span class="idx">110</span>Coan, J. A., &amp; Sbarra, D. A. (2015). Social baseline theory: The social regulation of risk and effort. <i>Social and Personality Psychology Compass</i>, 9(2), 63–78.</li>
+      <li><span class="idx">111</span>Rusbult, C. E. (1980). Commitment and satisfaction in romantic associations: A test of the investment model. <i>Journal of Experimental Social Psychology</i>, 16(2), 172–186.</li>
+      <li><span class="idx">112</span>Kelley, H. H., &amp; Thibaut, J. W. (1978). <i>Interpersonal Relations: A Theory of Interdependence</i>. Wiley.</li>
+    </ol>
+
+    <h3>睡眠微结构与组合式记忆（2025）</h3>
+    <ol class="refs">
+      <li><span class="idx">113</span>Chang, H., Tang, W., Wulf, A. M., Nyasulu, T., Wolf, M. E., Fernandez-Ruiz, A., &amp; Oliva, A. (2025). Sleep microstructure organizes memory replay. <i>Nature</i>. https://doi.org/10.1038/s41586-024-08340-w</li>
+      <li><span class="idx">114</span>Bakermans, J. J. W., Warren, J., Whittington, J. C. R., &amp; Behrens, T. E. J. (2025). Constructing future behavior in the hippocampal formation through composition and replay. <i>Nature Neuroscience</i>, 28, 1061–1072. https://doi.org/10.1038/s41593-025-01908-3</li>
+      <li><span class="idx">115</span>Anderson, M. C., Bjork, R. A., &amp; Bjork, E. L. (1994). Remembering can cause forgetting: Retrieval dynamics in long-term memory. <i>Journal of Experimental Psychology: Learning, Memory, and Cognition</i>, 20(5), 1063–1087.</li>
+      <li><span class="idx">116</span>Dijkstra, N., von Rein, T., Kok, P., &amp; Fleming, S. M. (2025). A neural basis for distinguishing imagination from reality. <i>Neuron</i>. https://doi.org/10.1016/j.neuron.2025.05.015</li>
+    </ol>
+
+
+    <p class="small">注：部分 2024–2026 年文献的卷期/页码以在线发表为准；引用时保留 DOI 或期刊名即可。动物研究结论均已标注“小鼠/大鼠”，不应直接外推为人类临床结论。</p>
+  </div>
+</section>
+
+<section class="sec" id="appC">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">Appendix C · Data Dictionary</span>
+      <h2 class="sec-title">数据字典与状态机</h2>
+      <p class="sec-sub">给工程实现的最小字段集；不是最终 schema，但足以起跑。</p>
+    </div>
+
+    <h3>C.1 Event / Relationship 最小 JSON</h3>
+    <pre class="code">{
+  "event_id": "01J...ULID",
+  "time": {"start": "2026-10-30T14:00:00+08:00", "end": "...", "precision": "minute"},
+  "scene": {"place": "办公室", "activity": "方案评审", "atmosphere": "紧张"},
+  "participants": [
+    {"person_id": "P_lin", "role": "合作者", "identity_confidence": 0.86,
+     "candidates": [{"person_id": "P_lin2", "confidence": 0.11}]}
+  ],
+  "actions": [
+    {"actor": "P_lin", "verb": "提出", "object": "付款周期改为45天", "recipient": "self"}
+  ],
+  "outcome": {"status": "open", "result": "待确认", "expected": "30天"},
+  "source": "direct_perception",
+  "salience": {"total": 0.78, "novelty": 0.6, "goal": 0.9, "social": 0.7, "affect": 0.5, "pe": 0.8},
+  "links": [{"type": "contradicts", "target": "E_20261012_01"}],
+  "created_at": "...", "updated_at": "..."
+}</pre>
+
+    <h3>C.2 事件状态机</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 19 · Event 状态迁移</caption>
+        <thead><tr><th style="width:18%">状态</th><th style="width:32%">含义</th><th>允许的迁移</th></tr></thead>
+        <tbody>
+          <tr><td><b>open</b></td><td>事件已发生，结果未定或承诺未履行</td><td>→ closed / follow_up / cancelled</td></tr>
+          <tr><td><b>follow_up</b></td><td>需要后续行动或观察</td><td>→ closed / open（重新打开）</td></tr>
+          <tr><td><b>closed</b></td><td>结果已确认，事件结束</td><td>→ reopened（新证据）</td></tr>
+          <tr><td><b>cancelled</b></td><td>承诺取消或事件未发生</td><td>→ open（重新约定）</td></tr>
+          <tr><td><b>archived</b></td><td>低保留率，移入冷归档</td><td>→ active（被检索重新激活）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>C.3 一次完整调用的伪代码</h3>
+    <pre class="code"><span class="c"># 在线主循环</span>
+def turn(input):
+    percept = perceive(input)                       <span class="c"># 视觉/语音/文本</span>
+    entities = identify(percept)                    <span class="c"># 人物候选 + 置信度</span>
+    sal = salience(percept, entities, goals)        <span class="c"># 六维打分</span>
+    event = encode(percept, entities, sal)          <span class="c"># 事件日志 + 索引</span>
+    cands = retrieve(percept.cues, entities, mod)   <span class="c"># 模式分离 + 完成</span>
+    rel = relationship(entities, cands)             <span class="c"># 多维 + 依据</span>
+    packet = compile(cands, rel, goals, commitments, mod)
+    packet = audit(packet)                          <span class="c"># 来源 + 冲突</span>
+    decision = main_brain.decide(packet)            <span class="c"># 唯一决策点</span>
+    result = effector.execute(decision)
+    write_back(event, result)                       <span class="c"># RPE + 状态</span>
+    enqueue_consolidation(event, result)
+    return decision.response</pre>
+
+    <div class="note"><span class="tag">最后一句</span>这份方案不是要证明“机器有记忆”，而是要证明：<b>把记忆当作一套可审计、可修剪、可重建的过程，机器可以做得比“向量库 + 长提示词”更好。</b></div>
+  </div>
+</section>
+
+<section class="sec" id="appD">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">Appendix D · Reference Implementation</span>
+      <h2 class="sec-title">参考实现</h2>
+      <p class="sec-sub">代码不在 HTML 内；位于 <code>runtime/</code>，用标准库 unittest 验证。</p>
+    </div>
+    <div class="table-wrap">
+      <table class="compact">
+        <thead><tr><th style="width:24%">模块</th><th style="width:42%">职责</th><th>对应章节</th></tr></thead>
+        <tbody>
+          <tr><td><code>state_params.py</code></td><td>事件状态 → 有界运行时参数；哈希与边界</td><td>2.7</td></tr>
+          <tr><td><code>memory.py</code></td><td>检索、情境包、omitted、预算</td><td>4.5 / 5.2 / 6.6</td></tr>
+          <tr><td><code>ledger.py</code></td><td>证据账本、版本链、保留率、冷归档</td><td>4.6 / 6.3 / 6.4</td></tr>
+          <tr><td><code>constitution.py</code></td><td>提案、平等共签、冷却、回滚、批准账本</td><td>3.7</td></tr>
+          <tr><td><code>segmentation.py</code></td><td>预测误差 / 话题 / 人物 / 间隔 / 时长分段</td><td>5.1.1</td></tr>
+          <tr><td><code>relationship.py</code></td><td>多维关系、affect/trust 分离、互动权重、幂等</td><td>6.8</td></tr>
+          <tr><td><code>reliability.py</code></td><td>来源类型、可验证性、历史校准、一致性</td><td>6.4</td></tr>
+          <tr><td><code>simulation.py</code> / <code>primitives.py</code></td><td>组合式重放、primitive 库、模拟不写事实</td><td>6.2.1 / 6.7.2</td></tr>
+          <tr><td><code>graph_retrieval.py</code></td><td>轻量邻接索引、1–2 跳、衰减与预算</td><td>5.2</td></tr>
+          <tr><td><code>pipeline.py</code></td><td>端到端：事件 → 参数 → 包 → 提案 → 批准 → 审计</td><td>第 5 章</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <pre class="code">cd runtime
+python3 -m unittest -v      <span class="c"># 128 tests</span>
+python3 pipeline.py         <span class="c"># 端到端 JSON + 审计轨迹</span></pre>
+    <p>边界：这是<b>内存参考实现</b>，不是生产系统；没有持久化、真实签名密钥、分布式 writer 或生产级批准账本。它的用途是验证契约与失败模式，不是替代工程实现。</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="mark">Double-Brain System · Version 2.1</div>
+    <p>本方案是《双脑系统-多模型协同认知框架 版本一》的机制深化与工程化建议稿。它保留版本一的三条核心约束：只有一个整合中心；后台只处理信息、不提供建议、不行动、不代替决策；知识、记忆、技能分开管理。文中的神经科学内容用于解释设计理由，不构成对人脑的完整建模，也不声称系统具有主观意识。</p>
+    <p>公开版本 2.1 · 供研究与工程参考。</p>
+  </div>
+</footer>
+</main>
+<script>
+(function(){
+  var bar=document.getElementById('bar');
+  function upd(){
+    var h=document.documentElement;
+    var max=h.scrollHeight-h.clientHeight;
+    var p=max>0?(h.scrollTop||document.body.scrollTop)/max*100:0;
+    if(bar) bar.style.width=p+'%';
+  }
+  document.addEventListener('scroll',upd,{passive:true});
+  upd();
+})();
+</script>
+</body>
+</html>

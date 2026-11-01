@@ -1,0 +1,94 @@
+<section class="sec" id="s7">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">07 · Context Economy</span>
+      <h2 class="sec-title">Multi-Model Division of Labor and Context Economy</h2>
+      <p class="sec-sub">The key to saving context is not writing shorter prompts, but letting each model face only its own small slice of the world.</p>
+    </div>
+
+    <p class="lead">&ldquo;Multi-agent&rdquo; is often misunderstood as &ldquo;several models discussing together.&rdquo; If every model reads the same long context and then forwards it to the others, costs go up and noise goes up. Real division of labor is <b>splitting context by schema</b>: person identification looks only at face, voice, and form of address; retrieval looks only at cues and indexes; relationship judgment looks only at event summaries; the Main Brain sees only 4&plusmn;1 slots. Across layers, only a single ContextPacket is passed, instead of copying the whole conversation ten times.</p>
+
+    <h3>7.1 Why several models instead of one larger model</h3>
+    <div class="defs">
+      <div class="row"><div class="term">Context isolation</div><div class="desc">Each backend role reads only the fields it needs, reducing its input from &ldquo;the whole conversation&rdquo; to &ldquo;a single structured slice.&rdquo; This saves tokens and reduces interference from irrelevant information in judgment.</div></div>
+      <div class="row"><div class="term">Capability specialization</div><div class="desc">Person identification suits small multimodal models, salience suits classifiers, retrieval suits embeddings plus graph algorithms, and only the Main Brain needs a large model. Using a large model for everything wastes both cost and latency.</div></div>
+      <div class="row"><div class="term">Parallelism</div><div class="desc">Perception, retrieval, and relationship judgment can run simultaneously; the Main Brain waits at only one convergence point: the ContextPacket. The critical path changes from &ldquo;ten serial steps&rdquo; to &ldquo;three parallel branches plus one compilation.&rdquo;</div></div>
+      <div class="row"><div class="term">Fault isolation</div><div class="desc">If retrieval is wrong, source auditing can stop it; if relationship judgment drifts, the Main Brain can see the evidence and the uncertainty. When one giant model errs, the entire answer usually errs with it.</div></div>
+      <div class="row"><div class="term">Replaceability</div><div class="desc">Each role has a fixed input/output schema, so its model, vendor, or version can be swapped independently without rewriting the whole system.</div></div>
+    </div>
+
+    <h3>7.2 Model tiers and role assignment</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>Table 13 · Role—model tier (illustrative)</caption>
+        <thead><tr><th style="width:20%">Role</th><th style="width:18%">Suggested tier</th><th style="width:24%">Context size</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Person identification</td><td>Small model / multimodal embedding</td><td>1&ndash;2k</td><td>Face/voiceprint/address matching; outputs candidates and confidence</td></tr>
+          <tr><td>Salience</td><td>Small model / classifier</td><td>&lt;1k</td><td>Six-dimensional scoring; no generation needed</td></tr>
+          <tr><td>Memory retrieval</td><td>Mid model + vector/graph</td><td>3&ndash;5k</td><td>Query parsing, multi-round expansion, reranking</td></tr>
+          <tr><td>Relationship judgment</td><td>Mid model</td><td>2&ndash;4k</td><td>Reads event summaries and relationship dimensions; outputs judgments with evidence</td></tr>
+          <tr><td>Context compilation</td><td>Mid model</td><td>4&ndash;6k</td><td>Compresses candidates into 4&plusmn;1 slots under a strict token budget</td></tr>
+          <tr><td>Source auditing</td><td>Mid model</td><td>3&ndash;5k</td><td>Sentence-by-sentence check of sources, conflicts, and confidence</td></tr>
+          <tr><td>Consolidation replay</td><td>Large model (offline)</td><td>8&ndash;16k/batch</td><td>Batch replay, abstraction, writing knowledge/skill candidates</td></tr>
+          <tr><td>Future simulation</td><td>Large model</td><td>4&ndash;8k</td><td>Generates 2&ndash;3 scenario drafts and risks</td></tr>
+          <tr><td>Main Brain (integrative organ)</td><td>Large model</td><td>3&ndash;6k</td><td>ContextPacket + values/goals + current conversation</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>7.3 The context contract</h3>
+    <p>Every Agent must have a &ldquo;context contract&rdquo;: input fields, output schema, max tokens, timeout, and fallback on failure. This matters more than a &ldquo;role prompt,&rdquo; because it turns &ldquo;you should only look at these fields&rdquo; into a system constraint.</p>
+    <pre class="code">AgentContract {
+  name, role,
+  input_schema,            <span class="c"># only these fields may enter context</span>
+  output_schema,           <span class="c"># structured output; free text rejected</span>
+  max_input_tokens,
+  max_output_tokens,
+  timeout_ms,
+  fallback,                <span class="c"># returns "unknown" on failure; never fabricates</span>
+  permissions: read | write | act
+}</pre>
+    <p>For example, the input to the person identification Agent is only face/voiceprint features, form of address, and the time and place of the most recent appearance; it cannot see the full conversation, nor does it need to know contract terms. The relationship judgment Agent sees only event summaries and relationship dimensions relevant to the current person, and does not need to see all project documents. Each model's context is thus small, and &ldquo;what it should see&rdquo; is designed rather than left to chance.</p>
+
+    <h3>7.4 Parallelism, caching, and lazy expansion</h3>
+    <p>The online critical path can be drawn as a DAG: perception and identity recognition in parallel; once identity is fixed, retrieval and relationship judgment in parallel; the two converge at context compilation; only after compilation does the Main Brain start. Source auditing can run after compilation and before the Main Brain, or as a &ldquo;post-hoc audit&rdquo; after the Main Brain generates.</p>
+    <div class="diagram">
+      <div class="dtitle">Figure 3 · Online critical path</div>
+      <div class="flow six">
+        <div class="node"><b>T0</b>Perception / segmentation</div><span class="ar">&rarr;</span>
+        <div class="node"><b>T1</b>Person identification &#8741; salience</div><span class="ar">&rarr;</span>
+        <div class="node"><b>T2</b>Memory retrieval &#8741; relationship judgment</div><span class="ar">&rarr;</span>
+        <div class="node"><b>T3</b>Context compilation</div><span class="ar">&rarr;</span>
+        <div class="node"><b>T4</b>Main Brain decision</div><span class="ar">&rarr;</span>
+        <div class="node"><b>T5</b>Expression / action</div>
+      </div>
+      <div class="dnote">The two branches at T1 can run in parallel; so can the two at T2; T3 is the only convergence point. Source auditing can be placed after T3 (pre-audit) or after T5 (post-audit): the former is safer, the latter has lower latency.</div>
+    </div>
+    <p><b>Caching.</b> Person profiles, relationship summaries, frequently used event indexes, and embedding vectors can all be cached; repeated queries for the same person/project need not be recomputed each time. Cache invalidation is triggered by event writes, not by a fixed TTL.</p>
+    <p><b>Lazy expansion.</b> The ContextPacket gives only &ldquo;one sentence + a pointer&rdquo;; when the Main Brain needs detail it issues <code>EXPAND</code>. This turns &ldquo;pull everything at once&rdquo; into &ldquo;paginate on demand,&rdquo; which saves tokens and keeps the Main Brain's attention on the current problem.</p>
+
+    <h3>7.5 Cost model: where the savings are</h3>
+    <p>Suppose a monolithic system stuffs 50 turns of history (about 30k tokens) into a large model every round; in the multi-model design, the Main Brain reads only a 1k ContextPacket plus a 2k system prompt per round, while the ten backend branches average 2k tokens each and mostly run in parallel. Roughly, total tokens per round are not necessarily lower (the backend still has to run), but <b>large-model tokens drop sharply</b>, latency is spread out by parallelism, and retrieval quality is higher. The real savings come from three things:</p>
+    <ul class="clean">
+      <li><b>Use small models for classification/extraction.</b> Salience, person identification, and source tagging do not need a large model.</li>
+      <li><b>Use structure instead of raw text.</b> Event records, relationship summaries, and sparse indexes are an order of magnitude shorter than the full conversation.</li>
+      <li><b>Trade offline for online.</b> Consolidation, abstraction, and deduplication are moved to nightly batch processing; online does only retrieval and compilation.</li>
+    </ul>
+    <div class="note"><span class="tag">Counterintuitive</span>A multi-model system may have higher total tokens than a monolithic system, but &ldquo;the tokens the Main Brain must read each round&rdquo; is lower and decision quality is steadier. The optimization target is not the fewest total tokens, but <b>the lowest cost per unit of decision quality</b>.</div>
+
+    <h3>7.6 How this differs from existing memory architectures</h3>
+    <p>Placing this proposal within the existing lineage of &ldquo;large-model memory&rdquo; makes the differences clearer. Most of them solve &ldquo;how to retrieve relevant text,&rdquo; whereas this proposal solves &ldquo;how memory is formed, how it changes, how it is trusted, and how it serves decisions.&rdquo;</p>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>Table 13b · Comparison of four classes of memory architecture</caption>
+        <thead><tr><th style="width:18%">Architecture</th><th style="width:30%">Core mechanism</th><th>What it lacks relative to this proposal</th></tr></thead>
+        <tbody>
+          <tr><td><b>RAG</b></td><td>Chunking, embedding, vector top-k, stuffing into the prompt</td><td>No encoding gate, consolidation, forgetting, source auditing, or relational structure; retrieving something &ldquo;similar&rdquo; does not mean it &ldquo;happened&rdquo;</td></tr>
+          <tr><td><b>MemGPT-like</b></td><td>Treats context as memory, with paging and swap-in/swap-out</td><td>Solves context capacity, not memory semantics; no events, versions, relationships, or offline distillation</td></tr>
+          <tr><td><b>Generative Agents-like</b></td><td>Memory stream + reflection + planning</td><td>Has a &ldquo;memory stream,&rdquo; but lacks an event-level evidence ledger, multi-dimensional relationships, a reconsolidation version chain, and dual-system arbitration</td></tr>
+          <tr><td><b>This proposal</b></td><td>Multi-store + backend compilation + Main Brain decision + offline consolidation + source auditing</td><td>Higher complexity, requiring stronger engineering constraints and evaluation; not suitable for every lightweight scenario</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>

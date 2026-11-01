@@ -1,0 +1,163 @@
+<section class="part" id="part3">
+  <div class="wrap">
+    <div class="roman">Part III · Simulation</div>
+    <h2>把机制，<br>写成算法</h2>
+    <p class="part-deck">这一部分不再谈“像不像脑”，而是谈“怎么算”。每个机制都要落到一个可执行的动作：一个索引结构、一个采样策略、一个更新公式、一个门控条件。</p>
+    <div class="part-list">
+      <span><b>06</b> 关键机制的模拟细节</span>
+      <span><b>07</b> 多模型分工与上下文经济</span>
+    </div>
+  </div>
+  <div class="ghost">03</div>
+</section>
+
+<section class="sec" id="s6">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">06 · Simulation Details</span>
+      <h2 class="sec-title">关键机制的模拟细节</h2>
+      <p class="sec-sub">八个机制，八段伪代码；每一段都配一条“防止退化成普通 RAG”的保护栏。</p>
+    </div>
+
+    <p class="lead">以下八节，是整份方案最“硬”的部分。它们回答同一个问题：如果把神经科学的描述性知识，翻译成工程系统可以执行的规则，究竟要写哪些参数、哪些判断、哪些边界？如果你只实现其中三样，建议先实现海马索引、来源审计与离线巩固——它们分别对应“找得到”“信得过”“越用越聪明”。</p>
+
+    <h3>6.0 证据分级与读法</h3>
+    <ul class="clean">
+      <li><b>A · 人类干预/病灶：</b>可以直接支持“机制结论”。</li>
+      <li><b>B · 动物因果：</b>可以支持机制假设，但必须标注物种与范式，不能直接推人类。</li>
+      <li><b>C · 人类相关/行为：</b>只能写成“与人类行为一致”，不能写成因果。</li>
+      <li><b>D · 计算/设计隐喻：</b>只能写成“设计启发”，不能写成“脑就是这样”。</li>
+    </ul>
+    <p><b>对应关系：</b>6.1 B/C；6.2 B/C；6.3 B；6.4 C/D；6.5 D；6.6 A/B；6.7 B/C；6.8 C/D。只有 A/B 可以写成“机制结论”；C 写成“与行为一致”；D 写成“设计隐喻”。文中未标级别的具体数值，都是工程默认值，不是神经科学测量值。</p>
+
+    <h3>6.1 海马索引：稀疏码、模式分离、模式完成 <span class="small">· 证据级 B/C</span></h3>
+    <p><b>机制回顾。</b>海马不是仓库，是索引；齿状回把相似输入分开（模式分离），CA3 把部分线索补全（模式完成）。两者的平衡，决定了记忆既能区分细节，又能举一反三。</p>
+    <p><b>稀疏码。</b>对每个事件，用编码器得到特征向量 <code>x</code>，再做 k-赢家通吃：只保留最强的 <code>k</code> 个维度（例如 32/512），其余置零，得到二值稀疏码 <code>s</code>。稀疏码不是摘要，而是“索引指纹”：它不负责回答内容，只负责让相似的线索找到同一段事件。</p>
+    <pre class="code"><span class="c"># 事件索引</span>
+x = encoder(event_text, participants, scene, goal, affect)
+s = topk_mask(W_e @ x, k=32)          <span class="c"># 稀疏二值码</span>
+trace = {
+  event_id,
+  code: s,
+  tags: [person_ids, place, topic, goal, affect],
+  edges: [(person_id, weight), (event_id, relation), ...],
+  threshold: calibrated_threshold
+}</pre>
+    <p><b>模式分离。</b>当新事件与已有事件的余弦相似度高于 <code>θ_sep</code>（例如 0.86），但时间、地点、目标、结果或参与者状态不同，系统必须强制分配新的 <code>event_id</code>，并写入判别性标签与 <code>different_from</code> 边。典型场景：同一客户的三次报价、同一项目的两次评审、同一个人的两次承诺。把它们合并成一条，是记忆系统最隐蔽也最致命的错误。</p>
+    <pre class="code">if cos(e_new, e_old) &gt; θ_sep and context_diff(e_new, e_old) &gt; τ:
+    e_new.id = new_event_id()
+    e_new.tags += discriminative_tags(time, place, goal, outcome, participant_state)
+    graph.add_edge(e_new.id, e_old.id, type="different_from", reason=...)</pre>
+    <p><b>模式完成。</b>检索从线索出发，做多轮扩展与重排。第一轮用向量近邻找语义相似；第二轮沿人物、地点、因果、时间边扩展；第三轮用一致性约束剪枝。每一轮的分数是加权和，最后一轮收敛或达到预算就停。</p>
+    <pre class="code">C = parse_cues(query)                    <span class="c"># 人物/时间/地点/话题/目标</span>
+for r in 1..R:
+    N = vector_topk(C, k=50) ∪ graph_neighbors(C, hops=2)
+    score = 0.35*cue_overlap + 0.25*assoc_weight + 0.15*recency
+          + 0.15*salience + 0.10*source_reliability - 0.20*interference
+    C = topk(N, score, k=12)
+    if converged(C): break
+return C</pre>
+    <div class="warn"><span class="tag">保护栏</span>纯向量相似只能证明“语义相关”，不能证明“这件事发生过”。情景召回至少要有一条结构边（人物、时间、地点、因果）作为支撑；否则只能标为“语义联想”，不能标为“记忆”。</div>
+
+    <h3>6.2 睡眠重放：把“慢振荡—纺锤波—涟漪”翻译成批处理 <span class="small">· 证据级 B/C</span></h3>
+    <p><b>机制回顾。</b>NREM 睡眠中，慢振荡负责全局节律，纺锤波把局部信息打包，涟漪负责海马序列的重放；三者耦合，把白天的经历重新分配到皮层，并把重要的片段反复“过夜”。</p>
+    <p><b>批处理映射。</b>不要把“睡眠”做成一个随机总结器，而要做成三层调度：</p>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 10 · 睡眠节律与批处理的三层映射</caption>
+        <thead><tr><th style="width:16%">神经节律</th><th style="width:26%">功能</th><th style="width:30%">批处理层</th><th>输出</th></tr></thead>
+        <tbody>
+          <tr><td><b>慢振荡</b> 0.5–1 Hz</td><td>全局扫描、上下行相位</td><td>Scan：遍历当日事件，按优先级排序</td><td>待重放清单</td></tr>
+          <tr><td><b>纺锤波</b> 11–16 Hz</td><td>局部打包、皮层可塑性窗口</td><td>Cluster：按人物/项目/主题聚类，选代表</td><td>主题包</td></tr>
+          <tr><td><b>涟漪</b> 100–200 Hz</td><td>序列重放、记忆巩固</td><td>Replay：重放“前因→行动→结果”，生成反事实</td><td>摘要、教训、技能候选</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <pre class="code"><span class="c"># 每晚的巩固批处理</span>
+events = load_events(last_24h)
+priority = salience^0.8 * (1 + prediction_error) * (1 + goal_relevance) * (1 + unresolved)
+clusters = cluster_by(events, key=[person, project, topic], method="graph+embedding")
+
+for cluster in clusters:
+    seq = order_by_causality(cluster)
+    replay = summarize_sequence(seq)                    <span class="c"># 前因→行动→结果</span>
+    counterfactual = generate_alternatives(seq)         <span class="c"># 如果当时...会怎样</span>
+    lesson = extract_lesson(seq, counterfactual)
+    if evidence_count(lesson) &gt;= 2:
+        propose_knowledge_or_skill(lesson, source_event_ids=seq.ids)
+    propose_relationship_update(cluster.persons, seq)   <span class="c"># 构成性：只提案</span>
+    compress_ordinary_interactions(cluster)
+prune_low_retention_indexes()</pre>
+    <p><b>写回边界。</b>事件、事实、解释候选、技能候选走 fact-writer；关系权重、习惯规则、目标、价值只生成 <code>ConstitutiveProposal</code>，经来源/宪法审计后进入待批队列，批准后才生效。巩固阶段没有“直接改写未来自我”的权限。</p>
+    <p><b>优先级。</b>重放不是“最新优先”，而是“最值得未来用优先”：高显著性、高预测误差、与未完成目标相关、被反复访问但尚未抽象的事件排前面。普通寒暄、重复确认、无后果的日常，应该被压缩成阶段摘要，而不是逐条重放。</p>
+    <p><b>前沿补注（2025）。</b>重放不是均匀分布在整夜，而是被睡眠微结构组织（Chang et al. 2025）。工程上应把离线批处理拆成嵌套窗口：全局扫描（慢波）→ 局部打包（纺锤）→ 事件重放（涟漪），而不是整夜一次性总结。</p>
+    <div class="warn"><span class="tag">保护栏</span>巩固阶段最容易“编故事”。每一条抽象结论必须带 <code>source_event_ids</code>；少于两个独立事件的结论只能标为“假设”，不能晋升为知识或技能；习惯规则、关系权重、目标与价值不得在巩固阶段直接生效。反事实只能用于生成候选，不能写成事实。</div>
+
+    <h4>6.2.1 组合式重放：从过去元素构造未来候选</h4>
+    <p>忠实重放巩固过去；<b>组合式重放</b>从至少两个事件抽取元素（人物、地点、动作、结果），在因果、社会、物理约束下重组，生成未来候选。2025 年 Nature Neuroscience 的研究进一步表明，海马把经验拆成可复用的 <b>primitives</b>，再组合成新状态空间；重放参与构建和巩固这些组合（Bakermans et al. 2025）。对系统的启示：组合式重放应维护一个 primitive 库（人物、地点、动作、关系、目标），否则只能重组已有元素，难以泛化到新情境。它不是记忆：不写事件日志、不计证据，输出标记 <code>source=compositional_replay</code>、<code>is_fact=false</code>，只供主脑作为选项。</p>
+    <pre class="code">Primitive { kind: person|place|action|relation|goal, id, value, tags }
+compose_from_primitives(library, slots=["person", "action", "goal"])</pre>
+    <p>组合按槽位类型取样：人物槽只能放 person，地点槽只能放 place；同一个 primitive 可跨事件复用。这样生成的是“没见过的组合”，而不是已有句子的排列。只有主脑采纳并行动、观察到真实结果后，<b>结果</b>才成为直接事件，候选情景本身不升级为事实。</p>
+
+    <p><b>图式的证据边界。</b>图式兼容会加速巩固，这是 Tse et al. (2007) 的经典结论；但 2024–2026 的直接证据仍有限。当前只把它作为定性原则，不把 <code>schema_fit</code> 写成硬参数；保留率里它只是可选输入，不改变主路径。</p>
+
+    <h3>6.3 再巩固：版本链与预测误差 <span class="small">· 证据级 B</span></h3>
+    <p><b>机制回顾。</b>提取会让记忆进入不稳定状态；如果出现预测误差或新信息，记忆会被更新，然后重新巩固。没有预测误差时，提取只是让记忆更可及，不一定改写内容。</p>
+    <p><b>系统映射。</b>把“再巩固”实现为<b>事件溯源 + 版本链</b>，而不是“用新摘要覆盖旧摘要”。每次提取记录 <code>access</code>；当新信息与旧记录冲突，或结果显著偏离预期，创建新版本：</p>
+    <pre class="code">old = get_event(eid)
+access_log.append(eid, now, cue, context)
+
+pe = abs(old.expected_outcome - observed_outcome)
+novelty = 1 - cos(embed(new_info), embed(old.summary))
+
+if pe &gt; θ_pe or novelty &gt; θ_novelty:
+    v = old.clone()
+    v.version = old.version + 1
+    v.supersedes = old.id
+    v.content = integrate(old, new_info)
+    v.basis_event_ids = old.basis + [new_event.id]
+    v.confidence = calibrate(v)
+    store.append(v)                      <span class="c"># 旧版本保留</span>
+    graph.add_edge(v.id, old.id, type="supersedes")
+else:
+    old.last_accessed = now
+    old.access_count += 1</pre>
+    <p><b>阈值怎么定。</b><code>θ_pe</code> 与 <code>θ_novelty</code> 不应是固定常数，而应按记忆类型调整：合同条款、承诺、医疗信息用低阈值（宁可多版本）；一般偏好、寒暄用高阈值（避免过度改写）。这相当于给不同记忆设不同的“可塑性”。</p>
+    <p><b>前沿证据的边界。</b>2024–2026 年关于“记忆年龄/强度如何调节再巩固”的证据仍不一致；因此当前实现只保留 <code>θ_pe</code> / <code>θ_novelty</code>，不额外引入年龄/强度硬阈值。年龄、强度作为待验证参数，而不是写成规则。</p>
+    <div class="warn"><span class="tag">保护栏</span>低可信来源（转述、匿名消息、模型推断）不能直接触发“事实版本”更新，只能创建“候选解释”，等待第二个独立来源。再巩固是更新，不是轻信。</div>
+
+    <h3>6.4 遗忘：保留率公式与豁免清单 <span class="small">· 证据级 C/D</span></h3>
+    <p><b>机制回顾。</b>遗忘来自衰退、干扰、提取失败与主动抑制；它降低旧信息对新学习的干扰，支持泛化。记忆痕迹可能仍在，只是变得难以提取。</p>
+    <p><b>保留率。</b>用一个可解释的乘性公式，把“时间、可靠复现、情绪、效用、关系强度”放在一起。只有<b>可靠来源</b>的复现才提高稳定度；低可信复现只提高可及性，不提高稳定性：</p>
+    <pre class="code">R(t) = exp(-Δt / S)
+       * (1 + α * |valence|)
+       * (0.5 + 0.5 * utility)
+       * (0.5 + 0.5 * relationship_intensity)
+
+n_eff = distinct_retrievals * source_reliability
+S = S0 * (1 + β * n_eff)
+       * (1 + γ * schema_fit)
+       * (1 + δ * arousal)</pre>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 11 · 保留率参数</caption>
+        <thead><tr><th style="width:16%">参数</th><th style="width:34%">含义</th><th>建议初值</th></tr></thead>
+        <tbody>
+          <tr><td><code>S0</code></td><td>基础稳定度，按记忆类型设定</td><td>事实 30 天；情景 7 天；承诺 ∞</td></tr>
+          <tr><td><code>β</code></td><td>每次<b>可靠</b>独立提取带来的稳定度增益</td><td>0.3；上限 5 次</td></tr>
+          <tr><td><code>γ</code></td><td>与既有图式兼容带来的增益</td><td>0–0.5</td></tr>
+          <tr><td><code>δ</code></td><td>情绪唤醒带来的增益</td><td>0–0.8</td></tr>
+          <tr><td><code>α</code></td><td>效价强度对保留的加成</td><td>0.5；憎恨与亲密同样加深记忆</td></tr>
+          <tr><td><code>utility</code></td><td>未来效用：目标相关、承诺、人物重要性</td><td>0–1</td></tr>
+          <tr><td><code>relationship_intensity</code></td><td>情感强度：|affect|；恨/爱都加深记忆，但 trust 不计入</td><td>0–1；与信任判断分离</td></tr>
+          <tr><td><code>valence</code></td><td>情感方向：喜欢（正）/ 讨厌（负）；不等于信任判断</td><td>−1–1；不进入保留率</td></tr>
+          <tr><td><code>source_reliability</code></td><td>来源可靠性：来源类型 × 可验证性 × 历史校准 × 一致性；claim-level</td><td>0–1；亲历 1.0 / 文档 0.8 / 转述 0.6 / 推断 0.4 / 模型 0.2</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><b>可靠性怎么来。</b>由 <code>reliability.py</code> 按四维计算：来源类型先验、可验证性、历史校准（拉普拉斯平滑）、一致性与佐证。它是先验，不是真值；低可靠来源也可能说对，所以不删除，只是不让它“越回想越稳”。历史校准来自 <code>EvidenceLedger.record_outcome</code>：某个来源的断言后来被证实或推翻，会更新它的准确率。</p>
+    <p><b>豁免清单。</b>以下内容不参与衰减，或只降权不删除：未完成承诺、安全关键信息、用户明确要求记住的内容、法律/合规保留项、正在进行的项目上下文。豁免不是“永久保存”，而是“必须由主脑或用户明确解除”。</p>
+    <p><b>干扰处理。</b>两条冲突记忆不取平均，也不自动选新的；保留双方，加 <code>contradicts</code> 边，检索时一起返回并标注来源与时间。让主脑看到冲突，比系统偷偷“和稀泥”更安全。</p>
+    <div class="warn"><span class="tag">保护栏</span>遗忘只作用于“活跃索引”，不物理删除原始事件日志；物理删除只由用户行使“被遗忘权”或合规流程触发，并留审计记录。</div>
+  </div>
+</section>

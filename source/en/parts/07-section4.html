@@ -1,0 +1,139 @@
+<section class="sec" id="s4">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">04 · Data Model</span>
+      <h2 class="sec-title">Data Model: Events, Persons, Relationships, Interpretations</h2>
+      <p class="sec-sub">The first table of a memory system determines what questions it can ask later.</p>
+    </div>
+
+    <p class="lead">If the system stores only "conversation fragments + vectors," it can only answer "which passage is most similar." If it stores "events + persons + participation + relationships + interpretations," it can answer "what did he promise last time we met," "is there evidence for the individual's judgment about him," and "are this matter and that matter the same one." The data model is not an implementation detail; it sets the cognitive ceiling of the system.</p>
+
+    <h3>4.1 Event: The Atomic Unit of Memory</h3>
+    <p>An event is not a single utterance, nor a whole day. It is a bounded experience with participants, a course, and an outcome. Event segmentation can be detected from peaks of prediction error, goal switches, scene changes, and turning points in the topic of conversation. An event record should contain at least the following fields:</p>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>Table 6 · Event record</caption>
+        <thead><tr><th style="width:18%">Field</th><th style="width:32%">Meaning</th><th>Example / constraint</th></tr></thead>
+        <tbody>
+          <tr><td><code>event_id</code></td><td>Globally unique, immutable</td><td>ULID; never reused once written</td></tr>
+          <tr><td><code>time</code></td><td>Start/end time, time zone, temporal precision</td><td>Store an interval when uncertain; do not force precision</td></tr>
+          <tr><td><code>scene</code></td><td>Place, activity, environment, atmosphere</td><td>"Office / design review / afternoon"</td></tr>
+          <tr><td><code>participants</code></td><td>Participants, roles, identity certainty</td><td>Person ID + confidence + candidates</td></tr>
+          <tr><td><code>actions</code></td><td>Who did what to whom, and how the other responded</td><td>Structured actions, not a plain-text summary</td></tr>
+          <tr><td><code>outcome</code></td><td>Actual result, whether the goal was achieved</td><td>Recorded separately from expectations</td></tr>
+          <tr><td><code>source</code></td><td>Firsthand / relayed / inferred / imagined / model-generated</td><td>Source tag, traceable item by item</td></tr>
+          <tr><td><code>status</code></td><td>Open / closed / to follow up</td><td>Unfulfilled commitments stay open</td></tr>
+          <tr><td><code>salience</code></td><td>Salience score and its components</td><td>novelty / goal / social / affect / PE</td></tr>
+          <tr><td><code>links</code></td><td>Related events, antecedents, consequences, contradictions</td><td>Causal edges, temporal edges, <code>contradicts</code> edges</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>4.2 Person, Participation, Relationship: Three Tables, Not One</h3>
+    <p>A person profile answers "who he is"; a participation record answers "what he did in this matter"; a relationship summary answers "what relationship we have now." The reason to keep them apart is simple: <b>a person can take part in many events, a relationship can be supported by many events, but a single interaction does not directly equal a relationship.</b></p>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>Table 7 · Person / Participation / Relationship</caption>
+        <thead><tr><th style="width:16%">Object</th><th style="width:38%">Key fields</th><th>Design point</th></tr></thead>
+        <tbody>
+          <tr><td><b>Person</b></td><td>person_id, forms of address/aliases, identification cues (face/voiceprint/address), known traits, first/last appearance</td><td>Keep candidates when identity is uncertain; do not force a merge</td></tr>
+          <tr><td><b>Participation</b></td><td>person_id, event_id, role, action, response, co-occurrence vs. actual interaction, source, confidence</td><td>"In the same frame" is not "interacting"; "he said" is not "he did"</td></tr>
+          <tr><td><b>Relationship</b></td><td>Familiarity, closeness, trust scope, cooperation, commitment, boundaries, social role; each dimension with value, evidence_event_ids, scope, confidence, updated_at</td><td>"The individual trusts him" and "he trusts the individual" are separate; judgments carry their basis</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>A relationship is multidimensional, not a single "good/bad" axis. One person may be "high work trust, low personal closeness, good commitment record, strong boundaries"; another may be "high closeness, low trust, average cooperation." Collapsing a relationship into one score discards the most useful information. Every dimension must have <b>evidence events</b>, <b>scope of applicability</b> (work/family/public), and <b>update time</b>; a judgment without evidence can only be labeled speculation.</p>
+
+    <h3>4.3 Interpretation Layer: Facts and Interpretations Separated, Interpretations Correctable</h3>
+    <p>"He did not reply to the request" is an event; "he does not care" is an interpretation. Mix the two and the system will fossilize a single act into a person's essence. The interpretation layer is stored separately and contains at least:</p>
+    <pre class="code">Interpretation {
+  interpretation_id,
+  target_event_id,
+  perspective: self | other,
+  type: feeling | speculation | attribution | evaluation,
+  content,
+  confidence,              <span class="c">// 0–1, not a true/false binary</span>
+  basis_event_ids: [],     <span class="c">// which events support this interpretation</span>
+  created_at, updated_at,
+  supersedes: interpretation_id | null,
+  status: active | revised | retracted
+}</pre>
+    <p>Key rule: <b>interpretations may be revised but must not overwrite history</b>. When new information arrives, create a new version that points to the old version being revised; the old version is retained for auditing "why we thought so at the time." This is not only more honest but also more useful: it lets the system explain changes in its own judgments instead of pretending it was always smart.</p>
+
+    <h3>4.4 Knowledge, Memory, Skill: Three Accumulations from the Same Events</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>Table 8 · Three accumulations plus the habit cache</caption>
+        <thead><tr><th style="width:14%">Type</th><th style="width:30%">Answers</th><th style="width:30%">Fields</th><th>Promotion condition</th></tr></thead>
+        <tbody>
+          <tr><td><b>Memory</b></td><td>What one has experienced</td><td>Event log + person/participation/relationship + interpretation versions; shared <code>event_id</code></td><td>Established as soon as the event is written; not promoted to "knowledge"</td></tr>
+          <tr><td><b>Knowledge</b></td><td>What one knows</td><td>Concepts/relations/rules, source event_ids, confidence, domain of applicability</td><td>Supported by at least 2–3 independent events; not contradictory to existing schemas</td></tr>
+          <tr><td><b>Skill</b></td><td>What one knows how to do</td><td>Steps, preconditions, postconditions, caveats, success rate, source</td><td>At least 2 successes + 1 failure/correction, or expert confirmation</td></tr>
+          <tr><td><b>Habit</b></td><td>What one did last time in a similar situation</td><td>Context signature, cached template/skill ID, status (candidate / ratified / revoked), proposed_by, ratified_by, frequency, success rate, last used, rollback_to</td><td>High-frequency repetition + stable outcome; <b>the Backend only proposes, the Main Brain ratifies</b>; caches templates only, never decisions</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><b>Memory</b> is the direct record of events and relationships; <b>knowledge</b> is a rule abstracted from multiple events; <b>skill</b> is a procedural sequence. All three share the same <code>event_id</code> but are updated separately. Habit is not a fourth kind of accumulation but a cache of high-frequency paths; it only accelerates context assembly and does not replace memory, knowledge, or skill.</p>
+    <p>"One success is not enough to form a stable skill, and one subjective judgment should not directly become certain knowledge." This constraint from version one should be written into the promotion rules rather than left to the model's self-restraint. It is also the last gate preventing the system from mistaking accident for regularity.</p>
+
+    <h3>4.5 ContextPacket: The Only Cross-Layer Interface</h3>
+    <p>The ContextPacket is not a "summary" but <b>the minimal situation tailored for the current decision</b>. Its slot count is hard-limited to 4±1, and each slot has a type, content, source, confidence, and TTL. Recommended schema:</p>
+    <pre class="code">ContextPacket {
+  packet_id, turn_id, created_at, expires_at,
+  governance_mode: companion | engineering,
+  self: {
+    ratified: { values[], role, long_term_goals[], active_commitments[] },
+    pending: [ { proposal_id, type, summary, evidence_count, expires_at } ]
+  },
+  who: { person_id, name, identity_confidence, candidates[] },
+  relationship: {
+    dimensions: { familiarity, closeness, trust_scope, cooperation,
+                  commitment, boundaries, social_role,
+                  social_safety, belonging_need },
+    basis_event_ids[], scope, confidence, updated_at
+  },
+  experiences: [
+    { event_id, one_line, why_relevant, source, confidence }
+  ],
+  omitted: { count, topics[], event_ids[] },   <span class="c">// candidates filtered out</span>
+  scene: { place, activity, time, atmosphere },
+  goal: {
+    current, priority, success_criteria,
+    scope: turn | constitutional,   <span class="c">// only constitutional requires ratification</span>
+    provenance: { proposed_by, ratified_by, ratified_at, proposal_id },
+    lock: none | dual_ratified | user_sovereign | constitutional   <span class="c">// applies only to constitutional</span>
+  },
+}</pre>
+    <pre class="code"><span class="c">// constitutive read-only pointer and remaining slots</span>
+ContextPacket (cont.) {
+  constitution_ref: { version, ledger_head },
+  commitments: [ { content, due, status, counterpart } ],
+  changes: [ { what_changed, since_when, source } ],
+  uncertainties: [ { question, candidates[], evidence_needed } ],
+  affect: { valence, arousal, confidence },
+  state_view: {
+    goal_pressure, relationship_strain, resource_load, uncertainty,
+    unresolved_commitments, impact_gap
+  },
+  state_params_ref: { schema_version, params_version, state_hash },   <span class="c">// params live in runtime, not in context</span>
+  budget: {
+    slots: 4, header_tokens: 300, slot_tokens: 600,
+    tokens: 900, detail_level: brief|standard|deep
+  }
+}</pre>
+    <p>This schema has no <code>advice</code>, no <code>recommendation</code>, and no <code>action</code>. It does not "give the Main Brain ideas" but "prepares the facts, relationships, goals, and uncertainties the Main Brain needs to know." The Main Brain may request <code>EXPAND(event_id)</code> to expand details and may request <code>VERIFY(claim)</code> to check sources; but it cannot ask the Backend to "decide for it."</p>
+
+    <h3>4.6 Evidence Ledger: Repeated Recollection Is Not Multiple Pieces of Evidence</h3>
+    <p>The error that large-model memory systems most easily make is "self-reinforcement": the same summary is repeatedly retrieved and repeatedly rewritten until the system believes it is supported by many independent sources. The human brain has a similar problem: repeatedly recalling an event raises its accessibility but does not turn it into multiple independent experiences. The remedy is an <b>evidence ledger</b>:</p>
+    <ul class="clean">
+      <li><b>Evidence is counted by <code>event_id</code>, not by retrieval count.</b><code>evidence_count = distinct(event_id)</code>; an event recalled a hundred times is still one piece of evidence.</li>
+      <li><b>Source stratification:</b>firsthand &gt; primary document &gt; relayed by another &gt; inferred &gt; model-generated. A higher layer may override a lower one, but the original source must be retained.</li>
+      <li><b>Interpretation and fact kept in separate accounts:</b>the confidence of an interpretation cannot rise because it has been "cited many times," only because "new independent events have appeared."</li>
+      <li><b>Contradictions are not averaged:</b>both conflicting records are kept and marked <code>contradicts</code>; retrieval returns both so the Main Brain sees the conflict, rather than the system secretly picking one.</li>
+    </ul>
+    <div class="note">
+      <span class="tag">In one sentence</span>
+      The credibility of a memory system does not depend on how fluently it remembers, but on whether it can put a checkable event ID behind every assertion.
+    </div>
+  </div>
+</section>

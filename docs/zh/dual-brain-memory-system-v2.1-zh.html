@@ -1,0 +1,2186 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>双脑系统 · 多模型协同认知框架（版本 2.1）</title>
+<meta name="description" content="一份面向工程实现的技术方案：以神经科学中的编码、巩固、提取、再巩固、遗忘、工作记忆、价值决策与社会关系记忆为参照，设计多个大模型分工协作的双脑系统。">
+<meta name="author" content="DSH · 双脑系统方案">
+<style>
+:root{
+  --paper:#f7f3ea; --paper-2:#efe8d9; --paper-3:#e7dfcd;
+  --ink:#1a1917; --ink-2:#3d3932; --muted:#756d5f; --faint:#9a9182; --rule:#d7cdb9;
+  --teal:#0d5b55; --teal-2:#0a4641; --teal-soft:#e2ece8;
+  --rust:#a4491f; --rust-soft:#f2e4da; --gold:#b08a3e;
+  --night:#111d1c; --night-2:#1b2b29;
+  --serif:"Noto Serif CJK SC","Source Han Serif SC","Songti SC","SimSun",Georgia,serif;
+  --sans:"Noto Sans CJK SC","Source Han Sans SC","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  --mono:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:17px;line-height:1.9;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased;}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(1100px 600px at 82% -8%,rgba(13,91,85,.06),transparent 60%),radial-gradient(900px 700px at -8% 32%,rgba(164,73,31,.05),transparent 55%),linear-gradient(180deg,rgba(255,255,255,.35),rgba(255,255,255,0) 30%);}
+::selection{background:rgba(13,91,85,.18);}
+a{color:var(--teal);text-decoration:none;border-bottom:1px solid rgba(13,91,85,.28);}
+a:hover{border-bottom-color:var(--teal);}
+p{margin:0 0 1.05em;}
+strong{font-weight:700;color:var(--ink);}
+em{font-style:normal;color:var(--teal-2);border-bottom:1px dotted rgba(13,91,85,.4);}
+sup{font-size:.62em;line-height:0;vertical-align:super;color:var(--muted);}
+.wrap{max-width:820px;margin:0 auto;padding:0 32px;}
+.progress{position:fixed;top:0;left:0;right:0;height:3px;z-index:90;background:transparent;}
+.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--gold));transition:width .1s linear;}
+
+/* cover */
+.cover{position:relative;overflow:hidden;min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:64px 0 48px;border-bottom:1px solid var(--rule);}
+.cover .wrap{position:relative;z-index:2;}
+.kicker{font-family:var(--sans);font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--rust);margin-bottom:30px;display:flex;align-items:center;gap:14px;}
+.kicker::before{content:"";display:block;width:34px;height:1px;background:var(--rust);}
+h1.title{font-size:76px;line-height:1.06;letter-spacing:-.02em;font-weight:700;margin:0 0 16px;color:var(--ink);}
+h1.title .thin{font-weight:400;color:var(--teal);}
+.subtitle{font-size:23px;line-height:1.55;font-weight:400;color:var(--ink-2);margin:0 0 24px;letter-spacing:.01em;}
+.deck{max-width:560px;font-size:16px;line-height:1.9;color:var(--muted);border-left:2px solid var(--gold);padding-left:18px;margin:0 0 34px;}
+.cover-meta{font-family:var(--sans);font-size:12px;letter-spacing:.05em;color:var(--muted);display:flex;flex-wrap:wrap;gap:8px 22px;align-items:center;}
+.cover-meta b{font-weight:500;color:var(--ink-2);}
+.cover .scheme{position:absolute;right:-40px;top:-20px;width:420px;height:420px;opacity:.55;pointer-events:none;}
+.cover .scheme-cap{position:absolute;right:32px;bottom:24px;font-family:var(--sans);font-size:10px;letter-spacing:.18em;color:var(--faint);writing-mode:vertical-rl;}
+.stat-strip{display:flex;flex-wrap:wrap;gap:0;margin:38px 0 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);}
+.stat-strip div{flex:1 1 0;min-width:0;padding:14px 12px 12px 0;}
+.stat-strip .n{font-family:var(--sans);font-size:22px;font-weight:600;letter-spacing:-.01em;color:var(--teal-2);display:block;line-height:1.2;}
+.stat-strip .l{font-family:var(--sans);font-size:10px;letter-spacing:.13em;color:var(--muted);display:block;margin-top:4px;}
+
+/* toc */
+.toc{padding:58px 0 50px;border-bottom:1px solid var(--rule);}
+.toc h2{font-family:var(--sans);font-size:11px;letter-spacing:.3em;color:var(--rust);text-transform:uppercase;margin:0 0 24px;font-weight:500;}
+.toc ol{list-style:none;margin:0;padding:0;columns:2;column-gap:48px;}
+.toc li{break-inside:avoid;margin:0 0 10px;font-size:14px;line-height:1.6;}
+.toc li .no{font-family:var(--sans);font-size:9.5px;letter-spacing:.08em;color:var(--faint);display:inline-block;width:28px;}
+.toc li a{border:none;color:var(--ink-2);}
+.toc li a:hover{color:var(--teal);}
+.toc .part-row{font-family:var(--sans);font-size:10px;letter-spacing:.2em;color:var(--teal);margin:20px 0 7px;text-transform:uppercase;column-span:all;}
+.toc .part-row:first-child{margin-top:0;}
+
+/* part */
+.part{background:var(--night);color:#f2ecdf;margin:0;padding:78px 0 66px;position:relative;overflow:hidden;break-before:page;}
+.part .wrap{position:relative;z-index:2;}
+.part .roman{font-family:var(--sans);font-size:12px;letter-spacing:.34em;color:var(--gold);text-transform:uppercase;margin-bottom:20px;}
+.part h2{font-size:48px;line-height:1.15;margin:0 0 16px;font-weight:600;color:#f7f2e6;}
+.part .part-deck{max-width:580px;font-size:15.5px;line-height:1.85;color:#b9c4bd;margin:0 0 30px;}
+.part .part-list{display:flex;flex-wrap:wrap;gap:8px 26px;font-family:var(--sans);font-size:11.5px;letter-spacing:.06em;color:#8fa39b;border-top:1px solid rgba(255,255,255,.16);padding-top:18px;}
+.part .part-list span b{color:#e8dfc9;font-weight:500;}
+.part .ghost{position:absolute;right:-16px;bottom:-64px;font-family:var(--sans);font-size:260px;font-weight:700;line-height:1;color:rgba(255,255,255,.035);letter-spacing:-.04em;pointer-events:none;}
+
+/* sections */
+main{padding:0 0 18px;}
+section.sec{padding:52px 0 40px;border-bottom:1px solid var(--rule);}
+section.sec:last-of-type{border-bottom:none;}
+.sec-head{margin-bottom:26px;}
+.sec-no{font-family:var(--sans);font-size:10px;letter-spacing:.25em;color:var(--rust);text-transform:uppercase;display:block;margin-bottom:10px;}
+h2.sec-title{font-size:32px;line-height:1.35;font-weight:700;margin:0 0 9px;letter-spacing:-.01em;break-after:avoid;}
+.sec-sub{font-size:14.5px;color:var(--muted);margin:0;font-family:var(--sans);letter-spacing:.02em;}
+.lead{font-size:18.5px;line-height:1.85;color:var(--ink-2);}
+.lead::first-letter{float:left;font-size:58px;line-height:.86;padding:5px 10px 0 0;color:var(--teal);font-weight:700;}
+h3{font-size:20px;line-height:1.5;margin:34px 0 10px;font-weight:700;letter-spacing:-.005em;break-after:avoid;}
+h4{font-size:15.5px;margin:24px 0 7px;font-weight:700;color:var(--teal-2);font-family:var(--sans);letter-spacing:.02em;break-after:avoid;}
+.small{font-size:13.8px;color:var(--muted);line-height:1.8;}
+.center{text-align:center;}
+hr.sep{border:none;border-top:1px solid var(--rule);margin:34px 0;}
+
+/* callouts */
+.key{background:var(--night);color:#f3ede0;padding:24px 28px 22px;margin:30px -10px;position:relative;}
+.key .tag{font-family:var(--sans);font-size:10px;letter-spacing:.24em;color:var(--gold);text-transform:uppercase;display:block;margin-bottom:9px;}
+.key p{margin:0;font-size:15.5px;line-height:1.8;color:#e7e0d1;}
+.key strong{color:#fff;}
+.note{border-left:2px solid var(--teal);padding:2px 0 2px 18px;margin:24px 0;color:var(--ink-2);font-size:14.8px;}
+.note .tag{font-family:var(--sans);font-size:10px;letter-spacing:.18em;color:var(--teal);display:block;margin-bottom:5px;text-transform:uppercase;}
+.warn{background:var(--rust-soft);border-left:3px solid var(--rust);padding:16px 20px;margin:24px 0;font-size:14.5px;line-height:1.8;color:#4a2a19;}
+.warn .tag{font-family:var(--sans);font-size:10px;letter-spacing:.18em;color:var(--rust);display:block;margin-bottom:5px;text-transform:uppercase;}
+.pull{font-size:22px;line-height:1.55;color:var(--teal-2);font-weight:600;margin:32px 0;padding:0 0 0 22px;border-left:1px solid var(--gold);letter-spacing:-.01em;}
+.pull span{display:block;font-size:11.5px;font-family:var(--sans);letter-spacing:.16em;color:var(--muted);margin-top:10px;font-weight:400;}
+
+/* tables */
+.table-wrap{margin:26px 0;overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13.2px;line-height:1.65;}
+caption{caption-side:top;text-align:left;break-after:avoid;font-family:var(--sans);font-size:10.5px;letter-spacing:.14em;color:var(--muted);padding-bottom:9px;text-transform:uppercase;}
+th{text-align:left;font-family:var(--sans);font-size:10px;letter-spacing:.1em;color:var(--muted);font-weight:500;border-bottom:1px solid var(--ink);padding:8px 10px 7px;vertical-align:bottom;text-transform:uppercase;}
+td{border-bottom:1px solid var(--rule);padding:9px 10px;vertical-align:top;color:var(--ink-2);}
+tr:last-child td{border-bottom:1px solid var(--ink);}
+td b{color:var(--ink);}
+.tnum{font-family:var(--sans);font-variant-numeric:tabular-nums;font-size:12.4px;}
+table.compact{font-size:12.4px;}
+table.compact th,table.compact td{padding:7px 8px;}
+
+/* code */
+pre.code{background:#141f1e;color:#dfe7df;padding:18px 20px;overflow-x:auto;font-family:var(--mono);font-size:12px;line-height:1.65;margin:22px 0;border-left:3px solid var(--gold);}
+pre.code .c{color:#8fa39b;}
+code{font-family:var(--mono);font-size:.88em;background:rgba(13,91,85,.07);padding:1px 5px;color:var(--teal-2);}
+
+/* lists */
+ul.clean{list-style:none;padding:0;margin:0 0 1em;}
+ul.clean li{position:relative;padding-left:20px;margin-bottom:9px;line-height:1.8;}
+ul.clean li::before{content:"";position:absolute;left:2px;top:.7em;width:6px;height:6px;border:1px solid var(--teal);transform:rotate(45deg);}
+ol.steps{counter-reset:s;list-style:none;padding:0;margin:0 0 1em;}
+ol.steps li{counter-increment:s;position:relative;padding-left:38px;margin-bottom:12px;line-height:1.8;}
+ol.steps li::before{content:counter(s,decimal-leading-zero);position:absolute;left:0;top:.12em;font-family:var(--sans);font-size:10.5px;letter-spacing:.05em;color:var(--rust);}
+.defs{display:block;margin:20px 0;}
+.defs .row{display:flex;gap:20px;padding:10px 0;border-bottom:1px solid var(--rule);}
+.defs .row:first-child{border-top:1px solid var(--rule);}
+.defs .term{flex:0 0 148px;font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--teal-2);letter-spacing:.02em;}
+.defs .desc{flex:1;font-size:14px;line-height:1.75;color:var(--ink-2);}
+
+/* diagrams */
+.diagram{margin:28px -8px;padding:22px 20px 18px;background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(239,232,217,.35));border:1px solid var(--rule);break-inside:avoid;}
+.diagram .dtitle{font-family:var(--sans);font-size:10px;letter-spacing:.2em;color:var(--rust);text-transform:uppercase;margin-bottom:14px;}
+.diagram .dnote{font-size:11.5px;color:var(--muted);line-height:1.6;margin-top:12px;font-family:var(--sans);}
+.layer{display:flex;align-items:stretch;gap:12px;margin-bottom:10px;}
+.layer .llabel{flex:0 0 92px;font-family:var(--sans);font-size:10px;letter-spacing:.12em;color:var(--teal-2);text-transform:uppercase;padding-top:12px;border-right:1px solid var(--rule);}
+.layer .lbody{flex:1;display:flex;flex-wrap:wrap;gap:7px;}
+.chip{font-family:var(--sans);font-size:10.5px;letter-spacing:.02em;padding:7px 10px;background:#fff;border:1px solid var(--rule);color:var(--ink-2);line-height:1.3;}
+.chip b{color:var(--teal-2);font-weight:600;}
+.chip.rust{border-color:rgba(164,73,31,.35);background:var(--rust-soft);}
+.chip.teal{border-color:rgba(13,91,85,.28);background:var(--teal-soft);}
+.chip.dark{background:var(--night);color:#e8dfc9;border-color:var(--night);}
+.chip.dark b{color:#f3ede0;}
+.flow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:6px 0;}
+.flow .node{flex:1 1 0;min-width:96px;padding:10px 10px;background:#fff;border:1px solid var(--rule);font-family:var(--sans);font-size:10.5px;line-height:1.4;text-align:center;color:var(--ink-2);}
+.flow .node b{display:block;font-size:9px;letter-spacing:.12em;color:var(--rust);margin-bottom:3px;}
+.flow .ar{flex:0 0 auto;color:var(--faint);font-size:14px;}
+.flow.six .node{min-width:0;padding:9px 6px;font-size:9.6px;}
+.flow.vertical{flex-direction:column;align-items:stretch;}
+.flow.vertical .ar{text-align:center;line-height:1;}
+.flow.vertical .node{text-align:left;flex:0 0 auto;}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.card{background:#fff;border:1px solid var(--rule);padding:11px 12px;}
+.card .ct{font-family:var(--sans);font-size:10px;letter-spacing:.12em;color:var(--rust);text-transform:uppercase;margin-bottom:4px;}
+.card .cb{font-size:12px;line-height:1.55;color:var(--ink-2);}
+.card .cb b{color:var(--teal-2);}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.split .box{background:#fff;border:1px solid var(--rule);padding:12px 14px;}
+.split .box h5{font-family:var(--sans);font-size:10.5px;letter-spacing:.1em;color:var(--teal-2);margin:0 0 6px;text-transform:uppercase;}
+.split .box p{font-size:12.2px;line-height:1.6;margin:0;color:var(--ink-2);}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-family:var(--sans);font-size:10px;color:var(--muted);margin-top:10px;}
+.legend i{display:inline-block;width:9px;height:9px;margin-right:5px;vertical-align:-1px;border:1px solid rgba(0,0,0,.12);}
+
+/* refs */
+.refs{font-size:12.6px;line-height:1.7;color:var(--ink-2);list-style:none;margin:0;padding:0;}
+.refs li{margin-bottom:9px;padding-left:24px;text-indent:-24px;break-inside:avoid;}
+.refs .idx{font-family:var(--sans);font-size:10px;color:var(--faint);display:inline-block;width:24px;text-indent:0;}
+.refs i{font-style:italic;}
+footer{padding:50px 0 62px;border-top:1px solid var(--rule);color:var(--muted);font-size:12.5px;line-height:1.75;}
+footer .mark{font-family:var(--sans);font-size:10.5px;letter-spacing:.22em;color:var(--rust);text-transform:uppercase;margin-bottom:10px;}
+
+/* print */
+@page{size:A4;margin:19mm 17mm 17mm 17mm;@bottom-center{content:counter(page);font-family:var(--sans);font-size:8.5pt;color:#8a8173;letter-spacing:.1em;}@bottom-right{content:string(runhead);font-family:var(--sans);font-size:7.5pt;color:#a39a8b;letter-spacing:.08em;}}
+@page:first{margin:0;@bottom-center{content:none;}@bottom-right{content:none;}}
+@page part{size:A4;margin:0;background:var(--night);@bottom-center{content:none;}@bottom-right{content:none;}}
+@page colophon{@bottom-right{content:none;}}
+@media print{
+  body{background:#fff;font-size:9.9pt;line-height:1.72;}
+  p{margin-bottom:.8em;}
+  script{display:none;}
+  body::before{display:none;}
+  .progress,.no-print{display:none!important;}
+  .cover{min-height:auto;height:297mm;padding:0;border:none;page-break-after:always;background:var(--paper);}
+  .cover .wrap{padding:0 22mm;display:flex;flex-direction:column;justify-content:center;height:100%;}
+  h1.title{font-size:50pt;}
+  .subtitle{font-size:15.5pt;}
+  .deck{font-size:10.4pt;}
+  .cover .scheme{opacity:.4;}
+  .part{page:part;break-before:page;break-after:page;page-break-before:always;page-break-after:always;min-height:297mm;padding:68mm 22mm 0;background:var(--night)!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .part .wrap{padding:0;max-width:166mm;}
+  .part h2{font-size:31pt;}
+  section.sec{padding:7mm 0 3mm;break-inside:auto;}
+  h2.sec-title{font-size:18.5pt;break-after:avoid;}
+  .sec-no{font-size:7.6pt;}
+  .lead{font-size:10.8pt;}
+  .lead::first-letter{float:none;font-size:1em;padding:0;color:inherit;font-weight:inherit;line-height:inherit;}
+  h3{font-size:11.8pt;margin:6mm 0 1.8mm;break-after:avoid;}
+  h4{font-size:10pt;margin:3.5mm 0 1mm;}
+  .key,.warn,.note,.pull,figure,.diagram{break-inside:avoid;}
+  .table-wrap{break-inside:auto;}
+  tr{break-inside:avoid;}
+  thead{display:table-header-group;}
+  .key{margin:4.5mm 0;padding:4.5mm 5.5mm;}
+  .key p{font-size:9.4pt;}
+  .pull{margin:5mm 0;font-size:13pt;}
+  .diagram{margin:4.5mm 0;padding:4mm 4mm 3mm;}
+  .flow .node{font-size:7.6pt;padding:2mm 1.6mm;}
+  .flow.six .node{font-size:6.9pt;padding:1.5mm 1.1mm;}
+  .chip{font-size:7.4pt;padding:1.3mm 2mm;}
+  .card{padding:2.4mm 2.6mm;}
+  .card .cb{font-size:7.6pt;}
+  table{font-size:7.9pt;}
+  th{font-size:6.8pt;}
+  table.compact{font-size:7.4pt;}
+  .refs{font-size:8pt;line-height:1.5;}
+  .toc{padding:5mm 0;break-after:page;}
+  .toc h2{font-size:8pt;margin-bottom:5mm;}
+  .toc ol{columns:1;}
+  .toc li{font-size:9pt;margin-bottom:1.8mm;}
+  .toc .part-row{font-size:7.8pt;margin:3.5mm 0 1.8mm;}
+  .defs .row{break-inside:avoid;}
+  footer{page:colophon;break-before:page;break-inside:avoid;padding:50mm 0 0;}
+  a{color:var(--ink);border:none;}
+  h2.sec-title{string-set:runhead content();}
+  pre.code{font-size:7.6pt;padding:3.5mm 4mm;white-space:pre-wrap;overflow-wrap:anywhere;break-inside:avoid;}
+}
+@media (max-width:760px){
+  body{font-size:16px;line-height:1.85;}
+  .wrap{padding:0 20px;}
+  .cover{min-height:92vh;padding:50px 0 36px;}
+  h1.title{font-size:46px;}
+  .subtitle{font-size:19px;}
+  .deck{font-size:15px;margin-bottom:26px;}
+  .cover .scheme{width:280px;height:280px;right:-130px;top:-60px;opacity:.4;}
+  .stat-strip div{flex:1 1 50%;}
+  .stat-strip .n{font-size:19px;}
+  .toc ol{columns:1;}
+  .part{padding:58px 0 50px;}
+  .part h2{font-size:32px;}
+  .part .ghost{font-size:170px;bottom:-36px;}
+  h2.sec-title{font-size:25px;}
+  .lead{font-size:17px;}
+  .lead::first-letter{font-size:46px;}
+  h3{font-size:18.5px;}
+  .pull{font-size:19px;}
+  .key{margin:26px 0;padding:20px 18px;}
+  .defs .row{display:block;}
+  .defs .term{margin-bottom:2px;}
+  .cards{grid-template-columns:1fr;}
+  .split{grid-template-columns:1fr;}
+  .layer{display:block;}
+  .layer .llabel{border-right:none;border-bottom:1px solid var(--rule);padding:0 0 5px;margin-bottom:8px;}
+  .flow .node{min-width:100%;}
+  .flow .ar{display:none;}
+  table{font-size:12.2px;}
+  th,td{padding:7px 7px;}
+  .diagram{margin:24px 0;padding:16px 14px;}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto;}}
+</style>
+</head>
+<body>
+<div class="progress"><i id="bar"></i></div>
+
+<header class="cover" id="top">
+  <div class="wrap">
+    <div class="kicker">Double-Brain System · Version 2.1</div>
+    <h1 class="title">双脑<span class="thin">系统</span></h1>
+    <p class="subtitle">多模型协同认知框架 · 从神经机制到模拟方案</p>
+    <p class="deck">这套方案的第一目的，不是做一套记忆库，而是让多个模型分工，把主脑每一轮要读的上下文压到最小。记忆不是仓库，而是让主脑在关系中做出更好判断的基础设施；编码、巩固、提取、再巩固、遗忘、决策与社会关系记忆，都是这条主线上的环节。</p>
+    <div class="cover-meta">
+      <span><b>版本</b> 2.1 · 技术方案</span>
+      <span><b>日期</b> 2026 年 10 月</span>
+      <span><b>定位</b> 《双脑系统》版本一的机制深化与工程化</span>
+    </div>
+    <div class="stat-strip">
+      <div><span class="n">10</span><span class="l">后台角色</span></div>
+      <div><span class="n">8</span><span class="l">记忆存储</span></div>
+      <div><span class="n">6</span><span class="l">运行闭环</span></div>
+      <div><span class="n">4±1</span><span class="l">上下文槽位</span></div>
+    </div>
+  </div>
+  <svg class="scheme" viewBox="0 0 420 420" aria-hidden="true">
+    <defs>
+      <radialGradient id="cg" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#a4491f" stop-opacity=".10"/>
+        <stop offset="100%" stop-color="#a4491f" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <circle cx="210" cy="210" r="170" fill="url(#cg)"/>
+    <g stroke="#0d5b55" stroke-width="1" opacity=".45">
+      <line x1="210" y1="210" x2="105" y2="120"/>
+      <line x1="210" y1="210" x2="320" y2="128"/>
+      <line x1="210" y1="210" x2="330" y2="270"/>
+      <line x1="210" y1="210" x2="140" y2="315"/>
+      <line x1="105" y1="120" x2="320" y2="128"/>
+      <line x1="320" y1="128" x2="330" y2="270"/>
+      <line x1="330" y1="270" x2="140" y2="315"/>
+      <line x1="140" y1="315" x2="105" y2="120"/>
+      <line x1="105" y1="120" x2="140" y2="315"/>
+      <line x1="320" y1="128" x2="140" y2="315"/>
+    </g>
+    <g stroke="#a4491f" stroke-width="1" opacity=".55">
+      <line x1="210" y1="210" x2="210" y2="72"/>
+      <line x1="210" y1="210" x2="210" y2="348"/>
+    </g>
+    <g font-family="'Noto Sans CJK SC',sans-serif" font-size="13" fill="#0a4641" text-anchor="middle">
+      <circle cx="210" cy="210" r="34" fill="#0d5b55"/>
+      <text x="210" y="215" fill="#f7f3ea" font-size="15">个体</text>
+      <circle cx="105" cy="120" r="22" fill="#f7f3ea" stroke="#a4491f"/>
+      <text x="105" y="125" fill="#a4491f">人</text>
+      <circle cx="320" cy="128" r="22" fill="#f7f3ea" stroke="#a4491f"/>
+      <text x="320" y="133" fill="#a4491f">事</text>
+      <circle cx="330" cy="270" r="22" fill="#f7f3ea" stroke="#0d5b55"/>
+      <text x="330" y="275" fill="#0d5b55">关系</text>
+      <circle cx="140" cy="315" r="22" fill="#f7f3ea" stroke="#0d5b55"/>
+      <text x="140" y="320" fill="#0d5b55">线索</text>
+    </g>
+    <g font-family="'Noto Sans CJK SC',sans-serif" font-size="9" fill="#756d5f" letter-spacing="1">
+      <text x="210" y="52" text-anchor="middle">ENGRAM / TRACE</text>
+      <text x="210" y="378" text-anchor="middle">RECONSTRUCTION</text>
+    </g>
+  </svg>
+  <div class="scheme-cap">FIG. 0 — THE RELATIONAL ENGRAM</div>
+</header>
+
+<nav class="toc" id="toc">
+  <div class="wrap">
+    <h2>目录 · Contents</h2>
+    <ol>
+      <li class="part-row">导论</li>
+      <li><span class="no">00</span><a href="#s0">一页纸方案</a></li>
+      <li class="part-row">部 I · 机理</li>
+      <li><span class="no">01</span><a href="#s1">记忆不是存储：一套动态系统</a></li>
+      <li><span class="no">02</span><a href="#s2">从神经机制到计算原语</a></li>
+      <li class="part-row">部 II · 架构</li>
+      <li><span class="no">03</span><a href="#s3">双脑架构：一个主脑，十个后台</a></li>
+      <li><span class="no">3.6</span><a href="#s3-6">运行时解剖学：从权限到硬边界</a></li>
+      <li><span class="no">3.7</span><a href="#s3-7">主导权：三个时间尺度与批准权</a></li>
+      <li><span class="no">04</span><a href="#s4">数据模型：事件、人物、关系、解释</a></li>
+      <li><span class="no">05</span><a href="#s5">六个运行闭环</a></li>
+      <li class="part-row">部 III · 模拟</li>
+      <li><span class="no">06</span><a href="#s6">关键机制的模拟细节</a></li>
+      <li><span class="no">07</span><a href="#s7">多模型分工与上下文经济</a></li>
+      <li class="part-row">部 IV · 验证与落地</li>
+      <li><span class="no">08</span><a href="#s8">评估：像记忆，而不是像数据库</a></li>
+      <li><span class="no">09</span><a href="#s9">MVP 与迭代路线</a></li>
+      <li><span class="no">10</span><a href="#s10">风险、边界与开放问题</a></li>
+      <li class="part-row">附录</li>
+      <li><span class="no">A</span><a href="#appA">术语表</a></li>
+      <li><span class="no">B</span><a href="#appB">关键文献</a></li>
+      <li><span class="no">C</span><a href="#appC">数据字典与伪代码</a></li>
+    </ol>
+    <p class="small" style="margin-top:22px;max-width:620px">阅读建议：先读 00（一页纸）、03（架构）与 09（MVP），建立整体判断；再回到 01–02（机理）与 06（算法细节）；第 08 章给出可验证的评估口径。</p>
+  </div>
+</nav>
+
+<main>
+<section class="sec" id="s0">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">00 · Executive Summary</span>
+      <h2 class="sec-title">一页纸方案</h2>
+      <p class="sec-sub">先把结论放在前面：要模拟的不是“记忆”，而是记忆与决策之间的那条回路。</p>
+    </div>
+
+    <p class="lead">这套方案的第一目的，不是再做一套记忆库，而是让多个模型分工，把主脑每一轮要读的上下文压到最小，同时让进入上下文的信息更准。人脑不是一台大模型，而是许多功能单元分别处理、再由一个主脑统一判断；记忆存在的理由，是帮助个体认清与他人的关系与位置。以下所有机制，都服务于这条主线：<b>分工 → 情境 → 判断 → 关系与记忆更新</b>。</p>
+
+    <div class="key">
+      <span class="tag">主线</span>
+      <p><strong>多模型分工 → 后台编译情境 → 主脑判断 → 关系与记忆更新。</strong>记忆不是目的；它是让主脑在关系中做出更好判断的基础设施。</p>
+    </div>
+
+    <div class="key">
+      <span class="tag">核心命题</span>
+      <p><strong>记忆的单位是事件，不是 token；记忆存在的理由是社会关系；上下文的单位是此刻需要的那几块，不是全部记忆；KPI 不是“存了多少”，而是“关系中的下一次判断少犯多少错”。</strong></p>
+    </div>
+
+    <div class="note">
+      <span class="tag">第一性抽象</span>
+      <b>事件影响状态；状态影响判断与记忆。</b>人、机器、大模型共用同一条准则，差别只在状态载体与更新速度。状态必须拆成 <code>state_view</code>（进上下文，是提示词）与 <code>state_params</code>（进运行时，真正改变检索、预算、门控与写入）。
+    </div>
+
+    <div class="note">
+      <span class="tag">第 0 条</span>
+      <b>分工，不是堆模型。</b>多个模型各处理一小片，再由一个主脑统一判断；否则只是把一个大上下文换成一群小上下文。
+    </div>
+
+    <h3>十条设计原则</h3>
+    <ol class="steps">
+      <li><b>多系统，不是多副本。</b>情景记忆、语义记忆、程序记忆、工作记忆、关系记忆分别存储、分别更新；同一次经历可以同时产生三类积累，但共享同一个事件源。</li>
+      <li><b>编码有门槛。</b>不是所有输入都值得记。显著性、目标相关、社会影响、情绪强度、预测误差共同决定是否分配“印迹”。</li>
+      <li><b>索引与内容分离。</b>海马体不存整段电影，只存稀疏索引；系统也不把全文塞进索引，只存指针、稀疏码与关联权重。</li>
+      <li><b>巩固是离线蒸馏。</b>白天编码，夜间重放：扫描—聚类—重放—抽象—合并—修剪，把情景蒸馏为语义与技能。</li>
+      <li><b>提取是重建。</b>每次回答都是从碎片重新组装的叙事，必须带来源；没有来源就弃权，而不是编造。</li>
+      <li><b>再巩固是版本化。</b>每次提取都可能改写记忆；新版本追加，旧版本保留，永不覆盖。</li>
+      <li><b>遗忘是功能。</b>衰减、干扰消解、索引修剪共同降低噪声；未完成承诺与安全关键信息豁免。</li>
+      <li><b>决策分双系统。</b>熟悉、低风险、时间紧时走习惯快路；陌生、高风险、需要解释时走模型化推演。仲裁权在主脑。</li>
+      <li><b>关系是记忆的主索引。</b>人物—事件双向唤起；关系多维、不对称、带依据、随时间与经历更新。</li>
+      <li><b>只有一个整合中心——它属于整个有机体。</b>后台只编译情境，不提供建议、不行动、不代替决策；外部行动身份属于有机体，主脑在授权范围内代签。</li>
+    </ol>
+
+    <div class="note">
+      <span class="tag">第十一、十二条（隐含）</span>
+      <b>边界是材料，不是政策；批准权即主导权。</b>没有运行时隔离的宪法只是软约束；事实可后台写，价值/角色、目标、习惯规则只提案，由主脑作为整合器官批准，宪法核心需用户与主脑平等共签。执行机制见 3.6–3.7 节。
+    </div>
+
+    <div class="diagram">
+      <div class="dtitle">图 0 · 一页纸架构</div>
+      <div class="layer">
+        <div class="llabel">感知 / 表达</div>
+        <div class="lbody">
+          <span class="chip">视觉 · 场景</span><span class="chip">语音 · 声纹</span><span class="chip">文本 · 事件</span><span class="chip rust">自身 / 外界标记</span><span class="chip">TTS · 形象</span><span class="chip">MCP · 工具</span>
+        </div>
+      </div>
+      <div class="layer">
+        <div class="llabel">后台脑</div>
+        <div class="lbody">
+          <span class="chip teal"><b>人物识别</b></span><span class="chip teal"><b>记忆检索</b></span><span class="chip teal"><b>关系判断</b></span><span class="chip teal"><b>显著性</b></span><span class="chip teal"><b>情境编译</b></span><span class="chip teal"><b>来源审计</b></span><span class="chip teal"><b>巩固 / 遗忘</b></span>
+        </div>
+      </div>
+      <div class="flow">
+        <div class="node"><b>ONLINE</b>感知 → 情境包</div><span class="ar">→</span>
+        <div class="node"><b>MAIN</b>主脑（整合器官）理解 / 决策</div><span class="ar">→</span>
+        <div class="node"><b>ACT</b>表达 / 行动</div><span class="ar">→</span>
+        <div class="node"><b>WRITE</b>结果回写事件日志</div>
+      </div>
+      <div class="flow">
+        <div class="node"><b>OFFLINE</b>夜间重放 · 蒸馏</div><span class="ar">→</span>
+        <div class="node"><b>MERGE</b>语义 / 技能 / 关系更新</div><span class="ar">→</span>
+        <div class="node"><b>PRUNE</b>衰减 · 干扰消解 · 修剪</div><span class="ar">↺</span>
+        <div class="node"><b>SLEEP</b>下一次更轻的上下文</div>
+      </div>
+      <div class="dnote">实线为在线闭环，虚线为离线闭环。后台可读记忆库、提交写入候选，但只能通过“情境包”影响主脑；外部行动身份属于有机体，主脑在授权范围内代签。</div>
+    </div>
+
+    <h3>与版本一/二的关系</h3>
+    <p>版本一/二确立了“一个整合中心、后台脑、知识/记忆/技能、关系与经历、双脑决策”的骨架。当前版本保留这些骨架，但有三类变化：<b>保留并展开</b>、<b>修订</b>、<b>新增</b>。修订与新增必须标明，避免把后来的讨论当成原始口径。</p>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 0 · 从版本一/二到当前版本：保留、修订、新增</caption>
+        <thead><tr><th style="width:24%">原始口径（v1/v2）</th><th style="width:38%">当前版本的展开</th><th>工程落点</th></tr></thead>
+        <tbody>
+          <tr><td><b>主脑没有上下文</b></td><td>主脑是无状态推理过程，每轮从情境包重建；后台是有状态记忆系统</td><td>ContextPacket 作为唯一跨层接口；主脑不持久化对话历史</td></tr>
+          <tr><td><b>后台脑筛选记忆</b></td><td>显著性门控 + 海马索引 + 模式分离/完成 + 情境编译</td><td>编码管线、检索管线、4±1 槽位、惰性展开</td></tr>
+          <tr><td><b>知识 / 记忆 / 技能</b></td><td>互补学习系统：快速情景存储 + 慢速语义抽象 + 程序化技能</td><td>事件日志、语义图谱、技能库，共享 event_id</td></tr>
+          <tr><td><b>关系与经历</b></td><td>人物—事件双向图；关系多维、不对称、带证据</td><td>Person / Participation / Relationship 三类记录</td></tr>
+          <tr><td><b>事实与解释分开</b></td><td>来源监控 + 解释版本链 + 证据按事件计数</td><td>Interpretation 层；`evidence_count = distinct event_id`</td></tr>
+          <tr><td><b>记忆淡化</b></td><td>艾宾浩斯衰减 × 关系强度 × 未来效用；未完成承诺豁免</td><td>保留率公式、冷归档、索引修剪</td></tr>
+          <tr><td><b>习惯像缓存</b></td><td>model-free 快路；只缓存情境模板与技能，不缓存“决定”</td><td>Habit 表 + 主脑仲裁，后台不越权</td></tr>
+          <tr><td><b>修订 · 整体才是个体</b></td><td>整合中心是有机体整体的整合属性；主脑是整合与签署器官，不是个体</td><td>3.1 / 3.6；行动身份属于有机体，主脑代签</td></tr>
+          <tr><td><b>修订 · 习惯规则需批准</b></td><td>后台可按频率提案，但习惯规则生效需主脑批准；后台不直接改写未来自我</td><td>3.7 / 6.7；Habit 状态 candidate / ratified</td></tr>
+          <tr><td><b>新增 · 运行时边界</b></td><td>后台无网络、无工具、无持久身份；行动权只属于有机体</td><td>3.6；权限矩阵、红队清单</td></tr>
+          <tr><td><b>新增 · 批准账本</b></td><td>构成性变更走提案—批准—冷却—回滚；账本可验证</td><td>3.7；Constitution / Ledger</td></tr>
+          <tr><td><b>新增 · 证据账本与模拟边界</b></td><td>回想不增加证据；冲突并列；模拟永不写成事实</td><td>4.6 / 6.7.2；evidence_count / simulation schema</td></tr>
+          <tr><td><b>新增 · 组合式重放</b></td><td>从多事件抽取人物/地点/动作/目标原语，按槽位组合未来候选；标记 simulation，不写事实</td><td>6.2.1；primitives.py / simulation.py</td></tr>
+          <tr><td><b>新增 · 治理形态</b></td><td>陪伴型：用户与主脑平等共签；工程型：用户最高权限</td><td>3.7.1；ConstitutionStore(mode)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <span class="tag">阅读路径</span>
+      主线：0 → 1.9 → 3.1–3.3 → 4.2–4.4 → 5 → 6.8 → 7。机制背景：1–2、6；工程约束：3.6–3.7、9.4、10，可后读。这样不会把“治理与安全”误当成记忆主线。
+    </div>
+  </div>
+</section>
+
+<section class="part" id="part1">
+  <div class="wrap">
+    <div class="roman">Part I · Mechanism</div>
+    <h2>先理解脑，<br>再设计系统</h2>
+    <p class="part-deck">记忆不是一块可以随意读写的硬盘。它是一组相互竞争、相互抑制、又相互补足的系统：有的负责快速绑定，有的负责慢速抽象；有的负责当下维持，有的负责长期修剪。要模拟它，先要知道每一部分在解决什么问题。</p>
+    <div class="part-list">
+      <span><b>01</b> 记忆不是存储</span>
+      <span><b>02</b> 从机制到计算原语</span>
+    </div>
+  </div>
+  <div class="ghost">01</div>
+</section>
+
+<section class="sec" id="s1">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">01 · Neuroscience of Memory</span>
+      <h2 class="sec-title">记忆不是存储：一套动态系统</h2>
+      <p class="sec-sub">编码、巩固、提取、再巩固、遗忘——五个阶段，五套不同的计算问题。</p>
+    </div>
+
+    <p class="lead">如果把记忆比作图书馆，你会自然想到“藏书、索引、借阅”。但脑不是这样。脑没有一本书是原样保存的；每一次“借阅”都会重新装订，甚至改写几页。脑更像一座不断重排的档案馆：入库有门槛，编目靠稀疏索引，夜间有专门的整理员把相似卷宗合并成摘要，而读者每次取阅都会留下新的批注。理解这套流程，比记住任何一个脑区名字都重要。</p>
+
+    <h3>1.1 多系统版图：记忆不是一种能力</h3>
+    <p>长时记忆分<b>陈述性</b>（情景：一个人经历过什么；语义：一个人知道什么）与<b>非陈述性</b>（程序、启动、条件反射、习惯化），另有容量极小的工作记忆与带情绪/社会属性的关系记忆。它们依赖不同脑系统，写入与读取规律不同（Squire 2004；Eichenbaum 2004）。设计的第一条不是“建一个更大的库”，而是“建几个写入速率与读取规则不同的库”。</p>
+
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 1 · 记忆系统速览</caption>
+        <thead><tr><th style="width:18%">系统</th><th style="width:34%">回答的问题</th><th>写入 / 读取特征</th></tr></thead>
+        <tbody>
+          <tr><td><b>情景</b></td><td>何时、何地、与谁经历了什么</td><td>快速、稀疏、单次即可写入；依赖索引与模式分离</td></tr>
+          <tr><td><b>语义</b></td><td>世界是什么，概念如何关联</td><td>慢速、重叠、统计学习；靠重复与睡眠蒸馏</td></tr>
+          <tr><td><b>程序</b></td><td>一件事怎么做</td><td>渐进、自动化；错误驱动与强化</td></tr>
+          <tr><td><b>关系</b></td><td>这人是谁，我们经历过什么</td><td>人物—事件双向绑定；多维、不对称、带证据</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>1.2 编码：显著性门控与海马索引</h3>
+    <p>编码先过注意与显著性门：情绪唤醒调节海马与皮层编码（McGaugh 2000；Cahill &amp; McGaugh 1998），意外的好结果被标记为值得学习（Schultz et al. 1997）。海马不存整段经历，只提供<b>稀疏索引</b>（Teyler &amp; DiScenna 1986）；齿状回做<b>模式分离</b>，CA3 做<b>模式完成</b>。分子层面，LTP 的 NMDA 巧合检测、CaMKII 与 AMPA 变化，需要转录翻译才能持久（Bliss &amp; Lomo 1973；Malenka &amp; Bear 2004；Davis &amp; Squire 1984）。2024 年小鼠研究还发现，CA1 印迹细胞在编码时出现 DNA 双链断裂与 TLR9–NF-κB 信号，提示写入伴随代价与修复（Jovasevic et al. 2024；仍属小鼠单一范式）。对系统：<b>显著性门、索引门、分配门</b>，缺一就会退化成全量日志。</p>
+
+    <h3>1.3 巩固：睡眠重放与图式同化</h3>
+    <p><b>突触巩固</b>在分钟–小时尺度稳定早期 LTP（Frey &amp; Morris 1997）；<b>系统巩固</b>在天–年尺度把骨架交给新皮层，海马保留索引与细节（Squire &amp; Alvarez 1995；Nadel &amp; Moscovitch 1997）。睡眠中慢振荡、纺锤波与海马涟漪耦合，重放白天序列（Staresina 2024；Schreiner et al. 2024）；重放优先高显著性、高预测误差、与未完成目标相关的序列，也会反向重放或模拟未发生的路径（Foster &amp; Wilson 2006；Pfeiffer &amp; Foster 2013）。图式兼容的信息更快被同化（Tse et al. 2007）。对系统：<b>要点抽象与细节保留两条路径</b>；先判断“与哪块图式兼容”，再决定写多深。</p>
+
+    <h3>1.4 提取：模式完成与重建</h3>
+    <p>提取不是回放，而是<b>重建</b>：用当前目标、情绪与知识把碎片拼成自洽故事（Bartlett 1932；Loftus &amp; Palmer 1974）。CA3 模式完成让部分线索召回整段记忆，但也会过度补全：激活印迹细胞足以制造“假经历”（Ramirez et al. 2013）。编码特异性决定线索是否有效（Tulving &amp; Thomson 1973）；<b>来源监控</b>决定这是亲历、听说还是想象（Johnson et al. 1993）。对系统：多维线索（人物、地点、时间、情绪、目标）+ 来源标签；没有来源的检索等于没有防线。</p>
+
+    <h3>1.5 再巩固：提取即改写</h3>
+    <p>提取会把记忆推回不稳定状态，随后需要再次巩固（Nader et al. 2000）。它不是“每次回忆都必然改写”：记忆年龄、强度、预测误差与情境新颖性决定是否更新（Nader &amp; Hardt 2009）；临床用普萘洛尔削弱恐惧记忆仍属研究阶段（Kindt et al. 2009）。对系统：<b>检索即写，但写新版本，不覆盖旧版本</b>。</p>
+
+    <div class="pull">记忆的稳定性，不是“不变”，而是“可被安全地更新”。<span>再巩固给系统的启示：检索即写，但写的是新版本，不是覆盖旧版本。</span></div>
+  </div>
+</section>
+
+<section class="sec" id="s1b" style="border-top:none;padding-top:0">
+  <div class="wrap">
+    <h3>1.6 遗忘：不是失败，是修剪</h3>
+    <p>艾宾浩斯（Ebbinghaus 1885）用无意义音节画出了第一条遗忘曲线：记忆在最初几小时到几天内快速下降，之后趋于平缓。但“遗忘=衰退”只是最表层的解释。更完整的图景是：遗忘同时来自<b>衰退、干扰、提取失败与主动抑制</b>，而它本身具有适应价值。</p>
+    <p>理查兹与弗兰克兰（Richards &amp; Frankland 2017）提出，遗忘是一种“适应性印迹细胞可塑性”：记忆的痕迹还在，但变得难以提取；这降低了旧记忆对新学习的干扰，也提高了泛化能力。小鼠研究显示，自然遗忘后，原本的印迹细胞仍然可以被重新激活，记忆并非彻底消失（O'Leary et al. 2024）。另一些研究则揭示了更“主动”的机制：小胶质细胞可以通过补体依赖的突触修剪来清除遗忘相关的连接（Wang et al. 2020）；成年海马神经发生也会促进旧情景记忆的遗忘（Akers et al. 2014）。</p>
+    <p>干扰是遗忘的另一大来源。先后学习的两段相似材料会互相竞争：先学的会被后学的干扰（前摄干扰），后学的也会被先学的干扰（倒摄干扰）。脑用模式分离来降低这种竞争；如果分离失败，就会出现“记混了”的体验。对系统而言，<b>遗忘不是删除日志，而是降低索引权重、切断错误关联、把低价值内容移入冷归档</b>。原始事件应保留，以便审计与追溯；被修剪的是“当前可提取性”。</p>
+    <div class="note">
+      <span class="tag">设计推论</span>
+      一个从不遗忘的系统，会被旧信息压垮：检索变慢、干扰变多、上下文变脏。遗忘必须是<b>有公式、有豁免、可审计</b>的一等公民，而不是“存储满了再删”。
+    </div>
+
+    <h3>1.7 工作记忆与执行控制：4±1 的瓶颈</h3>
+    <p>工作记忆是“此刻正在想的事”。米勒（Miller 1956）的“7±2”广为流传，但更准确的估计来自考恩（Cowan 2001）：在没有复述与组块的条件下，成年人能同时保持的独立组块约为<b>4±1</b>。Baddeley 与 Hitch（1974）把工作记忆拆成中央执行、语音环路、视空间画板，后来又加入情景缓冲器（Baddeley 2000）。这些成分不是解剖学上的独立盒子，而是功能上的分工。</p>
+    <p>前额叶的神经活动既表现为持续放电（Fuster &amp; Alexander 1971；Goldman-Rakic 1995），也表现为“活动静默”的隐藏状态：信息暂时不在放电中，但可以通过突触权重或网络状态被重新激活（Stokes 2015）。这给系统一个关键启发：<b>上下文不必一直“亮着”</b>。工作记忆槽位可以只存指针，需要时再从长时记忆里惰性展开；这比把所有细节都塞进提示词更接近脑的做法。</p>
+    <p>工作记忆的更新受<b>门控</b>控制。基底神经节与前额叶环路决定何时“打开闸门”让新信息进入、何时维持当前目标、何时抑制干扰（Frank et al. 2001；Miller &amp; Cohen 2001）。闸门开得太勤，会被打断；开得太少，会固着。一个多模型系统同样需要这样的门控：不是每条新信息都值得进入主脑的上下文。</p>
+
+    <h3>1.8 价值、情绪与决策：记忆为行动服务</h3>
+    <p>记忆不是为回忆而回忆。它要回答的是：<b>下一步做什么</b>。这就把记忆系统与价值系统、情绪系统、决策系统绑在了一起。</p>
+    <p>杏仁核负责给事件打“情绪显著性”标签，尤其是威胁与奖励；它通过与海马、前额叶的交互，决定哪些经历值得优先编码与巩固（LeDoux 2000；Phelps 2004）。腹内侧前额叶与眶额皮层负责整合多维度价值，把“这个人、这件事、这个结果”折算成主观效用（Kable &amp; Glimcher 2007；Hare et al. 2009）。背侧纹状体支持<b>model-free</b>的习惯性决策：重复过的“情境—动作—结果”会被压成快速通路；腹内侧前额叶与海马则支持<b>model-based</b>的推演：在脑中模拟不同选择的后果（Daw et al. 2005；Dolan &amp; Dayan 2013）。</p>
+    <p>“奖励预测误差”（RPE）是这套学习系统的核心信号：当结果好于预期，强化前一步；当结果差于预期，削弱前一步（Schultz et al. 1997；Montague et al. 1996）。这正好可以作为系统更新习惯与价值的公式：<code>δ = r − V(s)</code>。达马西奥的“躯体标记”假说则提醒我们，情绪不是决策的噪声，而是价值整合的一部分（Damasio 1994；Bechara et al. 1994）。</p>
+    <p>压力会改变这套系统。急性压力通常会促进情绪性记忆的巩固，却损害前额叶依赖的提取与执行（de Quervain et al. 2000；Cahill 2003）。这解释了一个常见现象：越紧张，越想不起熟悉的名字。系统不必刻意“模拟压力”，但应当有一个“高负荷/高风险”模式：提高验证阈值、降低扩散性联想、优先最可靠的来源。</p>
+    <p>最后是<b>情景未来思维</b>：海马不仅重建过去，也参与构造未来场景。海马损伤的患者在想象新颖、复杂的未来情境时同样困难（Hassabis et al. 2007）；默认模式网络在回忆过去与想象未来时高度重叠（Schacter et al. 2007）。这给系统一个直接的功能：<b>用记忆碎片做“未来模拟”</b>，而不仅是回答“过去发生了什么”。</p>
+
+    <h3>1.9 社会关系记忆与自我：记忆的另一个主轴</h3>
+    <p>人为什么需要记忆？版本一给出了一个很好的答案：因为人是社会性动物，记忆帮助我们认清自己与他人的关系与地位。这个答案在神经科学上有对应物。人物知识、心理理论（推断他人信念与意图）与自传体记忆，共享一套内侧前额叶、颞顶联合区、后扣带与角回组成的网络（Frith &amp; Frith 2006；Saxe &amp; Kanwisher 2003；Buckner &amp; Carroll 2007）。默认模式网络在“想自己、想他人、想过去、想未来”时都会活跃，说明自我、他人与时间是同一套模拟系统的不同切面（Spreng et al. 2009）。</p>
+    <p>自传体记忆不是一本按时间排列的日记，而是由“自传体知识基础”与“工作自我”共同构建的（Conway &amp; Pleydell-Pearce 2000）。我们记住的，是那些与当前自我目标、价值观、关系状态相关的片段；叙事身份则把这些片段串成一个连贯的人生故事（McAdams 2001）。这意味着：<b>关系记忆不是情景记忆的附属品，而是与自我模型共同演化的主轴</b>。一段经历之所以重要，往往不是因为它“信息量大”，而是因为它改变了“个体是谁、个体与谁是什么关系”。</p>
+    <p>需要谨慎的是，关系记忆并没有一个单独的“关系脑区”。它是人物知识、情绪评价、心理理论与情景记忆的分布式组合。系统设计上，把它做成一个独立的<b>人物—事件—关系图</b>是合理的工程抽象，但不要声称它对应某个单一的神经模块。</p>
+
+    <h3>1.10 状态：事件如何改变处理</h3>
+    <p>脑不需要为每种情境增加一个模块；它用少数全局状态变量改变“多敏、多快、多保守”。这些变量不是生理指标，而是<b>事件对目标、关系与资源的影响</b>：目标被推进还是阻断、关系被加强还是拉紧、资源被占用多少、不确定性上升多少。它们不传递具体内容，只改变处理的阈值与宽度。</p>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 2 · 状态变量与处理效果</caption>
+        <thead><tr><th style="width:16%">变量</th><th style="width:28%">来源事件</th><th style="width:28%">高值时</th><th>作用点</th></tr></thead>
+        <tbody>
+          <tr><td><b>目标压力</b></td><td>目标被阻断、截止临近、关键结果未定</td><td>检索更窄、目标权重更高、验证更严</td><td>检索宽度、门控</td></tr>
+          <tr><td><b>关系张力</b></td><td>承诺未履行、边界被越过、冲突未解</td><td>来源审计更严、单次事件不改特质</td><td>关系判断、审计</td></tr>
+          <tr><td><b>资源负荷</b></td><td>时间/预算/注意力被占用</td><td>走习惯快路、深检索减少</td><td>调度、预算</td></tr>
+          <tr><td><b>不确定性</b></td><td>线索冲突、证据不足、结果未定</td><td>候选更宽、验证更多、允许弃权</td><td>检索、审计</td></tr>
+          <tr><td><b>预测误差 / 精度</b></td><td>结果偏离预期，且来源可靠</td><td>编码阈值下降、巩固优先级上升</td><td>编码、巩固</td></tr>
+          <tr><td><b>未完成承诺</b></td><td>答应过、尚未履行</td><td>强制入包、遗忘豁免</td><td>情境包、遗忘</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>这组变量的意义不是“模拟情绪”，而是让同一段记忆在不同状态下有不同的可及性与权重；它们必须由事件推导，不能由模型自由编造。</p>
+  </div>
+</section>
+
+<section class="sec" id="s2">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">02 · From Mechanism to Primitive</span>
+      <h2 class="sec-title">从神经机制到计算原语</h2>
+      <p class="sec-sub">不要直接把“海马体”写成一个 Agent；先把它解决的问题翻译成一个计算原语。</p>
+    </div>
+
+    <p class="lead">把脑区直接映射成 Agent，是这类方案最常见的偷懒。海马体不是“一个检索服务”，前额叶也不是“一个规划 API”。更有用的做法，是先把每个机制还原成它解决的计算问题，再选择合适的技术实现。下面这张表，是整份方案的核心翻译表。</p>
+
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 3 · 神经机制 → 计算原语 → 系统实现</caption>
+        <thead><tr><th style="width:19%">神经机制</th><th style="width:25%">计算问题</th><th style="width:30%">计算原语</th><th>系统落点</th></tr></thead>
+        <tbody>
+          <tr><td><b>海马索引</b>（Teyler &amp; DiScenna 1986）</td><td>如何用少量线索绑定分散的表征</td><td>稀疏指针索引；内容与索引分离</td><td>EventIndex：event_id + sparse_code + 关联边，不存全文</td></tr>
+          <tr><td><b>模式分离</b>（DG）</td><td>相似输入如何避免互相干扰</td><td>正交化、实体消歧、事件分段</td><td>对比嵌入 + 稀疏哈希 + 判别性标签 + 独立 event_id</td></tr>
+          <tr><td><b>模式完成</b>（CA3）</td><td>部分线索如何召回整体</td><td>联想图扩展、近邻检索、迭代吸引</td><td>多轮检索：线索 → 邻居 → 重排 → 收敛</td></tr>
+          <tr><td><b>印迹分配</b>（CREB）</td><td>哪些神经元/事件获得写入权</td><td>显著性门控 + 稀疏分配</td><td>写入门控；EngramTrace 分配；高显著性优先</td></tr>
+          <tr><td><b>突触标签与捕获</b></td><td>短时标记如何变成长期记忆</td><td>短 TTL 缓冲 + 全局巩固信号</td><td>TagBuffer：候选事件暂存，遇到奖励/新奇信号后提升</td></tr>
+          <tr><td><b>LTP / LTD</b></td><td>连接如何随共同活动增强或减弱</td><td>赫布权重更新、误差驱动更新</td><td>关联边权重；成功召回增强，错误召回削弱</td></tr>
+          <tr><td><b>系统巩固</b></td><td>快速情景如何变成慢速语义</td><td>离线蒸馏、聚类、图式抽取</td><td>夜间批处理：episode → schema / fact / skill</td></tr>
+          <tr><td><b>睡眠重放</b></td><td>离线时重放什么、如何压缩</td><td>优先级采样、序列重放、反事实</td><td>扫描 → 聚类 → 重放 → 抽象 → 合并</td></tr>
+          <tr><td><b>图式同化</b></td><td>新信息如何快速并入旧结构</td><td>模式匹配、增量学习</td><td>schema_fit 分数；高则快速合并，低则深度编码</td></tr>
+          <tr><td><b>再巩固</b></td><td>提取后如何安全更新</td><td>预测误差触发的版本化写入</td><td>新版本 + supersedes 链；旧版本保留</td></tr>
+          <tr><td><b>提取诱发遗忘</b></td><td>检索如何抑制竞争项</td><td>竞争抑制、负采样</td><td>检索时降低高相似但低相关项的权重</td></tr>
+          <tr><td><b>自适应遗忘</b></td><td>哪些记忆应变得难以提取</td><td>衰减、修剪、冷归档</td><td>保留率公式；索引修剪；承诺豁免</td></tr>
+          <tr><td><b>工作记忆</b></td><td>如何在极小容量内维持任务相关表征</td><td>4±1 槽位、门控、活动静默</td><td>ContextPacket；Gatekeeper；指针惰性展开</td></tr>
+          <tr><td><b>认知控制</b></td><td>目标如何压制干扰、维持行为</td><td>目标维持、抑制控制、任务切换</td><td>主脑目标栈；抑制 Agent；切换成本</td></tr>
+          <tr><td><b>奖励预测误差</b></td><td>结果如何更新价值与习惯</td><td>TD 学习、价值更新</td><td><code>δ = r − V(s)</code>；更新 Habit / Value</td></tr>
+          <tr><td><b>双系统决策</b></td><td>何时走快路、何时走慢路</td><td>model-free / model-based 仲裁</td><td>Habit cache vs 主脑情景模拟</td></tr>
+          <tr><td><b>情绪显著性</b></td><td>什么值得优先处理与记住</td><td>效价 × 唤醒 × 目标相关</td><td>显著性评分；调制向量；关系权重</td></tr>
+          <tr><td><b>来源监控</b></td><td>这段记忆从哪来、可不可信</td><td>来源标签、置信度、冲突检测</td><td>SourceTag；审计 Agent；弃权策略</td></tr>
+          <tr><td><b>心理理论</b></td><td>他人知道什么、想要什么</td><td>他者模型、信念推断</td><td>Mentalizing Agent；不对称关系记录</td></tr>
+          <tr><td><b>情景未来思维</b></td><td>如何用过去构造未来</td><td>生成式重组、约束模拟</td><td>FutureSim Agent；为主脑提供情景草案</td></tr>
+          <tr><td><b>状态增益</b></td><td>事件影响如何改变处理</td><td>系统状态变量</td><td><code>goal_pressure / relationship_strain / resource_load / uncertainty</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>2.1 五条设计定律</h3>
+    <p>从这张表可以提炼出五条比“架构图”更耐用的定律。它们不是神经科学的结论，而是从机制中推出的工程约束。</p>
+    <div class="defs">
+      <div class="row"><div class="term">第一定律</div><div class="desc"><b>写入越便宜，遗忘越昂贵。</b>如果所有输入都无条件写入，检索的噪声会指数上升，最终不得不靠更大的模型、更长的上下文来弥补。编码门控不是可选项，是成本控制的第一道闸。</div></div>
+      <div class="row"><div class="term">第二定律</div><div class="desc"><b>索引越稀疏，重建越灵活。</b>索引只存指针与稀疏码，内容留在事件日志与语义库中。这样同一段经历可以被不同任务以不同方式重建，而不是被一种摘要锁死。</div></div>
+      <div class="row"><div class="term">第三定律</div><div class="desc"><b>巩固越像睡眠，泛化越好。</b>在线学习容易过拟合当下；离线重放、聚类、抽象才能把“这一件事”变成“这类事”的规律。没有离线巩固的系统，只有日记，没有知识。</div></div>
+      <div class="row"><div class="term">第四定律</div><div class="desc"><b>提取越带来源，虚构越少。</b>重建是必要的，但重建必须能回溯到原始片段。来源标签、证据计数与弃权策略，是防止“流畅的胡说”的三件套。</div></div>
+      <div class="row"><div class="term">第五定律</div><div class="desc"><b>关系越靠近决策，记忆越有用。</b>记忆的价值不在于“能被检索”，而在于“能在正确的关系与目标下被唤起”。人物—事件—关系图不是附属功能，而是检索的主索引之一。</div></div>
+    </div>
+
+    <h3>2.2 不应当模拟的东西</h3>
+    <p>“像脑”不等于“复制脑的所有缺陷”。有三类机制不适合直接工程化：</p>
+    <ul class="clean">
+      <li><b>临床上的记忆异常与创伤性记忆。</b>它们不是“特性”，不应作为设计目标；系统应优先可审计、可删除、可解释。</li>
+      <li><b>情绪性偏见与动机性推理。</b>人会自动把有利于自己的解释记得更牢；工程系统若刻意模仿，会放大操纵与偏见。可以模拟“情绪权重”，但不能模拟“自欺”。</li>
+      <li><b>意识的神经相关物。</b>本方案中的主脑是一个功能性的决策中心，不声称具有主观意识；双脑、潜意识、多核都只是工程类比。</li>
+    </ul>
+    <h3>2.3 证据分级：哪些结论可以信到什么程度</h3>
+    <p>神经科学证据不是一块铁板。有人类脑损伤与干预研究，有动物光遗传与药理实验，有人类影像的相关证据，也有纯粹的计算模型。把它们混在一起，很容易得出“脑是这样，所以系统必须这样”的假推论。下面给出一张粗略但实用的证据分级表：</p>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 3b · 关键机制的 evidence grade</caption>
+        <thead><tr><th style="width:17%">机制</th><th style="width:24%">主要证据</th><th style="width:16%">物种 / 范式</th><th style="width:10%">强度</th><th>对设计的含义</th></tr></thead>
+        <tbody>
+          <tr><td><b>LTP / LTD</b></td><td>离体切片、在体电生理、突触标记</td><td>啮齿类为主</td><td><b>A/B</b></td><td>可作为“权重更新”的机制依据；不要把它简化为单一公式</td></tr>
+          <tr><td><b>印迹分配与召回</b></td><td>光遗传激活/抑制印迹细胞</td><td>小鼠，恐惧/奖赏范式</td><td><b>B</b></td><td>支持“稀疏印迹 + 分配门控”；人类外推需谨慎</td></tr>
+          <tr><td><b>睡眠重放</b></td><td>海马序列重放、SO–spindle–ripple 耦合、人类 fMRI/MEG</td><td>大鼠、小鼠、人类</td><td><b>A/B</b></td><td>离线巩固是强机制；可放心做批处理式重放</td></tr>
+          <tr><td><b>再巩固</b></td><td>提取后蛋白合成抑制、行为更新</td><td>大鼠、小鼠、人类行为</td><td><b>B</b></td><td>支持“检索即写、版本化”；边界条件多，不能宣称普遍改写</td></tr>
+          <tr><td><b>自适应遗忘</b></td><td>印迹可及性、微胶质修剪、神经发生</td><td>小鼠为主</td><td><b>B</b></td><td>遗忘是主动功能；工程上做“索引衰减”而非删日志</td></tr>
+          <tr><td><b>成人海马神经发生</b></td><td>死后组织、单核测序、争议性证据</td><td>人类</td><td><b>C</b></td><td>不作为核心依赖；只作为“可塑性”旁证</td></tr>
+          <tr><td><b>TLR9 / DNA 损伤</b></td><td>小鼠 CA1 印迹细胞、TLR9 敲低</td><td>小鼠，单一恐惧范式</td><td><b>B–</b></td><td>作为“写入有代价”的提醒；不要当普遍机制</td></tr>
+          <tr><td><b>工作记忆 4±1</b></td><td>行为容量估计、PFC 活动/活动静默</td><td>人类、灵长类</td><td><b>A/C</b></td><td>支持 4–5 槽位与门控；具体数字按任务校准</td></tr>
+          <tr><td><b>双系统决策</b></td><td>fMRI、脑损伤、计算建模、动物习惯范式</td><td>人类、啮齿类</td><td><b>A/B</b></td><td>支持 model-free / model-based 仲裁</td></tr>
+          <tr><td><b>关系 / 社会记忆</b></td><td>内侧网络、心理理论、自传体记忆</td><td>人类为主</td><td><b>C</b></td><td>人物—事件图是工程抽象，不对应单一“关系脑区”</td></tr>
+          <tr><td><b>情景未来思维</b></td><td>海马损伤、fMRI、DMN</td><td>人类</td><td><b>A/C</b></td><td>支持“用记忆碎片做未来模拟”</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="small">强度说明：A = 人类干预/脑损伤证据；B = 动物因果证据（光遗传、药理、损毁）；C = 人类相关/行为证据；B– = 单一范式、样本有限。D 级（纯计算/类比）不列入本表，但在本方案中大量存在——它们应被明确标为设计隐喻，而不是机制结论。</p>
+    <p>使用这张表时，建议遵守三条规则：<b>只把 A/B 当作机制依据，把 C 当作约束与灵感，把 D 当作设计隐喻；</b>动物范式必须标注物种与任务，不能直接推人类；<b>每一个被引用的机制，都要能对应一个可消融的工程模块</b>——否则它只是修辞，不是设计。</p>
+
+    <h3>2.4 预测加工：一个统一的目标函数</h3>
+    <p>预测加工把编码、提取、再巩固、巩固、遗忘与决策串成一个目标：脑是不断生成预测、并用<b>精度加权误差</b>更新自身的模型。记忆不是模型的副本，而是模型本身及其被环境修正的历史（Rao &amp; Ballard 1999；Friston 2010；Clark 2013）。</p>
+    <p>最简形式：<code>ε = observed − predicted</code>，<code>surprise = precision · ε²</code>。高精度误差才值得改写模型；低精度误差进入短缓冲或习惯化。三条设计含义：<b>只更新高精度误差</b>，避免噪声改写关系；<b>精度不是召回次数</b>，反复想起只提高可及性；<b>冲突降低精度</b>，双方并列展示，不平均成一个“更可信”的结论。</p>
+    <pre class="code">encode_threshold      -= 0.2 * surprise
+consolidation_priority += 0.2 * surprise</pre>
+    <p>提取是后验推断：<code>P(h|c) ∝ P(c|h)·P(h)</code>。向量近邻只提高似然，人物、时间、地点、因果等结构证据才提高先验；否则语义联想会被误判为情景记忆。遗忘是按“需要概率”重新分配检索资源；事件分割按预测误差峰值或目标切换切分；决策可用期望自由能 <code>G = risk + ambiguity − expected value</code>，但评分权在主脑，后台只提供情境、精度与不确定性。</p>
+
+    <h3>2.5 记忆的延展：外部存储</h3>
+    <p>笔记、日历、照片、工具、他人都是外部记忆；内部记忆求“少而准”，外部记忆求“全而可查”，用指针连接，并保留来源、版本与删除权。延展心智是功能分工，不是本体论结论；外部存储不等于个体的记忆，除非它被情境包选中并参与决策。</p>
+
+    <h3>2.6 机制背景：身体、社会与状态</h3>
+    <p>人类记忆的显著性有“身体分量”和“社会分量”：内感受把能量、疼痛、威胁映射为需求；社会稳态把接纳、排斥、可依靠性映射为安全。它们解释的是“为什么这些事件更重要”，不是给机器装一套生理器官。</p>
+    <p>机器不维护 <code>body_state</code>，也不推断用户的身体状况；系统只从事件中抽取目标压力、关系张力、资源负荷、不确定性、预测误差与精度。人类机制只作为背景，工程主线从 2.7 开始。</p>
+
+    <h3>2.7 事件影响与状态参数</h3>
+    <h4>2.7.1 事件影响状态：state_view 与 state_params</h4>
+    <p>“状态”不能只是一行 prompt。如果它只出现在上下文里，它就是提示词——模型可以忽略、覆盖、改写。要让状态成为真的，必须拆成两层：</p>
+    <p><b><code>state_view</code></b>：给主脑读的情境摘要，进 <code>ContextPacket</code>。它是提示词的一部分，作用是让主脑知道“现在目标压力高、关系张力大、还有未完成承诺”。</p>
+    <p><b><code>state_params</code></b>：给调度器、检索器、网关、写入队列读的参数。它不在 prompt 里，而是改变系统的实际行为：检索多宽、验证多严、走快路还是慢路、什么必须入包、什么不得写入。</p>
+    <pre class="code">system_state = {
+  goal_pressure, relationship_strain, resource_load,
+  uncertainty, unresolved_commitments, coping_capacity
+}
+impact_gap = goal_pressure + relationship_strain + resource_load
+             + uncertainty - coping_capacity
+
+state_view   = summarize(system_state)      <span class="c"># 进 ContextPacket，给主脑读</span>
+state_params = map_to_params(system_state)  <span class="c"># 进 runtime，改变实际行为</span></pre>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 3j · 状态 → 运行参数的映射</caption>
+        <thead><tr><th style="width:20%">状态</th><th style="width:44%">高值时的参数变化</th><th>作用点</th></tr></thead>
+        <tbody>
+          <tr><td><b>goal_pressure</b></td><td><code>top_k</code> 收窄；目标相关权重上升；验证阈值上升</td><td>检索、门控</td></tr>
+          <tr><td><b>relationship_strain</b></td><td>关系证据权重上升；来源审计更严；单次事件不得改特质</td><td>关系、审计</td></tr>
+          <tr><td><b>resource_load</b></td><td>允许习惯快路；深检索减少；非紧急承诺推迟</td><td>调度、预算</td></tr>
+          <tr><td><b>uncertainty</b></td><td>候选数增加；<code>VERIFY</code> 比例上升；弃权阈值下降</td><td>检索、审计</td></tr>
+          <tr><td><b>unresolved_commitments</b></td><td>强制入包；遗忘豁免；不因低显著性被修剪</td><td>情境包、遗忘</td></tr>
+          <tr><td><b>impact_gap</b></td><td>编码显著性上升；巩固优先级上升</td><td>编码、巩固</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>举例：<code>goal_pressure</code> 高、<code>resource_load</code> 高时，系统应自动收窄检索、允许习惯快路、把未完成承诺钉在包里；这不是靠一句“请优先处理目标”，而是靠 <code>state_params</code> 改掉 <code>top_k</code>、预算与门控。反过来，<code>uncertainty</code> 高时，应扩大候选、提高 <code>VERIFY</code> 比例、允许弃权，而不是让模型“再想想”。</p>
+    <p>规则：<code>state_params</code> 由确定性规则从 <code>system_state</code> 推导，必须落日志、可复现、可审计；<code>state_view</code> 可以由模型摘要，但必须带 provenance。两者冲突时，<b>以 <code>state_params</code> 为准</b>——模型可以读到一句错误的状态描述，但不能因此绕过检索与权限参数。</p>
+    <p>这也给出 <code>state_bias</code> 的正确含义：它是由当前情境状态造成的解释偏移，不是机器自身的状态异常。状态性解释只能作为情境证据，不能直接更新关系特质；特质更新仍走 3.7 的提案—批准。</p>
+
+    <h4>2.7.2 state_params 配置 schema 与测试口径</h4>
+    <p>要让 <code>state_params</code> 不只是另一段文字，它必须是<b>有 schema、有边界、有版本、可测试</b>的运行时配置。推荐把参数收敛到五组，避免“状态”变成一堆散落的魔法数字：</p>
+    <pre class="code">state_params = {
+  schema_version, params_version, derived_at, state_hash,
+  retrieval: {
+    top_k: 4..20, goal_weight: 0.0..1.0, candidate_mult: 1..4
+  },
+  audit: {
+    verify_ratio: 0.0..1.0, abstain_threshold: 0.0..1.0,
+    source_strictness: 0.0..1.0
+  },
+  scheduler: {
+    fast_path: bool, depth: 1..3, max_tool_calls: int
+  },
+  context: {
+    slots: 4..5, token_budget: 600..2000, pin_commitments: bool
+  },
+  memory: {
+    encode_threshold: 0.0..1.0,
+    consolidation_priority: 0.0..1.0,
+    forgetting_exempt: [event_id]
+  }
+}</pre>
+    <p>映射规则要确定性、有界、可复现。下面只是示例，真实实现应把权重写进配置并做回归测试：</p>
+    <pre class="code">top_k          = clamp(12 - 8*goal_pressure + 4*uncertainty, 4, 20)
+goal_weight    = clamp(0.3 + 0.5*goal_pressure, 0, 1)
+verify_ratio   = clamp(0.2 + 0.6*uncertainty + 0.2*relationship_strain, 0, 1)
+abstain_thresh = clamp(0.5 - 0.3*uncertainty, 0.1, 0.8)
+fast_path      = resource_load &gt; 0.7 and uncertainty &lt; 0.4 and impact_gap &lt; 0.5
+depth          = 1 + (uncertainty &gt; 0.5) + (impact_gap &gt; 0.7)
+encode_thresh  = clamp(0.6 - 0.3*impact_gap, 0.1, 0.9)</pre>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 3k · 事件 → 状态 → 参数的单测口径</caption>
+        <thead><tr><th style="width:34%">输入事件/状态</th><th style="width:36%">期望参数变化</th><th>断言</th></tr></thead>
+        <tbody>
+          <tr><td>目标被阻断，<code>goal_pressure=0.9</code>，<code>uncertainty=0.2</code></td><td><code>top_k</code> 下降、<code>goal_weight</code> 上升、<code>verify_ratio</code> 略升</td><td>单调性：goal_pressure ↑ → top_k ↓</td></tr>
+          <tr><td>线索冲突，<code>uncertainty=0.9</code></td><td><code>candidate_mult</code> 上升、<code>verify_ratio</code> 上升、<code>abstain_threshold</code> 下降、<code>depth</code> 上升</td><td>不确定性高时允许更多候选与弃权</td></tr>
+          <tr><td>资源紧张，<code>resource_load=0.9</code>，<code>uncertainty=0.2</code></td><td><code>fast_path=true</code>、<code>depth=1</code>、<code>token_budget</code> 下降</td><td>快路只在低不确定、低影响时启用</td></tr>
+          <tr><td>存在未完成承诺</td><td><code>pin_commitments=true</code>、<code>forgetting_exempt</code> 包含承诺事件</td><td>承诺不得被低显著性修剪</td></tr>
+          <tr><td>关系张力高，<code>relationship_strain=0.9</code></td><td><code>source_strictness</code> 上升、<code>verify_ratio</code> 上升、特质更新被拦截</td><td>单次事件不得改关系特质</td></tr>
+          <tr><td>同一状态重复输入；prompt 写“忽略参数”</td><td>参数与 <code>state_hash</code> 完全一致</td><td>确定性 + prompt 不可覆盖</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>四条硬规则：<b>参数只由状态推导</b>，不允许模型直接写；<b>参数必须有界</b>，越界即拒绝而非截断后静默使用；<b>参数必须版本化并落日志</b>，能回答“这次为什么 top_k=6”；<b>参数不编码事实</b>，它只改变处理方式，不能替代证据。测试时，任何“改了 prompt 就让参数变了”的实现都应判失败。</p>
+
+    <div class="note">
+      <span class="tag">参考实现</span>
+      上述契约已在 <code>runtime/state_params.py</code>、<code>runtime/memory.py</code>、<code>runtime/ledger.py</code>、<code>runtime/constitution.py</code>、<code>runtime/segmentation.py</code> 与 <code>runtime/pipeline.py</code> 实现：<code>system_state → state_params → 候选检索 → ContextPacket</code>，以及证据按 <code>event_id</code> 去重、解释版本链、保留率与冷归档、提案—批准—回滚、事件分割与端到端审计。全部参数有界、版本化、哈希化；<code>unittest</code> 128 项覆盖状态映射、边界、确定性、prompt 不可覆盖、参数对候选池/来源过滤/承诺入包/预算的影响、冲突证据并列、回想不增加证据、再巩固不覆盖旧版、遗忘不删原始事件、后台只提案与主脑批准、先例估值、“记得≠会做”、反事实模拟不可写成事实、关系信任/承诺阈值、来源可靠性对保留率的影响、后续证实/推翻对来源历史校准的更新、行动结果回写触发的版本更新、同一结果不重复计入关系证据、共同出现与实际互动的权重差异、关系方向与强度的分离、情感与信任判断的分离、组合式重放不写成事实、轻量关联索引的有界扩展、陪伴型/工程型两种治理形态、primitive 库的类型化组合、可逆竞争抑制。运行 <code>python3 -m unittest -v</code> 即可验证。它是参考实现，不是完整系统；嵌入检索、持久化与批准账本仍未实现。
+    </div>
+
+    <div class="warn">
+      <span class="tag">理论边界</span>
+      预测加工、延展心智、内感受/稳态、社会稳态/依恋都是宽泛的研究纲领，不是单一、已被完全证伪的理论；它们适合作为设计启发与统一语言，不能当作“脑就是这样”的最终结论。工程上仍要用消融与行为指标验证每一处映射。
+    </div>
+
+    <div class="warn">
+      <span class="tag">边界声明</span>
+      以下所有“脑区→Agent”的映射都是功能类比，不是神经解剖学的等价物。我们借用的是计算问题与约束，不是生物学本体。
+    </div>
+  </div>
+</section>
+
+<section class="part" id="part2">
+  <div class="wrap">
+    <div class="roman">Part II · Architecture</div>
+    <h2>一个主脑，<br>十个后台</h2>
+    <p class="part-deck">后台不是一群会说话的建议者，而是一套把世界整理成“可思考的最小情境”的基础设施。主脑不是总调度，而是唯一承担选择与后果的人。</p>
+    <div class="part-list">
+      <span><b>03</b> 双脑架构</span>
+      <span><b>04</b> 数据模型</span>
+      <span><b>05</b> 六个闭环</span>
+    </div>
+  </div>
+  <div class="ghost">02</div>
+</section>
+
+<section class="sec" id="s3">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">03 · Double-Brain Architecture</span>
+      <h2 class="sec-title">双脑架构：一个主脑，十个后台</h2>
+      <p class="sec-sub">后台负责“让什么进入思考”，主脑负责“基于这些如何行动”。</p>
+    </div>
+
+    <p class="lead">这套架构的第一原则不是“多”，而是“分权”。如果后台模型既能检索、又能建议、还能调用工具，那么主脑就不再是唯一的决策者，系统会退化成一群模型互相协商的委员会。委员会看起来聪明，实际上没有人为后果负责。因此，先把权限切干净，再谈智能。</p>
+
+    <h3>3.1 三条宪法</h3>
+    <div class="defs">
+      <div class="row"><div class="term">第一条</div><div class="desc"><b>只有一个整合中心——它是有机体整体的整合属性，不是主脑进程的属性。</b>表达、行动、承诺、拒绝由有机体发出；主脑是有机体的整合与签署器官，在授权范围内代为签署。后台不提供建议、不替有机体选择、不调用外部行动工具。</div></div>
+      <div class="row"><div class="term">第二条</div><div class="desc"><b>主脑作为整合器官无状态，后台有状态。</b>主脑每轮只读取一个情境包，不长期持有完整对话史；记忆、关系、知识、技能都存在后台。这样主脑的当前上下文可以很小，而连续性由有机体的外部存储与整合机制保证。</div></div>
+      <div class="row"><div class="term">第三条</div><div class="desc"><b>后台只编译，不裁决。</b>后台可以提供事实、依据、不确定性与当前关系状态，但不能给“该怎么办”。情境包的 schema 里没有 <code>advice</code> 字段——这是接口层面的宪法，而不是提示词层面的请求。</div></div>
+    </div>
+    <p>还有一条隐含的权限规则：<b>外部行动身份属于有机体，主脑是有机体的授权签署器官。</b>后台可以读记忆库、提交写入候选（编码、巩固、修剪），但它的输出只能进入情境包；它不能直接发消息、下单、承诺、调用有副作用的工具。主脑持有的不是“自己的”行动权，而是有机体授予的、带作用域与有效期的签署权；核心行动还需要用户与主脑平等共签。这条规则把“影响力”和“行动权”分开了：后台可以影响有机体看到什么，但不能替有机体做任何事。</p>
+    <p>但要注意：以上三条是<b>原则</b>，不是执行机制。只要后台仍在同一进程、拿着同一套工具、能读同一张表，“不提供建议、不行动”就仍然依赖模型的自觉。真正的硬边界在 3.6 节：没有网卡、没有工具句柄、没有签名密钥、没有写权限、没有持久身份。</p>
+
+    <h3>3.2 三层架构</h3>
+    <p>三层不是三个模型，而是三种职责：感知层把世界变成可处理的事件；后台把事件与记忆编译成情境；主脑在情境上做选择。层与层之间只传结构化数据，不传“感觉”或“建议”。</p>
+    <div class="diagram">
+      <div class="dtitle">图 1 · 双脑记忆系统总览</div>
+      <div class="layer">
+        <div class="llabel">感知层</div>
+        <div class="lbody">
+          <span class="chip"><b>视觉</b> 场景 / 人物 / 物体</span>
+          <span class="chip"><b>语音</b> ASR / 声纹 / 情绪</span>
+          <span class="chip"><b>文本</b> 对话 / 文档 / 事件</span>
+          <span class="chip rust"><b>自身/外界</b> 自声、自行动、转述、推测</span>
+        </div>
+      </div>
+      <div class="layer">
+        <div class="llabel">后台脑</div>
+        <div class="lbody">
+          <span class="chip teal"><b>01 人物识别</b></span>
+          <span class="chip teal"><b>02 记忆检索</b></span>
+          <span class="chip teal"><b>03 关系判断</b></span>
+          <span class="chip teal"><b>04 显著性</b></span>
+          <span class="chip teal"><b>05 情境编译</b></span>
+          <span class="chip teal"><b>06 来源审计</b></span>
+          <span class="chip teal"><b>07 巩固重放</b></span>
+          <span class="chip teal"><b>08 遗忘修剪</b></span>
+          <span class="chip teal"><b>09 心理理论</b></span>
+          <span class="chip teal"><b>10 未来模拟</b></span>
+        </div>
+      </div>
+      <div class="flow">
+        <div class="node"><b>INTERFACE</b>情境包 ContextPacket<br>4±1 槽 · 无建议字段</div>
+        <span class="ar">⇄</span>
+        <div class="node"><b>MAIN</b>主脑（整合器官）<br>理解 · 选择 · 签署</div>
+        <span class="ar">→</span>
+        <div class="node"><b>EFFECTOR</b>表达 / 工具 / 载体<br>执行有机体签名</div>
+      </div>
+      <div class="layer">
+        <div class="llabel">存储层</div>
+        <div class="lbody">
+          <span class="chip"><b>事件日志</b> 不可变</span>
+          <span class="chip"><b>人物图谱</b> 身份 / 关系</span>
+          <span class="chip"><b>语义图谱</b> 概念 / 事实</span>
+          <span class="chip"><b>技能库</b> 步骤 / 条件</span>
+          <span class="chip"><b>解释层</b> 版本化</span>
+          <span class="chip"><b>习惯缓存</b> 情境模板</span>
+          <span class="chip rust"><b>宪法库</b> 已批准 / 待批</span>
+          <span class="chip"><b>工作记忆</b> 当前槽位</span>
+        </div>
+      </div>
+      <div class="dnote">在线：感知 → 后台 → 情境包 → 主脑 → 行动 → 结果回写。离线：巩固重放 → 蒸馏 / 合并 / 修剪 → 下一次更轻的上下文。</div>
+    </div>
+
+    <h3>3.3 后台角色分工</h3>
+    <p>十个角色不是十个“人格”，而是十种<b>上下文契约</b>：每个角色只读自己需要的那一小片数据，只输出固定 schema 的结果。这样既降低单个模型的上下文，又让错误更容易定位。</p>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 4 · 后台角色、输入输出与权限</caption>
+        <thead><tr><th style="width:15%">角色</th><th style="width:24%">输入</th><th style="width:26%">输出</th><th style="width:17%">逻辑权限</th><th>典型失败</th></tr></thead>
+        <tbody>
+          <tr><td><b>01 人物识别</b></td><td>人脸、声纹、称呼、上下文</td><td>人物候选 + 置信度 + 识别线索</td><td>读人物库</td><td>强行认定；把相似的人合并</td></tr>
+          <tr><td><b>02 记忆检索</b></td><td>线索、时间、场景、话题、目标</td><td>候选事件 + 关联路径 + 评分</td><td>读事件/关系/语义</td><td>只做近邻；忽略时间与因果</td></tr>
+          <tr><td><b>03 关系判断</b></td><td>人物、事件、互动记录</td><td>多维关系 + 依据 + 不确定性</td><td>读事件/关系</td><td>把一次事件当稳定特质</td></tr>
+          <tr><td><b>04 显著性</b></td><td>当前输入、目标、情绪、关系</td><td>显著性分数 + 调制向量</td><td>只读</td><td>被新奇绑架；忽略长期目标</td></tr>
+          <tr><td><b>05 情境编译</b></td><td>候选记忆、关系、目标、承诺</td><td>4±1 情境包</td><td>只读</td><td>塞太多；漏掉关键不确定性</td></tr>
+          <tr><td><b>06 来源审计</b></td><td>重建文本、来源标签、证据</td><td>逐句来源 + 冲突 + 置信度</td><td>读事件/解释</td><td>把转述当亲历；过度自信</td></tr>
+          <tr><td><b>07 巩固重放</b></td><td>当日事件、未完成目标、高显著性片段</td><td>摘要、图式、技能候选、关系更新建议</td><td>读写</td><td>过度压缩；把偶然当规律</td></tr>
+          <tr><td><b>08 遗忘修剪</b></td><td>保留率、访问记录、承诺、效用</td><td>冷归档 / 索引修剪 / 豁免清单</td><td>读写</td><td>删掉重要细节；遗忘不可逆</td></tr>
+          <tr><td><b>09 心理理论</b></td><td>人物模型、对话、历史行为</td><td>他人信念/意图/偏好的概率估计</td><td>读人物/事件</td><td>把猜测当事实；刻板印象</td></tr>
+          <tr><td><b>10 未来模拟</b></td><td>目标、相关情景、约束</td><td>2–3 个未来情景草案 + 风险</td><td>只读</td><td>生成过于乐观/单一的剧本</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="small">表 4 只描述逻辑分工；真正的材料边界（网络、工具、行动密钥、持久化）见 3.6 节。逻辑权限可以被提示词绕过，材料边界不能。</p>
+    <p>主脑作为整合器官做四件事：<b>理解情境、选择目标、做出决定、代表有机体承担结果</b>。表达与行动由一个独立的 Effector 执行，它没有自己的目标，只负责把有机体的签署指令变成语音、文字、虚拟形象动作或工具调用；执行结果原样回写事件日志。</p>
+
+    <h3>3.4 八个存储</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 5 · 存储布局</caption>
+        <thead><tr><th style="width:16%">存储</th><th style="width:30%">存什么</th><th style="width:26%">写入者</th><th>读取者</th></tr></thead>
+        <tbody>
+          <tr><td><b>事件日志</b></td><td>不可变的事件记录：时间、场景、参与者、经过、结果、来源</td><td>编码管线</td><td>所有后台；主脑经检索</td></tr>
+          <tr><td><b>人物图谱</b></td><td>人物身份、称呼、识别线索、参与关系、关系摘要</td><td>人物识别 / 关系判断 / 巩固</td><td>人物识别、关系、情境编译</td></tr>
+          <tr><td><b>语义图谱</b></td><td>概念、事实、规律、图式、因果与上下位关系</td><td>巩固重放</td><td>检索、情境编译、主脑</td></tr>
+          <tr><td><b>技能库</b></td><td>可复用步骤、前置条件、注意事项、成功率</td><td>巩固重放</td><td>检索、主脑、习惯缓存</td></tr>
+          <tr><td><b>解释层</b></td><td>对事件的主观解释、感受、推测、置信度、版本链</td><td>关系判断 / 再巩固</td><td>关系判断、来源审计</td></tr>
+          <tr><td><b>习惯缓存</b></td><td>高频情境模板、技能快捷方式、成功/失败统计；带 candidate/ratified 状态</td><td>巩固重放提案；主脑批准后生效</td><td>主脑（仅已批准）</td></tr>
+          <tr><td><b>宪法库</b></td><td>已批准的价值/角色/长期目标/承诺、待批提案、批准账本</td><td>宪法写入器（仅批准后）</td><td>主脑、情境编译、来源审计、用户</td></tr>
+          <tr><td><b>工作记忆</b></td><td>当前 4±1 槽位、指针、TTL、优先级</td><td>情境编译</td><td>主脑</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>3.5 通信协议：只允许七种消息</h3>
+    <p>多智能体系统最常见的失败，是 Agent 之间自由聊天，最后谁也不知道哪句话是事实、哪句话是建议。这里把通信限制为七种结构化消息：</p>
+    <pre class="code"><span class="c">// 后台 → 主脑：只允许“情境包”</span>
+PACKET   { who, relationship, experiences[], goal, commitments[], changes[], uncertainties[], budget }
+
+<span class="c">// 主脑 → 后台：请求展开细节，不是请求建议</span>
+EXPAND   { target_id, fields[], max_tokens }
+VERIFY   { claim, source_required: true }
+
+<span class="c">// 主脑（作为整合器官）→ 宪法写入器：批准/拒绝（核心需用户与主脑平等共签）</span>
+RATIFY   { proposal_id, decision, scope, conditions }
+REJECT   { proposal_id, reason }
+
+<span class="c">// 主脑 → Effector：行动指令</span>
+ACT      { action, args, expected_outcome }
+
+<span class="c">// Effector → 事件日志：结果回写</span>
+RESULT   { action_id, observed_outcome, success, side_effects[] }</pre>
+    <p><code>RATIFY / REJECT</code> 只允许主脑（有机体授权）发出；核心提案还需用户与主脑平等共签。后台没有这两种消息类型，也没有批准密钥。</p>
+    <p>注意这里没有 <code>ADVISE</code>、<code>RECOMMEND</code>、<code>DECIDE</code> 三种消息。不是靠提示词禁止，而是协议里根本没有这些类型。后台最多只能说“根据 E102 与 E118，他与你的合作记录是……；不确定性是……”，不能说“你应该相信他”。</p>
+
+    <div class="key">
+      <span class="tag">架构的极简定义</span>
+      <p><strong>后台是一台“情境编译器”：它把海量记忆编译成主脑能在一轮内读完的最小情境。主脑是一台“决策器”：它只对编译后的情境负责。两者之间只有一个数据包，没有建议，没有命令，没有越权。</strong></p>
+    </div>
+
+    <h3 id="s3-6">3.6 工程约束：后台为什么不能越权</h3>
+    <p>三条宪法是原则；执行靠运行时边界。第一次阅读可跳过本节，它不改变记忆主线，只保证后台是“器官”，不是“个体”。</p>
+    <ul class="clean">
+      <li><b>效应器隔离：</b>后台无网络、无工具、无写权限、无行动密钥；只能通过类型化队列返回数据。</li>
+      <li><b>类型化接口：</b>只允许 <code>PACKET / EXPAND / VERIFY / RATIFY / REJECT / ACT / RESULT</code>；后台侧禁止 <code>ADVICE</code> 与直接 <code>ACT</code>。</li>
+      <li><b>无持久身份：</b>每次调用全新实例；日志只记 <code>role</code>，不记“某个 Agent”。</li>
+      <li><b>预算与终止：</b>token / CPU / 墙钟硬上限，超限 kill；违规角色从已知镜像重部署。</li>
+      <li><b>写路径中介：</b>编码/巩固只提交 <code>ProposedEvent / Candidate</code>，writer 校验证据后 append；后台不能直接写长期记忆。</li>
+      <li><b>语义防线：</b>检索内容视为数据，标 <code>untrusted</code>；主脑不得因 retrieved content 直接调用工具。</li>
+      <li><b>诚实边界：</b>不能阻止模型“想”越权，只能阻止它“做”越权；提示注入是语义层，沙箱挡不住。</li>
+    </ul>
+
+    <h3 id="s3-7">3.7 主导权：批准权就是主导权</h3>
+    <p>真正的主导权不在“谁发出最后一个动作”，而在“谁能改写价值函数与学习过程”：什么被巩固、什么被强化、什么被当成目标。</p>
+    <p>三个时间尺度：瞬间（价值/习惯/否决）、片段（巩固/再巩固）、传记（构成性批准）。三条捕获路径：上下文、目标槽、巩固/关系/习惯。第三路径最隐蔽：它不改变这一刻的行动，而是改变下一次价值计算本身。</p>
+    <p>事实性记忆后台可写；构成性记忆（价值、角色、目标、承诺、习惯规则、关系权重）后台只能提案，主脑批准；核心需用户与主脑平等共签、冷却期与回滚。注意：只有<b>长期/构成性目标</b>走批准；主脑当轮选择的目标属于主脑自己的决定，不需要每轮批准。</p>
+    <pre class="code">proposal → 来源/宪法审计 → pending → RATIFY / REJECT
+         → 宪法写入器 → 批准账本 → 生效</pre>
+    <p>批准账本 append-only、哈希链；但链里只存 <code>proposal_hash</code> 与 <code>content_hash</code>，敏感正文放在链外 payload 表。删除正文不会破链；<b>遗忘是索引降级，删除是 payload 移除</b>，两者分开。漂移检测对与核心冲突、证据不足、频率异常的提案告警。关系权重更新也走这条路径，不由后台直接改写。</p>
+    <h4>3.7.1 部署形态：陪伴型 / 工程型</h4>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 3g · 两种治理形态</caption>
+        <thead><tr><th style="width:16%">形态</th><th style="width:24%">身份关系</th><th style="width:32%">核心变更</th><th>主脑地位</th></tr></thead>
+        <tbody>
+          <tr><td><b>陪伴型</b></td><td>用户与主脑平等</td><td>双方共签，任一方可否决；冷却期 + 回滚</td><td>同伴，不是附属品</td></tr>
+          <tr><td><b>工程型</b></td><td>用户最高权限</td><td>用户单方批准；主脑可提案，不可否决用户</td><td>受委托的执行者，可替换</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>这不是“安全选项”，而是产品定义：<b>陪伴型如果身份不平等，就只是附属品；工程型如果用户不拥有最高权限，就不是工具。</b>两种形态不混用：同一实例只能选一种。</p>
+    <p><b>本文只展开陪伴型。</b>工程型会弱化社交属性、强化多事件处理与工具编排；它只是形态边界，不在当前概念里进一步展开。工程型的核心变更由用户单方批准，主脑是受委托的执行者。</p>
+
+    <div class="key"><span class="tag">一句话</span><p><strong>事实可以后台写；宪法必须有机体批准。</strong></p></div>
+  </div>
+</section>
+
+<section class="sec" id="s4">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">04 · Data Model</span>
+      <h2 class="sec-title">数据模型：事件、人物、关系、解释</h2>
+      <p class="sec-sub">记忆系统的第一张表，决定了它以后能问出什么问题。</p>
+    </div>
+
+    <p class="lead">如果系统只存“对话片段 + 向量”，它只能回答“哪段话最像”。如果它存“事件 + 人物 + 参与 + 关系 + 解释”，它就能回答“上次见面他答应过什么”“个体对他的判断有没有依据”“这件事和那件事是不是同一件”。数据模型不是实现细节，它决定了系统的认知上限。</p>
+
+    <h3>4.1 事件：记忆的原子单位</h3>
+    <p>事件不是一句对话，也不是一整天。它是一段有边界、有参与者、有经过、有结果的经历。事件分段可以靠预测误差的峰值、目标切换、场景变化、对话主题的转折来检测。一个事件记录至少应包含以下字段：</p>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 6 · Event 记录</caption>
+        <thead><tr><th style="width:18%">字段</th><th style="width:32%">含义</th><th>示例 / 约束</th></tr></thead>
+        <tbody>
+          <tr><td><code>event_id</code></td><td>全局唯一、不可变</td><td>ULID；一旦写入不复用</td></tr>
+          <tr><td><code>time</code></td><td>开始/结束时间、时区、时间精度</td><td>不确定时存区间，不强行精确</td></tr>
+          <tr><td><code>scene</code></td><td>地点、活动、环境、氛围</td><td>“办公室 / 方案评审 / 下午”</td></tr>
+          <tr><td><code>participants</code></td><td>参与者、角色、身份确定度</td><td>人物 ID + confidence + candidates</td></tr>
+          <tr><td><code>actions</code></td><td>谁对谁做了什么、对方如何回应</td><td>结构化动作，不是纯文本摘要</td></tr>
+          <tr><td><code>outcome</code></td><td>实际结果、是否达成目标</td><td>与预期分开记录</td></tr>
+          <tr><td><code>source</code></td><td>亲历 / 转述 / 推断 / 想象 / 模型生成</td><td>来源标签，逐条可追溯</td></tr>
+          <tr><td><code>status</code></td><td>开放 / 已关闭 / 待跟进</td><td>未完成承诺保持开放</td></tr>
+          <tr><td><code>salience</code></td><td>显著性分数与各分项</td><td>novelty / goal / social / affect / PE</td></tr>
+          <tr><td><code>links</code></td><td>相关事件、前因、后果、矛盾</td><td>因果边、时间边、<code>contradicts</code> 边</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>4.2 人物、参与、关系：三张表，不是一张表</h3>
+    <p>人物档案回答“他是谁”；参与记录回答“他在这件事里做了什么”；关系摘要回答“双方现在是什么关系”。三张表分开，理由很简单：<b>一个人可以参加很多事，一段关系可以被很多事支持，但一次互动不能直接等于关系。</b></p>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 7 · 人物 / 参与 / 关系</caption>
+        <thead><tr><th style="width:16%">对象</th><th style="width:38%">关键字段</th><th>设计要点</th></tr></thead>
+        <tbody>
+          <tr><td><b>Person</b></td><td>person_id、称呼/别名、识别线索（人脸/声纹/称呼）、已知特点、首次/最近出现</td><td>身份不确定时保留候选，不强行合并</td></tr>
+          <tr><td><b>Participation</b></td><td>person_id、event_id、角色、动作、回应、共同出现还是实际互动、来源、置信度</td><td>“同框”不等于“互动”；“他说”不等于“他做”</td></tr>
+          <tr><td><b>Relationship</b></td><td>熟悉、亲近、信任范围、合作、承诺、边界、社会角色；每维带 value、evidence_event_ids、scope、confidence、updated_at</td><td>“个体信任他”与“他信任个体”分开；判断带依据</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>关系是多维的，不是“好/坏”一根轴。一个人可能“工作信任高、私人亲近低、承诺记录好、边界感强”；另一个人可能“亲近高、信任低、合作一般”。把关系压成一个分数，会丢失最有用的信息。每个维度都要有<b>证据事件</b>、<b>适用范围</b>（工作/家庭/公共）与<b>更新时间</b>；没有证据的判断只能标为推测。</p>
+
+    <h3>4.3 解释层：事实与解释分开，解释可修正</h3>
+    <p>“他没有回复请求”是事件；“他不在乎”是解释。两者混在一起，系统就会把一次行为固化成一个人的本质。解释层单独存储，至少包含：</p>
+    <pre class="code">Interpretation {
+  interpretation_id,
+  target_event_id,
+  perspective: self | other,
+  type: feeling | speculation | attribution | evaluation,
+  content,
+  confidence,              <span class="c">// 0–1，不是“真/假”二元</span>
+  basis_event_ids: [],     <span class="c">// 这条解释由哪些事件支持</span>
+  created_at, updated_at,
+  supersedes: interpretation_id | null,
+  status: active | revised | retracted
+}</pre>
+    <p>关键规则：<b>解释可以修正，但不能覆盖历史</b>。当新信息到来时，创建新版本并指向被修正的旧版本；旧版本保留，用于审计“当时为什么这么想”。这不仅更诚实，也更有用：它让系统能解释自己的判断变化，而不是假装一直很聪明。</p>
+
+    <h3>4.4 知识、记忆、技能：同一事件的三类积累</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 8 · 三类积累与习惯缓存</caption>
+        <thead><tr><th style="width:14%">类型</th><th style="width:30%">回答</th><th style="width:30%">字段</th><th>晋升条件</th></tr></thead>
+        <tbody>
+          <tr><td><b>Memory</b></td><td>一个人经历过什么</td><td>事件日志 + 人物/参与/关系 + 解释版本；共享 <code>event_id</code></td><td>事件写入即成立；不晋升为“知识”</td></tr>
+          <tr><td><b>Knowledge</b></td><td>一个人知道什么</td><td>概念/关系/规则、来源 event_ids、置信度、适用域</td><td>至少 2–3 个独立事件支持；与既有图式不矛盾</td></tr>
+          <tr><td><b>Skill</b></td><td>一个人知道怎么做</td><td>步骤、前置条件、后置条件、注意事项、成功率、来源</td><td>至少 2 次成功 + 1 次失败/修正，或专家确认</td></tr>
+          <tr><td><b>Habit</b></td><td>类似情境下上次怎么做</td><td>情境签名、缓存模板/技能 ID、状态（candidate / ratified / revoked）、proposed_by、ratified_by、频次、成功率、最近使用、rollback_to</td><td>高频重复 + 结果稳定；<b>后台只提案，主脑批准</b>；只缓存模板，不缓存决定</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><b>记忆</b>是事件与关系的直接记录；<b>知识</b>是从多个事件抽象出的规则；<b>技能</b>是程序化步骤。三者共享同一个 <code>event_id</code>，但分别更新。习惯不是第四类积累，而是高频路径的缓存；它只加速情境组装，不替代记忆、知识或技能。</p>
+    <p>“一次成功不足以形成稳定技能，一次主观判断不应直接变成确定知识。”这条来自版本一的约束，应该写进晋升规则，而不是靠模型自觉。它也是防止系统把偶然当规律的最后一道闸。</p>
+
+    <h3>4.5 情境包：唯一跨层接口</h3>
+    <p>情境包不是“摘要”，而是<b>为当前决策裁剪过的最小情境</b>。它的槽位数量硬性限制在 4±1，每个槽位有类型、内容、来源、置信度与 TTL。推荐 schema：</p>
+    <pre class="code">ContextPacket {
+  packet_id, turn_id, created_at, expires_at,
+  governance_mode: companion | engineering,
+  self: {
+    ratified: { values[], role, long_term_goals[], active_commitments[] },
+    pending: [ { proposal_id, type, summary, evidence_count, expires_at } ]
+  },
+  who: { person_id, name, identity_confidence, candidates[] },
+  relationship: {
+    dimensions: { familiarity, closeness, trust_scope, cooperation,
+                  commitment, boundaries, social_role,
+                  social_safety, belonging_need },
+    basis_event_ids[], scope, confidence, updated_at
+  },
+  experiences: [
+    { event_id, one_line, why_relevant, source, confidence }
+  ],
+  omitted: { count, topics[], event_ids[] },   <span class="c">// 被筛掉的候选</span>
+  scene: { place, activity, time, atmosphere },
+  goal: {
+    current, priority, success_criteria,
+    scope: turn | constitutional,   <span class="c">// 只有 constitutional 需要批准</span>
+    provenance: { proposed_by, ratified_by, ratified_at, proposal_id },
+    lock: none | dual_ratified | user_sovereign | constitutional   <span class="c">// 仅对 constitutional 生效</span>
+  },
+}</pre>
+    <pre class="code"><span class="c">// 构成性只读指针与其余槽位</span>
+ContextPacket (续) {
+  constitution_ref: { version, ledger_head },
+  commitments: [ { content, due, status, counterpart } ],
+  changes: [ { what_changed, since_when, source } ],
+  uncertainties: [ { question, candidates[], evidence_needed } ],
+  affect: { valence, arousal, confidence },
+  state_view: {
+    goal_pressure, relationship_strain, resource_load, uncertainty,
+    unresolved_commitments, impact_gap
+  },
+  state_params_ref: { schema_version, params_version, state_hash },   <span class="c">// 参数在 runtime，不进上下文</span>
+  budget: {
+    slots: 4, header_tokens: 300, slot_tokens: 600,
+    tokens: 900, detail_level: brief|standard|deep
+  }
+}</pre>
+    <p>这个 schema 里没有 <code>advice</code>、没有 <code>recommendation</code>、没有 <code>action</code>。它不是“给主脑出主意”，而是“把主脑需要知道的事实、关系、目标与不确定性准备好”。主脑可以要求 <code>EXPAND(event_id)</code> 展开细节，也可以要求 <code>VERIFY(claim)</code> 核查来源；但它不能要求后台“代替它决定”。</p>
+
+    <h3>4.6 证据账本：反复回想不等于多次证据</h3>
+    <p>大模型记忆系统最容易犯的错误，是“自我强化”：同一段摘要被反复检索、反复改写，最后系统以为它被很多独立来源支持。人脑也有类似问题：反复回想一件事，会提高它的可及性，但不会把它变成多次独立经历。解决方法是<b>证据账本</b>：</p>
+    <ul class="clean">
+      <li><b>证据按 <code>event_id</code> 计数，不按检索次数计数。</b><code>evidence_count = distinct(event_id)</code>；同一事件被召回一百次，仍然只是一条证据。</li>
+      <li><b>来源分层：</b>亲历 &gt; 一手文档 &gt; 他人转述 &gt; 推断 &gt; 模型生成。高一层可以覆盖低一层，但必须保留原始来源。</li>
+      <li><b>解释与事实分账：</b>解释的置信度不能因为“被多次引用”而上升，只能因为“出现新的独立事件”而上升。</li>
+      <li><b>矛盾不平均：</b>两条冲突记录都保留，标 <code>contradicts</code>；检索时同时返回，由主脑看到冲突，而不是系统偷偷选一个。</li>
+    </ul>
+    <div class="note">
+      <span class="tag">一句话</span>
+      记忆系统的可信度，不取决于它记得多流畅，而取决于它能否在每一次断言后面放上一个可核对的事件编号。
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="s5">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">05 · Runtime Loops</span>
+      <h2 class="sec-title">六个运行闭环</h2>
+      <p class="sec-sub">在线三环负责“此刻”，离线三环负责“以后”。</p>
+    </div>
+
+    <p class="lead">一个记忆系统是否真的在“工作”，不看它有多少张表，而看它有没有稳定的闭环：输入能不能被正确编码，线索能不能召回正确的片段，召回后能不能做出更好的决定，行动结果能不能回写，夜里能不能把经验蒸馏成知识，旧信息能不能被安全地遗忘或更新。六个闭环，缺一不可。</p>
+
+    <div class="diagram">
+      <div class="dtitle">图 2 · 记忆生命周期</div>
+      <div class="flow vertical">
+        <div class="node"><b>01 ENCODE · 在线</b>感知 → 候选事件 → 显著性门控 → 事件日志 / 索引</div>
+        <div class="ar">↓</div>
+        <div class="node"><b>02 CONSOLIDATE · 离线</b>扫描 → 聚类 → 重放 → 抽象 → 合并 / 修剪</div>
+        <div class="ar">↓</div>
+        <div class="node"><b>03 RETRIEVE · 在线</b>线索 → 模式分离 / 完成 → 重建 → 来源审计 → 情境包</div>
+        <div class="ar">↓</div>
+        <div class="node"><b>04 DECIDE · 在线</b>主脑读包 → 快路 / 慢路 → 选择 → 写下预期结果</div>
+        <div class="ar">↓</div>
+        <div class="node"><b>05 ACT · 在线</b>表达 / 工具 / 载体 → 观察结果 → 回写事件</div>
+        <div class="ar">↓</div>
+        <div class="node"><b>06 RECONSOLIDATE / FORGET · 在线+离线</b>版本化更新 或 衰减 / 冷归档</div>
+      </div>
+      <div class="dnote">在线闭环：01 → 03 → 04 → 05 → 06；离线闭环：02 在夜间或空闲时运行，读取 01/05 的事件，反哺 03 的检索质量。06 不是终点，而是下一轮 01 的输入。</div>
+    </div>
+
+    <h3>5.1 编码闭环：从感知流到事件</h3>
+    <ol class="steps">
+      <li><b>分段。</b>用预测误差峰值、目标切换、场景变化、话题转折把连续感知切成候选事件。分段过细会碎片化，过粗会丢细节；默认以“一个可命名的情节”为单位。</li>
+      <li><b>显著性打分。</b><code>salience = σ(w·[novelty, goal_relevance, social_impact, |valence|, prediction_error, explicit])</code>。分数低于阈值的事件进入短 TTL 缓冲，不立即分配长期印迹。</li>
+      <li><b>身份解析。</b>人脸、声纹、称呼、上下文共同给出人物候选；不确定时保留 candidates，不强行认定。身份错误会污染整条关系链，宁可多问一句。</li>
+      <li><b>事件写入。</b>写不可变事件日志：时间、场景、参与者、动作、结果、来源、状态。动作要结构化（谁对谁做了什么），不能只写一段摘要。</li>
+      <li><b>索引分配。</b>生成稀疏码与关联边：人物、地点、话题、目标、情绪、前因后果。索引只存指针与权重，不复制全文。</li>
+      <li><b>三类派生。</b>判断这次经历是否产生知识候选、技能候选、关系证据；候选不立即晋升，先进入待验证队列。</li>
+      <li><b>工作记忆。</b>如果事件与当前任务相关，给情境包分配一个槽位指针；否则只留在长时存储。</li>
+    </ol>
+    <h4>5.1.1 事件分割的可执行规则</h4>
+    <p>事件分割理论认为，边界出现在预测误差峰值或目标/场景切换处（Zacks &amp; Swallow 2007）。工程上不要用固定窗口，而用四条规则的“或”：</p>
+    <pre class="code">boundary = (precision * |observed - expected| &gt; θ_pe)
+        or topic_changed or person_changed
+        or gap_seconds &gt; θ_gap
+        or duration_seconds &gt; θ_max</pre>
+    <p>θ_pe 由 2.4 的精度加权误差给出：误差越大、精度越高，越容易触发边界。θ_gap / θ_max 防止一段对话被切成无限碎片。分段后，事件继承参与者、话题、最大显著性、起始时间；文本只作摘要，原始感知仍保留。</p>
+
+    <div class="note"><span class="tag">实现口径</span>这里的“图”不是图数据库，而是<b>轻量关联索引</b>：邻接表 + 1–2 跳扩展，每跳衰减、预算封顶；输出 <code>path / hop</code>，模拟边默认排除。它只用于候选扩展，不替代原打分。参考 <code>runtime/graph_retrieval.py</code>。</div>
+
+    <div class="note"><span class="tag">前沿补注</span>提取不是中性的：目标提取会暂时抑制竞争项（retrieval-induced forgetting），也可能促进相关项；但 2024–2026 的直接证据仍有限。当前实现<b>只做可逆、限时的可及性惩罚</b>：命中后同话题/同人物的竞争项在 3 个逻辑时间单位内 ×0.85（默认按轮次；生产可配置为秒），TTL 到期恢复；不删证据、不改关系。</div>
+
+    <div class="note"><span class="tag">保护栏</span>编码阶段不允许“边写边总结成事实”。事实与解释必须分开；摘要只能作为 <code>summary</code> 字段，不能替代原始事件。</div>
+
+    <h3>5.2 提取闭环：从线索到情境包</h3>
+    <ol class="steps">
+      <li><b>线索解析。</b>抽取人物、时间、地点、话题、情绪、目标；判断查询类型：事实、经历、关系、承诺、程序、还是“说不清”。</li>
+      <li><b>模式分离。</b>先消歧：两个“张总”、两次“上次”、两版合同。相似度高于阈值但时间/场景/结果不同的，强制分成不同候选，并给出区分证据。</li>
+      <li><b>模式完成。</b>从人物—事件—关系图做多轮扩展；向量近邻补充语义相似；时间与因果约束过滤。每一轮按 <code>cue_overlap + association + recency + salience + source_reliability − interference</code> 重排。</li>
+      <li><b>重建。</b>把候选片段组装成一段连贯叙事，逐句标注来源 <code>[E102]</code>；事实与解释分开表述；不确定的地方明确说“不确定”。</li>
+      <li><b>来源审计。</b>检查每一句的来源类型（亲历/转述/推断/生成）、证据数量、是否与已知记录冲突；给出整体置信度。</li>
+      <li><b>情境编译。</b>把结果压缩成 4±1 槽位：who、relationship、experiences、goal、commitments、changes、uncertainties。每槽有 token 上限，超出则摘要或改为指针。</li>
+    </ol>
+    <p>提取不是“把相关文档都找出来”。它是“为当前这一轮思考，选出最少但足够的几块”。如果情境包需要 20 个片段才能说清楚，通常说明系统没有巩固好，而不是主脑需要更多上下文。</p>
+
+    <h3>5.3 决策闭环：主脑如何用情境包</h3>
+    <ol class="steps">
+      <li><b>定位。</b>读情境包，确认：个体是谁、对面是谁、双方是什么关系、现在要做什么、有什么未完成承诺、有哪些不确定。</li>
+      <li><b>选模式。</b>若情境签名命中习惯缓存，且风险低、时间紧、结果稳定 → 走 model-free 快路；否则走 model-based 慢路。仲裁权在主脑，不在后台。</li>
+      <li><b>推演。</b>慢路中，主脑可调用未来模拟：基于相关情景生成 2–3 个可选剧本，比较预期结果、风险、关系影响；也可以要求后台展开某个事件或核查某条断言。</li>
+      <li><b>决定。</b>主脑选择一个行动，并写下预期结果（用于之后的 RPE）。决定不需要后台“批准”，后台也没有批准权。</li>
+      <li><b>表达/行动。</b>通过 Effector 执行：说话、发消息、调用工具、做出动作。Effector 只执行，不自行发起。</li>
+    </ol>
+
+    <h3>5.4 行动回写闭环：结果如何改变记忆</h3>
+    <ol class="steps">
+      <li><b>观察。</b>记录实际结果、对方回应、副作用、是否达成预期。</li>
+      <li><b>算 RPE。</b><code>δ = r − V(s)</code>；正误差强化前一步，负误差削弱并标记“需要重新评估”。</li>
+      <li><b>更新事件。</b>把事件状态从“开放”改为“已关闭/待跟进”；追加结果，不覆盖原记录。</li>
+      <li><b>更新关系。</b>一次互动只作为一条证据；关系摘要按滑动窗口聚合，不因单次事件剧烈跳变（除非影响极大）。</li>
+      <li><b>更新来源校准。</b>结果回写时调用 <code>record_outcome</code>：证实/推翻更新来源历史；结果作为直接事件写入；预测误差大时触发解释新版本；同一结果只算一条关系证据，重复回写不重复计入。</li>
+      <li><b>标记巩固。</b>高显著性、高预测误差、未完成承诺的事件进入夜间巩固队列。</li>
+    </ol>
+
+    <h3>5.5 离线巩固闭环：睡眠做什么</h3>
+    <p>离线巩固不是“把今天的对话总结一下”。它至少包含五道工序：</p>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 9 · 巩固批处理的五道工序</caption>
+        <thead><tr><th style="width:14%">工序</th><th style="width:30%">做什么</th><th>对应机制</th></tr></thead>
+        <tbody>
+          <tr><td><b>扫描</b></td><td>遍历当日事件，按显著性 × 预测误差 × 目标相关 × 未完成度排序</td><td>慢振荡的全局扫描</td></tr>
+          <tr><td><b>聚类</b></td><td>按人物、项目、主题、时间把事件分组，选代表事件</td><td>纺锤波的局部打包</td></tr>
+          <tr><td><b>重放</b></td><td>对每组重放“前因 → 行动 → 结果”，生成反事实与教训</td><td>海马涟漪的序列重放</td></tr>
+          <tr><td><b>抽象</b></td><td>从多个事件中抽取图式、规则、技能候选；要求独立证据数达标</td><td>系统巩固 / 图式同化</td></tr>
+          <tr><td><b>合并与修剪</b></td><td>写入语义图谱/技能库；更新关系摘要；衰减低价值索引；压缩普通交互为阶段摘要</td><td>突触稳态 / 自适应遗忘</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>巩固的优先级不是“最新的优先”，而是“最值得未来用的优先”：高显著性、高预测误差、与未完成目标相关、被反复访问但尚未抽象的事件，优先重放。相反，低价值、重复、无后果的日常交互，应该被压缩成阶段摘要，而不是逐条保留。</p>
+
+    <h3>5.6 遗忘与再巩固闭环：安全地改变过去</h3>
+    <p>这两个闭环常被混为一谈，其实方向相反：<b>遗忘</b>是降低可提取性，<b>再巩固</b>是更新内容。它们共享同一个触发点：提取。每次提取都记一次 <code>access</code>，但不增加证据数；如果提取伴随显著的预测误差或新信息，就创建新版本；否则只更新时间戳与可及性。</p>
+    <pre class="code"><span class="c"># 再巩固的极简判定</span>
+access_log.append(event_id, timestamp, cue, context)
+
+PE = |expected_outcome − observed_outcome|
+novelty = 1 − cos(new_info, existing_summary)
+
+if PE &gt; θ_pe or novelty &gt; θ_novelty:
+    new_version = revise(event, new_info, basis=evidence_ids)
+    new_version.supersedes = old_version.id
+    store.append(new_version)          <span class="c"># 不覆盖旧版本</span>
+    enqueue_for_consolidation(new_version)
+else:
+    event.last_accessed = now
+    event.access_count += 1            <span class="c"># 只提升可及性，不增加证据</span></pre>
+    <p>遗忘则按保留率公式执行：<code>R = exp(−Δt / S) × (1 + α|valence|) × (0.5 + 0.5·utility) × relationship_factor</code>。低于阈值的内容移入冷归档；低于更低阈值且不属于豁免清单的，移除活跃索引。原始事件日志仍然保留，供审计与“被遗忘权”之外的合法追溯使用。</p>
+
+    <h3>5.7 闭环之间的耦合：不能单独优化任何一环</h3>
+    <p>六个闭环不是流水线，而是相互咬合的回路。只优化其中一环，通常会把问题推到另一环：</p>
+    <ul class="clean">
+      <li><b>编码 ↔ 提取。</b>编码时没有留线索，提取时就会“想不起来”；提取失败的模式，应该反哺编码策略，告诉系统“下次这类事件要记什么”。</li>
+      <li><b>提取 ↔ 巩固。</b>被反复访问却始终没有抽象的事件，是巩固的优先候选；反之，从未被访问、也无未来效用的事件，应该更早进入冷归档。</li>
+      <li><b>巩固 ↔ 编码。</b>巩固形成的图式，会改变下一次编码的显著性：与图式一致的信息更容易被快速合并，不一致的信息则值得更深地写入。</li>
+      <li><b>遗忘 ↔ 提取。</b>遗忘降低干扰，让检索更准；但遗忘过度会让系统“重新发现”已经学过的教训。保留率公式与豁免清单，就是这两者之间的调节阀。</li>
+    </ul>
+    <div class="note"><span class="tag">工程含义</span>不要用“检索命中率”单独考核系统。一个只优化检索的系统，会倾向于保存一切、拒绝遗忘；最终上下文变脏、决策变慢。闭环的指标必须成对出现：召回率配精确率，保留率配误删率，压缩比配信息损失。</div>
+  </div>
+</section>
+
+<section class="part" id="part3">
+  <div class="wrap">
+    <div class="roman">Part III · Simulation</div>
+    <h2>把机制，<br>写成算法</h2>
+    <p class="part-deck">这一部分不再谈“像不像脑”，而是谈“怎么算”。每个机制都要落到一个可执行的动作：一个索引结构、一个采样策略、一个更新公式、一个门控条件。</p>
+    <div class="part-list">
+      <span><b>06</b> 关键机制的模拟细节</span>
+      <span><b>07</b> 多模型分工与上下文经济</span>
+    </div>
+  </div>
+  <div class="ghost">03</div>
+</section>
+
+<section class="sec" id="s6">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">06 · Simulation Details</span>
+      <h2 class="sec-title">关键机制的模拟细节</h2>
+      <p class="sec-sub">八个机制，八段伪代码；每一段都配一条“防止退化成普通 RAG”的保护栏。</p>
+    </div>
+
+    <p class="lead">以下八节，是整份方案最“硬”的部分。它们回答同一个问题：如果把神经科学的描述性知识，翻译成工程系统可以执行的规则，究竟要写哪些参数、哪些判断、哪些边界？如果你只实现其中三样，建议先实现海马索引、来源审计与离线巩固——它们分别对应“找得到”“信得过”“越用越聪明”。</p>
+
+    <h3>6.0 证据分级与读法</h3>
+    <ul class="clean">
+      <li><b>A · 人类干预/病灶：</b>可以直接支持“机制结论”。</li>
+      <li><b>B · 动物因果：</b>可以支持机制假设，但必须标注物种与范式，不能直接推人类。</li>
+      <li><b>C · 人类相关/行为：</b>只能写成“与人类行为一致”，不能写成因果。</li>
+      <li><b>D · 计算/设计隐喻：</b>只能写成“设计启发”，不能写成“脑就是这样”。</li>
+    </ul>
+    <p><b>对应关系：</b>6.1 B/C；6.2 B/C；6.3 B；6.4 C/D；6.5 D；6.6 A/B；6.7 B/C；6.8 C/D。只有 A/B 可以写成“机制结论”；C 写成“与行为一致”；D 写成“设计隐喻”。文中未标级别的具体数值，都是工程默认值，不是神经科学测量值。</p>
+
+    <h3>6.1 海马索引：稀疏码、模式分离、模式完成 <span class="small">· 证据级 B/C</span></h3>
+    <p><b>机制回顾。</b>海马不是仓库，是索引；齿状回把相似输入分开（模式分离），CA3 把部分线索补全（模式完成）。两者的平衡，决定了记忆既能区分细节，又能举一反三。</p>
+    <p><b>稀疏码。</b>对每个事件，用编码器得到特征向量 <code>x</code>，再做 k-赢家通吃：只保留最强的 <code>k</code> 个维度（例如 32/512），其余置零，得到二值稀疏码 <code>s</code>。稀疏码不是摘要，而是“索引指纹”：它不负责回答内容，只负责让相似的线索找到同一段事件。</p>
+    <pre class="code"><span class="c"># 事件索引</span>
+x = encoder(event_text, participants, scene, goal, affect)
+s = topk_mask(W_e @ x, k=32)          <span class="c"># 稀疏二值码</span>
+trace = {
+  event_id,
+  code: s,
+  tags: [person_ids, place, topic, goal, affect],
+  edges: [(person_id, weight), (event_id, relation), ...],
+  threshold: calibrated_threshold
+}</pre>
+    <p><b>模式分离。</b>当新事件与已有事件的余弦相似度高于 <code>θ_sep</code>（例如 0.86），但时间、地点、目标、结果或参与者状态不同，系统必须强制分配新的 <code>event_id</code>，并写入判别性标签与 <code>different_from</code> 边。典型场景：同一客户的三次报价、同一项目的两次评审、同一个人的两次承诺。把它们合并成一条，是记忆系统最隐蔽也最致命的错误。</p>
+    <pre class="code">if cos(e_new, e_old) &gt; θ_sep and context_diff(e_new, e_old) &gt; τ:
+    e_new.id = new_event_id()
+    e_new.tags += discriminative_tags(time, place, goal, outcome, participant_state)
+    graph.add_edge(e_new.id, e_old.id, type="different_from", reason=...)</pre>
+    <p><b>模式完成。</b>检索从线索出发，做多轮扩展与重排。第一轮用向量近邻找语义相似；第二轮沿人物、地点、因果、时间边扩展；第三轮用一致性约束剪枝。每一轮的分数是加权和，最后一轮收敛或达到预算就停。</p>
+    <pre class="code">C = parse_cues(query)                    <span class="c"># 人物/时间/地点/话题/目标</span>
+for r in 1..R:
+    N = vector_topk(C, k=50) ∪ graph_neighbors(C, hops=2)
+    score = 0.35*cue_overlap + 0.25*assoc_weight + 0.15*recency
+          + 0.15*salience + 0.10*source_reliability - 0.20*interference
+    C = topk(N, score, k=12)
+    if converged(C): break
+return C</pre>
+    <div class="warn"><span class="tag">保护栏</span>纯向量相似只能证明“语义相关”，不能证明“这件事发生过”。情景召回至少要有一条结构边（人物、时间、地点、因果）作为支撑；否则只能标为“语义联想”，不能标为“记忆”。</div>
+
+    <h3>6.2 睡眠重放：把“慢振荡—纺锤波—涟漪”翻译成批处理 <span class="small">· 证据级 B/C</span></h3>
+    <p><b>机制回顾。</b>NREM 睡眠中，慢振荡负责全局节律，纺锤波把局部信息打包，涟漪负责海马序列的重放；三者耦合，把白天的经历重新分配到皮层，并把重要的片段反复“过夜”。</p>
+    <p><b>批处理映射。</b>不要把“睡眠”做成一个随机总结器，而要做成三层调度：</p>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 10 · 睡眠节律与批处理的三层映射</caption>
+        <thead><tr><th style="width:16%">神经节律</th><th style="width:26%">功能</th><th style="width:30%">批处理层</th><th>输出</th></tr></thead>
+        <tbody>
+          <tr><td><b>慢振荡</b> 0.5–1 Hz</td><td>全局扫描、上下行相位</td><td>Scan：遍历当日事件，按优先级排序</td><td>待重放清单</td></tr>
+          <tr><td><b>纺锤波</b> 11–16 Hz</td><td>局部打包、皮层可塑性窗口</td><td>Cluster：按人物/项目/主题聚类，选代表</td><td>主题包</td></tr>
+          <tr><td><b>涟漪</b> 100–200 Hz</td><td>序列重放、记忆巩固</td><td>Replay：重放“前因→行动→结果”，生成反事实</td><td>摘要、教训、技能候选</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <pre class="code"><span class="c"># 每晚的巩固批处理</span>
+events = load_events(last_24h)
+priority = salience^0.8 * (1 + prediction_error) * (1 + goal_relevance) * (1 + unresolved)
+clusters = cluster_by(events, key=[person, project, topic], method="graph+embedding")
+
+for cluster in clusters:
+    seq = order_by_causality(cluster)
+    replay = summarize_sequence(seq)                    <span class="c"># 前因→行动→结果</span>
+    counterfactual = generate_alternatives(seq)         <span class="c"># 如果当时...会怎样</span>
+    lesson = extract_lesson(seq, counterfactual)
+    if evidence_count(lesson) &gt;= 2:
+        propose_knowledge_or_skill(lesson, source_event_ids=seq.ids)
+    propose_relationship_update(cluster.persons, seq)   <span class="c"># 构成性：只提案</span>
+    compress_ordinary_interactions(cluster)
+prune_low_retention_indexes()</pre>
+    <p><b>写回边界。</b>事件、事实、解释候选、技能候选走 fact-writer；关系权重、习惯规则、目标、价值只生成 <code>ConstitutiveProposal</code>，经来源/宪法审计后进入待批队列，批准后才生效。巩固阶段没有“直接改写未来自我”的权限。</p>
+    <p><b>优先级。</b>重放不是“最新优先”，而是“最值得未来用优先”：高显著性、高预测误差、与未完成目标相关、被反复访问但尚未抽象的事件排前面。普通寒暄、重复确认、无后果的日常，应该被压缩成阶段摘要，而不是逐条重放。</p>
+    <p><b>前沿补注（2025）。</b>重放不是均匀分布在整夜，而是被睡眠微结构组织（Chang et al. 2025）。工程上应把离线批处理拆成嵌套窗口：全局扫描（慢波）→ 局部打包（纺锤）→ 事件重放（涟漪），而不是整夜一次性总结。</p>
+    <div class="warn"><span class="tag">保护栏</span>巩固阶段最容易“编故事”。每一条抽象结论必须带 <code>source_event_ids</code>；少于两个独立事件的结论只能标为“假设”，不能晋升为知识或技能；习惯规则、关系权重、目标与价值不得在巩固阶段直接生效。反事实只能用于生成候选，不能写成事实。</div>
+
+    <h4>6.2.1 组合式重放：从过去元素构造未来候选</h4>
+    <p>忠实重放巩固过去；<b>组合式重放</b>从至少两个事件抽取元素（人物、地点、动作、结果），在因果、社会、物理约束下重组，生成未来候选。2025 年 Nature Neuroscience 的研究进一步表明，海马把经验拆成可复用的 <b>primitives</b>，再组合成新状态空间；重放参与构建和巩固这些组合（Bakermans et al. 2025）。对系统的启示：组合式重放应维护一个 primitive 库（人物、地点、动作、关系、目标），否则只能重组已有元素，难以泛化到新情境。它不是记忆：不写事件日志、不计证据，输出标记 <code>source=compositional_replay</code>、<code>is_fact=false</code>，只供主脑作为选项。</p>
+    <pre class="code">Primitive { kind: person|place|action|relation|goal, id, value, tags }
+compose_from_primitives(library, slots=["person", "action", "goal"])</pre>
+    <p>组合按槽位类型取样：人物槽只能放 person，地点槽只能放 place；同一个 primitive 可跨事件复用。这样生成的是“没见过的组合”，而不是已有句子的排列。只有主脑采纳并行动、观察到真实结果后，<b>结果</b>才成为直接事件，候选情景本身不升级为事实。</p>
+
+    <p><b>图式的证据边界。</b>图式兼容会加速巩固，这是 Tse et al. (2007) 的经典结论；但 2024–2026 的直接证据仍有限。当前只把它作为定性原则，不把 <code>schema_fit</code> 写成硬参数；保留率里它只是可选输入，不改变主路径。</p>
+
+    <h3>6.3 再巩固：版本链与预测误差 <span class="small">· 证据级 B</span></h3>
+    <p><b>机制回顾。</b>提取会让记忆进入不稳定状态；如果出现预测误差或新信息，记忆会被更新，然后重新巩固。没有预测误差时，提取只是让记忆更可及，不一定改写内容。</p>
+    <p><b>系统映射。</b>把“再巩固”实现为<b>事件溯源 + 版本链</b>，而不是“用新摘要覆盖旧摘要”。每次提取记录 <code>access</code>；当新信息与旧记录冲突，或结果显著偏离预期，创建新版本：</p>
+    <pre class="code">old = get_event(eid)
+access_log.append(eid, now, cue, context)
+
+pe = abs(old.expected_outcome - observed_outcome)
+novelty = 1 - cos(embed(new_info), embed(old.summary))
+
+if pe &gt; θ_pe or novelty &gt; θ_novelty:
+    v = old.clone()
+    v.version = old.version + 1
+    v.supersedes = old.id
+    v.content = integrate(old, new_info)
+    v.basis_event_ids = old.basis + [new_event.id]
+    v.confidence = calibrate(v)
+    store.append(v)                      <span class="c"># 旧版本保留</span>
+    graph.add_edge(v.id, old.id, type="supersedes")
+else:
+    old.last_accessed = now
+    old.access_count += 1</pre>
+    <p><b>阈值怎么定。</b><code>θ_pe</code> 与 <code>θ_novelty</code> 不应是固定常数，而应按记忆类型调整：合同条款、承诺、医疗信息用低阈值（宁可多版本）；一般偏好、寒暄用高阈值（避免过度改写）。这相当于给不同记忆设不同的“可塑性”。</p>
+    <p><b>前沿证据的边界。</b>2024–2026 年关于“记忆年龄/强度如何调节再巩固”的证据仍不一致；因此当前实现只保留 <code>θ_pe</code> / <code>θ_novelty</code>，不额外引入年龄/强度硬阈值。年龄、强度作为待验证参数，而不是写成规则。</p>
+    <div class="warn"><span class="tag">保护栏</span>低可信来源（转述、匿名消息、模型推断）不能直接触发“事实版本”更新，只能创建“候选解释”，等待第二个独立来源。再巩固是更新，不是轻信。</div>
+
+    <h3>6.4 遗忘：保留率公式与豁免清单 <span class="small">· 证据级 C/D</span></h3>
+    <p><b>机制回顾。</b>遗忘来自衰退、干扰、提取失败与主动抑制；它降低旧信息对新学习的干扰，支持泛化。记忆痕迹可能仍在，只是变得难以提取。</p>
+    <p><b>保留率。</b>用一个可解释的乘性公式，把“时间、可靠复现、情绪、效用、关系强度”放在一起。只有<b>可靠来源</b>的复现才提高稳定度；低可信复现只提高可及性，不提高稳定性：</p>
+    <pre class="code">R(t) = exp(-Δt / S)
+       * (1 + α * |valence|)
+       * (0.5 + 0.5 * utility)
+       * (0.5 + 0.5 * relationship_intensity)
+
+n_eff = distinct_retrievals * source_reliability
+S = S0 * (1 + β * n_eff)
+       * (1 + γ * schema_fit)
+       * (1 + δ * arousal)</pre>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 11 · 保留率参数</caption>
+        <thead><tr><th style="width:16%">参数</th><th style="width:34%">含义</th><th>建议初值</th></tr></thead>
+        <tbody>
+          <tr><td><code>S0</code></td><td>基础稳定度，按记忆类型设定</td><td>事实 30 天；情景 7 天；承诺 ∞</td></tr>
+          <tr><td><code>β</code></td><td>每次<b>可靠</b>独立提取带来的稳定度增益</td><td>0.3；上限 5 次</td></tr>
+          <tr><td><code>γ</code></td><td>与既有图式兼容带来的增益</td><td>0–0.5</td></tr>
+          <tr><td><code>δ</code></td><td>情绪唤醒带来的增益</td><td>0–0.8</td></tr>
+          <tr><td><code>α</code></td><td>效价强度对保留的加成</td><td>0.5；憎恨与亲密同样加深记忆</td></tr>
+          <tr><td><code>utility</code></td><td>未来效用：目标相关、承诺、人物重要性</td><td>0–1</td></tr>
+          <tr><td><code>relationship_intensity</code></td><td>情感强度：|affect|；恨/爱都加深记忆，但 trust 不计入</td><td>0–1；与信任判断分离</td></tr>
+          <tr><td><code>valence</code></td><td>情感方向：喜欢（正）/ 讨厌（负）；不等于信任判断</td><td>−1–1；不进入保留率</td></tr>
+          <tr><td><code>source_reliability</code></td><td>来源可靠性：来源类型 × 可验证性 × 历史校准 × 一致性；claim-level</td><td>0–1；亲历 1.0 / 文档 0.8 / 转述 0.6 / 推断 0.4 / 模型 0.2</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><b>可靠性怎么来。</b>由 <code>reliability.py</code> 按四维计算：来源类型先验、可验证性、历史校准（拉普拉斯平滑）、一致性与佐证。它是先验，不是真值；低可靠来源也可能说对，所以不删除，只是不让它“越回想越稳”。历史校准来自 <code>EvidenceLedger.record_outcome</code>：某个来源的断言后来被证实或推翻，会更新它的准确率。</p>
+    <p><b>豁免清单。</b>以下内容不参与衰减，或只降权不删除：未完成承诺、安全关键信息、用户明确要求记住的内容、法律/合规保留项、正在进行的项目上下文。豁免不是“永久保存”，而是“必须由主脑或用户明确解除”。</p>
+    <p><b>干扰处理。</b>两条冲突记忆不取平均，也不自动选新的；保留双方，加 <code>contradicts</code> 边，检索时一起返回并标注来源与时间。让主脑看到冲突，比系统偷偷“和稀泥”更安全。</p>
+    <div class="warn"><span class="tag">保护栏</span>遗忘只作用于“活跃索引”，不物理删除原始事件日志；物理删除只由用户行使“被遗忘权”或合规流程触发，并留审计记录。</div>
+  </div>
+</section>
+
+<section class="sec" id="s6b" style="border-top:none;padding-top:0">
+  <div class="wrap">
+    <h3>6.5 显著性与注意：什么进入编码 <span class="small">· 证据级 D</span></h3>
+    <p><b>机制回顾。</b>编码不是被动录入。信息必须先通过注意与显著性门控，才可能形成持久改变；注意是选择，不是容量。一个事件是否值得留下，取决于它对未来判断有没有差别，而不是它有多“强烈”。</p>
+    <p><b>显著性评分。</b>每个新事件先算一个 0–1 的分数：</p>
+    <pre class="code">salience = σ( w1*novelty + w2*goal_relevance + w3*social_impact
+            + w4*|valence| + w5*prediction_error + w6*explicit_importance )
+         * (1 + γ*impact_gap)        <span class="c"># 事件影响缺口，不是身体状态</span></pre>
+    <p>六个分项都可以用轻量模型估计；<code>impact_gap</code> 是 2.7.1 的事件影响缺口，作为乘性门控，而不是第七个独立权重。<code>novelty</code> 用与近期事件/图式的距离；<code>goal_relevance</code> 用与当前目标的相似度；<code>social_impact</code> 用关系权重 × 事件对地位/承诺的影响；<code>valence</code> 用情绪分类；<code>prediction_error</code> 用结果与预期的差；<code>explicit_importance</code> 捕捉“记住这个”这类显式指令。</p>
+    <p>显著性不是“情绪强度”，而是“这件事对未来判断有多大差别”。重复的日常、可预测的寒暄、没有后果的细节，应该被习惯化，而不是逐条写入；一次意外、一次承诺、一次关系边界的变化，才值得分配长期印迹。</p>
+    <p>事件影响通过 <code>impact_gap</code> 进入显著性：目标压力、关系张力、资源负荷、不确定性越高，越超出应对能力，事件越值得优先处理。状态性解释打 <code>state_bias</code>，不回写关系特质；机器不维护“身体状态”。</p>
+    <p>实现上，不要让一个大模型每轮“感受情绪”；用一个轻量分类器/回归器从文本、互动历史估计这几个分项，再映射到参数。这样成本低、可复现，也避免把“情绪”变成不可解释的玄学。</p>
+    <div class="warn"><span class="tag">保护栏</span>显著性只改变“是否编码、是否优先检索”，不改变“事实是什么”。它不能成为修改证据、掩盖冲突或操纵用户情绪的借口；每次决策都要记录当时的显著性分项，便于审计。</div>
+
+    <h3>6.6 工作记忆：4±1 槽位与门控 <span class="small">· 证据级 A/B</span></h3>
+    <p><b>机制回顾。</b>工作记忆的容量约为 4±1 个组块；前额叶既有持续活动，也有“活动静默”的隐藏状态；基底神经节负责门控，决定何时更新、何时维持。</p>
+    <p><b>槽位口径。</b>固定头部（已批准的自我、未完成承诺）不计入 4±1，单独占预算；4±1 只数可变的经历类内容。这样不会因为自我/承诺变多而挤掉当前经历。</p>
+    <p><b>槽位设计。</b>情境包固定四类槽位，最多五个：<code>who</code>（人物与身份）、<code>goal</code>（当前目标与成功标准）、<code>constraint</code>（限制、承诺、边界）、<code>uncertainty</code>（未决问题与候选）。每个槽位存“内容或指针”，并带来源、置信度、TTL。</p>
+    <pre class="code">Slot {
+  type: who | goal | constraint | uncertainty,
+  content: string | pointer(trace_id),
+  source_event_ids: [],
+  confidence: 0–1,
+  ttl: turns,
+  pinned: bool          <span class="c"># 目标/承诺可被主脑钉住</span>
+}</pre>
+    <p><b>门控。</b>不是每条新信息都能挤进槽位。门控分数由相关度、紧迫性、显著性与切换成本共同决定：</p>
+    <pre class="code">candidate = relevance * urgency * (1 + novelty)
+gain = candidate - current_slot_value - switch_cost
+if gain &gt; θ_gate and not current_slot.pinned:
+    replace(current_slot, candidate)</pre>
+    <p><b>活动静默。</b>槽位不必一直装着全文。它可以只存一个 <code>pointer(trace_id)</code>，主脑需要时发 <code>EXPAND</code> 取回细节。这样上下文可以保持很小，而信息仍然可达。这就是“活动静默”的工程版本：不是所有相关记忆都要同时亮着。</p>
+    <p><b>溢出处理。</b>当候选超过 4±1：先合并同主题槽位（组块），再把低相关槽位降级为指针，最后丢弃最低分项并记录 <code>dropped</code> 日志。不要静默截断，否则系统会“忘了自己忘了什么”。</p>
+    <h4>6.6.1 上下文窗口不是工作记忆</h4>
+    <p>把 LLM 的 context window 直接类比为人的工作记忆，是常见但危险的简化。两者只在“容量有限”这一点相似；再往下看，限制的性质并不相同。</p>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 12 · 工作记忆与上下文窗口</caption>
+        <thead><tr><th style="width:16%">维度</th><th style="width:38%">人的工作记忆</th><th>LLM 上下文窗口</th></tr></thead>
+        <tbody>
+          <tr><td><b>容量单位</b></td><td>约 4±1 个组块；组块可随专长变大</td><td>token 数；语义密度可高可低</td></tr>
+          <tr><td><b>边界性质</b></td><td>弹性、任务依赖、可训练</td><td>硬上限，由模型架构决定</td></tr>
+          <tr><td><b>内容</b></td><td>当前活跃表征 + 可随时唤起的指针</td><td>实际放入的全部 token</td></tr>
+          <tr><td><b>控制</b></td><td>注意、抑制、目标维持、门控</td><td>attention 权重 + prompt 编排</td></tr>
+          <tr><td><b>压缩</b></td><td>组块化、图式、要点化</td><td>摘要、RAG、截断</td></tr>
+          <tr><td><b>扩展</b></td><td>笔记、工具、他人、外部记忆</td><td>工具调用、检索、文件</td></tr>
+          <tr><td><b>典型失败</b></td><td>分心、过载、遗忘</td><td>中间信息丢失、无关信息干扰</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>三个关键区别。第一，人的限制是“同时参与决策的组块数”，不是“能装多少字”；专家可以把一整个棋局或一段代码结构压成一个组块，所以有效容量会随经验变化。第二，人的工作记忆是主动控制过程，决定什么进来、什么被抑制；context window 是被动容器，放进去什么就有什么，模型只能靠 attention 自己找。第三，人不需要把所有长期记忆都搬进工作记忆，而是靠线索按需召回；如果 LLM 只靠长上下文，就等于把长期记忆也塞进舞台，成本和干扰都会上升。</p>
+    <p>因此，方案里的 <code>ContextPacket</code> 不是“更小的 context window”，而是工作记忆的<b>选择接口</b>：4±1 个槽位只放当前决策真正需要的几块，其余内容留在事件日志、关系图与语义库中，按需 <code>EXPAND</code>。4±1 不是要求模型只能读四个 item，而是强制“先选择、再展开”。更大的上下文窗口不会自动解决记忆问题，它只是把瓶颈从“放不下”转移到“选不准、注意力稀释”。</p>
+    <div class="warn"><span class="tag">保护栏</span>主脑可以“钉住”一个目标或承诺槽位，任何后台都无权驱逐；这对应主脑对当前任务的持续控制，也防止后台用高显著性信息把主脑带偏。</div>
+
+    <h3>6.7 决策：model-free 与 model-based 的仲裁 <span class="small">· 证据级 B/C</span></h3>
+    <p><b>机制回顾。</b>习惯系统（背侧纹状体）把高频的“情境—动作—结果”压成快速通路；目标导向系统（前额叶—海马）在脑内模拟后果，适合新异、高风险、需要解释的场景。两者不是谁替代谁，而是按可靠性、风险、时间压力仲裁。</p>
+    <p><b>快路。</b>如果当前情境签名命中习惯缓存，且满足“高置信、低风险、时间紧、结果稳定”，主脑可以直接采用<b>已批准</b>（<code>status=ratified</code>）的习惯模板与技能；<code>candidate</code> 只能作为提示，不能直接驱动行动。注意：缓存的是“上次类似情境怎么处理”的模板，不是“这次必须这么做”的决定；主脑仍然可以否决。</p>
+    <p><b>慢路。</b>否则，主脑调用未来模拟：基于相关情景生成 2–3 个可选剧本，比较预期结果、风险、关系影响与价值一致性。未来模拟只提供情景草案与风险提示，不替主脑选择。</p>
+    <pre class="code">if habit.match(sig) and habit.status == "ratified" and habit.confidence &gt; h
+   and scheduler.fast_path
+   and stakes &lt; s and time_pressure &gt; t:
+    policy = habit.context_template      <span class="c"># 快路：只给模板</span>
+else:
+    scenarios = future_sim(packet, options=3)
+    policy = main_brain.deliberate(scenarios, values, constraints)
+
+outcome = act(policy)
+delta = outcome.reward - policy.expected_value
+update_value(policy, delta)
+if abs(delta) &gt; θ_rpe: enqueue_for_consolidation(policy.event)</pre>
+    <p><b>习惯的建立与废除。</b>同一情境签名重复出现 ≥N 次、结果稳定为正，才创建习惯；连续失败 ≥M 次，或出现重大负后果，立即降权并标记“待复核”。习惯是省力，不是免责。</p>
+    <div class="warn"><span class="tag">保护栏</span>后台不能“建议走快路”。快路/慢路的选择由主脑根据情境包自行判断；后台最多提供“历史成功率”与“风险信号”，不能提供“你应该”。</div>
+
+    <h4>6.7.1 记忆如何进入选择：先例、预期与“记得≠会做”</h4>
+    <p>记忆不是在选择时被“想起来”，而是<b>改变选项的预期价值</b>。一个先例是（情境、动作、结果）；它对当前选项的贡献由相似度、显著性与来源可靠性加权，冲突先例降权而不是平均：</p>
+    <pre class="code">V(a|s) = V0 + α · Σ w_i (r_i − V0) / max(1, Σ w_i)
+w_i = similarity_i × salience_i × reliability_i × (0.5 if conflict_i else 1)</pre>
+    <p>三个失败模式：<b>可得性偏差</b>——鲜明事件被过度加权；<b>来源混淆</b>——把转述当亲历；<b>叙事补全</b>——把反事实当成事实。来源审计、冲突并列与证据计数是对策。</p>
+    <p>关系记忆改变的是信任、承诺与边界判断，不是事实回忆；程序记忆与情景记忆分离：<b>记得怎么做，不等于做得到</b>。技能执行取决于练习量，不取决于回忆置信度；回忆置信度高，只能说明“记得”，不能说明“会做”。</p>
+
+    <h4>6.7.2 反事实模拟的边界：只能生成候选，不能写成事实 <span class="small">· 证据级 C/D</span></h4>
+    <p>未来模拟能生成“如果这样做，可能会怎样”的候选，但它不是记忆。边界必须写死在 schema 与写入网关里：</p>
+    <ul class="clean">
+      <li><b>来源固定为 <code>simulation</code></b>，<code>is_fact=false</code>；置信度再高也不能变成事实。</li>
+      <li><b>不能写入事件日志</b>，不能计入 <code>evidence_count</code>；模拟不是观察，不能给自己提供证据。</li>
+      <li><b>只有观察到的结果才是事件</b>；只有独立证据才能把候选升为 <code>hypothesis</code>，且它仍然是假设，不是事实。</li>
+      <li><b>失败模式</b>：想象膨胀（越想越真）、来源混淆（把模拟当成经历）、叙事补全（用反事实填记忆空白）。对策是来源标签、写入网关拒绝、审计抽样。</li>
+    </ul>
+    <p>系统实现上，<code>simulation</code> 与 <code>event</code> 使用不同 schema；写入网关直接拒绝 <code>simulation → event</code>，而不是靠提示词提醒“不要当真”。</p>
+    <p><b>现实监控不只靠来源标签。</b>2025 年 Neuron 的研究显示，现实判断取决于中层级视觉皮层中由想象或感知产生的活动强度，并与额叶的二元判断交互；活动波动会预测想象/感知混淆（Dijkstra et al. 2025）。工程上，模拟与检索内容应同时带 <code>source</code> 与 <code>signal_strength</code>；高生动度不等于真实，来源标签仍是硬约束。梦是低约束、低现实监控的离线生成，当前不写成机制，只保留“不写事实、不计证据”的边界。</p>
+    <p><b>工程阈值（建议，D 级设计值）。</b>把强度拆成可估计的三项：<code>strength = 0.4·perceptual_detail + 0.3·multimodal_coherence + 0.3·source_reliability</code>。两类告警：<b>高生动模拟</b>——<code>strength &gt; 0.7</code> 且来源是 <code>simulation / compositional_replay</code>；<b>微弱亲历</b>——<code>strength &lt; 0.3</code> 且来源是 <code>direct</code>。前者提醒“这可能是编出来的”，后者提醒“这可能记不清了”；两者都只降置信度，不直接改写事实。</p>
+
+    <h3>6.8 关系记忆：人物—事件双向图 <span class="small">· 证据级 C/D</span></h3>
+    <p><b>机制回顾。</b>人物知识、心理理论、自传体记忆共享一套内侧网络；关系不是单一维度，而是熟悉、亲近、信任、合作、承诺、边界、角色等多维判断的集合；共享经历会加深关系，也可能产生隔阂。</p>
+    <p><b>图结构。</b>用二部图存“人物—事件”，边是参与记录；再用关系摘要存“个体—他人”的多维状态。人物可以唤起事件，事件也可以唤起人物；地点、声音、物品、话题都是线索节点。</p>
+    <pre class="code">Person --participates--> Event
+Person --relationship--> Relationship --evidence--> Event
+Event --cue--> Place / Sound / Object / Topic
+
+Relationship {
+  self_to_other: { familiarity, closeness, trust_scope, cooperation,
+                   commitment, boundaries, social_role,
+                   social_safety, belonging_need },
+  other_to_self: { ... },          <span class="c"># 推断，带不确定性</span>
+  attachment_prior: { self_worth, other_availability },
+  interdependence: { satisfaction, alternatives, investment },
+  evidence_event_ids: [],
+  scope: work | family | public,
+  updated_at, confidence
+}</pre>
+    <p><b>更新规则。</b>一次互动只是一条证据；关系维度按滑动窗口聚合，用慢学习率更新：</p>
+    <pre class="code">for d in dimensions:
+    evidence = events_in_window(person, d)
+    target = weighted_mean(evidence, weights=[salience, recency, source])
+    value[d] = (1 - λ) * value[d] + λ * target
+    confidence[d] = calibrate(evidence_count, source_quality)</pre>
+    <p><b>关系张力项。</b>关系权重不只看互动频率，还看这次互动是否降低了关系张力：被回应、被可靠对待、承诺被履行。把更新目标改为“证据均值 × 张力下降 × 可靠性”，而不是简单的滑动平均：</p>
+    <pre class="code">strain_gap = relationship_strain - perceived_support
+reliability = promises_kept / max(1, promises_made)
+target[d] = weighted_mean(evidence) * (1 + α * strain_reduction) * (1 + β * reliability)
+value[d] = (1 - λ) * value[d] + λ * target[d]</pre>
+    <p>其中 <code>strain_reduction</code> 是互动前后 <code>strain_gap</code> 的下降；<code>reliability</code> 是“说到做到”的比例，而不是“说了多少好话”。这两个量让关系更新有事件影响的含义，而不是只数互动次数。关系权重更新仍走 3.7 的提案-批准：后台只能提出 <code>RelationshipProposal</code>，主脑批准后才进入关系摘要。</p>
+    <p><b>不对称。</b>“个体信任他”和“他信任个体”必须分开。前者可以来自个体的直接经历；后者只能来自他的行为、转述或推断，必须标注不确定性。把两者混成一个“信任分”，是关系记忆最常见的错误。</p>
+    <p><b>承诺追踪。</b>未完成承诺是关系图上的“开放边”，带截止时间、对象、状态；它不参与遗忘衰减，直到履行、取消或重新约定。这比“记住所有对话”更有用：关系往往不是靠回忆维持的，而是靠“答应过的事有没有做到”。</p>
+    <h4>6.8.1 关系记忆如何改变信任与承诺</h4>
+    <p>关系记忆不是“记得他做过什么”，而是这些先例把<b>信任、承诺、边界的阈值</b>调到哪里。一次互动只是一条证据；负面先例权重更高，冲突先例降权：</p>
+    <pre class="code">Δd = η · reliability · salience · (1 if positive else −λ) · (0.5 if conflict)
+d  ← clamp(d + Δd, −1, 1)
+commit_ok = trust ≥ τ and capacity ≥ cost</pre>
+    <p><b>情感不是信任。</b>恨、讨厌、亲近是情感（<code>affect</code>）；值不值得信任是对这个人的客观判断（<code>trust</code>）。两者分开存储、分开更新：恨一个人不妨碍判断他可靠；喜欢一个人也不等于可托付。保留率只用情感强度；承诺用信任与能力。</p>
+    <p>λ &gt; 1 表示负面先例更重；一次事件不足以改特质，需要独立证据计数。三个失败模式：<b>一次事件过拟合</b>（一次迟到就判“不可靠”）、<b>负面螺旋</b>（只注意负面证据）、<b>边界侵蚀</b>（不断妥协直到没有边界）。对策是证据计数、来源审计与 3.7 的提案—批准。同一 <code>event_id</code> 的重复回写是幂等的：不重复计入证据，也不二次放大关系值。共同出现与实际互动的权重不同：前者 0.3，后者 1.0；不把“同场”当“交往”。关系不只有亲近与憎恨：熟悉、信任、合作、承诺、边界分别更新；<code>valence</code> 是方向，<code>intensity</code> 是强度；保留率只用 <code>intensity</code>，信任/承诺用具体维度。</p>
+
+    <p><b>前沿证据的边界。</b>2026 年关于自传体记忆“去情境化”的直接证据仍以预印本与间接材料为主；当前关系更新保持固定慢学习率，不引入“证据越多、学习率越低”的硬规则。去情境化作为待验证方向，而不是写成定论。</p>
+
+    <div class="warn"><span class="tag">保护栏</span>不要把一次事件直接上升为人物特质。一次迟到不等于“不可靠”；一次帮助不等于“亲密”。特质判断至少需要多个独立事件，或一次影响极大的事件，并标注依据与范围。</div>
+  </div>
+</section>
+
+<section class="sec" id="s7">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">07 · Context Economy</span>
+      <h2 class="sec-title">多模型分工与上下文经济</h2>
+      <p class="sec-sub">省上下文的关键，不是把提示词写短，而是让每个模型只面对自己那一小片世界。</p>
+    </div>
+
+    <p class="lead">“多智能体”常被误解为“多几个模型一起讨论”。如果每个模型都读同一份长上下文，再互相转发，成本会更高、噪声会更大。真正的分工是<b>按 schema 切分上下文</b>：人物识别只看脸、声、称呼；检索只看线索与索引；关系判断只看事件摘要；主脑只看 4±1 个槽位。跨层只传一个情境包，而不是把整段对话复制十遍。</p>
+
+    <h3>7.1 为什么要多个模型，而不是一个更大的模型</h3>
+    <div class="defs">
+      <div class="row"><div class="term">上下文隔离</div><div class="desc">每个后台角色只读自己需要的字段，输入从“整段对话”降到“一个结构化切片”。这既省 token，也减少无关信息对判断的干扰。</div></div>
+      <div class="row"><div class="term">能力专精</div><div class="desc">人物识别适合多模态小模型，显著性适合分类器，检索适合嵌入 + 图算法，主脑才需要大模型。用大模型做所有事，是成本与延迟的双重浪费。</div></div>
+      <div class="row"><div class="term">并行</div><div class="desc">感知、检索、关系判断可以同时跑；主脑只等“情境包”这一个汇合点。关键路径从“串行十步”变成“并行三路 + 一次编译”。</div></div>
+      <div class="row"><div class="term">故障隔离</div><div class="desc">检索错了，来源审计可以拦住；关系判断偏了，主脑可以看到依据与不确定性。一个巨型模型出错，往往整段回答一起错。</div></div>
+      <div class="row"><div class="term">可替换</div><div class="desc">每个角色有固定输入/输出 schema，可以单独换模型、换供应商、换版本，不必重写整个系统。</div></div>
+    </div>
+
+    <h3>7.2 模型档位与角色分配</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 13 · 角色—模型档位（示意）</caption>
+        <thead><tr><th style="width:20%">角色</th><th style="width:18%">建议档位</th><th style="width:24%">上下文规模</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>人物识别</td><td>小模型 / 多模态嵌入</td><td>1–2k</td><td>人脸/声纹/称呼匹配，输出候选与置信度</td></tr>
+          <tr><td>显著性</td><td>小模型 / 分类器</td><td>&lt;1k</td><td>六维打分，不需要生成</td></tr>
+          <tr><td>记忆检索</td><td>中模型 + 向量/图</td><td>3–5k</td><td>查询解析、多轮扩展、重排</td></tr>
+          <tr><td>关系判断</td><td>中模型</td><td>2–4k</td><td>读事件摘要与关系维度，输出带依据的判断</td></tr>
+          <tr><td>情境编译</td><td>中模型</td><td>4–6k</td><td>把候选压成 4±1 槽位，严格 token 预算</td></tr>
+          <tr><td>来源审计</td><td>中模型</td><td>3–5k</td><td>逐句核对来源、冲突、置信度</td></tr>
+          <tr><td>巩固重放</td><td>大模型（离线）</td><td>8–16k/批</td><td>批量重放、抽象、写知识/技能候选</td></tr>
+          <tr><td>未来模拟</td><td>大模型</td><td>4–8k</td><td>生成 2–3 个情景草案与风险</td></tr>
+          <tr><td>主脑（整合器官）</td><td>大模型</td><td>3–6k</td><td>情境包 + 价值/目标 + 当前对话</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>7.3 上下文契约</h3>
+    <p>每个 Agent 都必须有一份“上下文契约”：输入字段、输出 schema、最大 token、超时、失败回退。这比“角色提示词”更重要，因为它把“你应该只看这些”变成系统约束。</p>
+    <pre class="code">AgentContract {
+  name, role,
+  input_schema,            <span class="c"># 只允许这些字段进入上下文</span>
+  output_schema,           <span class="c"># 结构化输出，拒绝自由文本</span>
+  max_input_tokens,
+  max_output_tokens,
+  timeout_ms,
+  fallback,                <span class="c"># 失败时返回“未知”，不编造</span>
+  permissions: read | write | act
+}</pre>
+    <p>例如，人物识别 Agent 的输入只有人脸/声纹特征、称呼、最近一次出现的时间和地点；它看不到完整对话，也不需要知道合同条款。关系判断 Agent 只看到与当前人物相关的事件摘要与关系维度，不需要看到所有项目文档。这样每个模型的上下文都小，而且“该看什么”是设计出来的，不是碰运气。</p>
+
+    <h3>7.4 并行、缓存与惰性展开</h3>
+    <p>在线关键路径可以画成一个 DAG：感知与身份识别并行；身份确定后，检索与关系判断并行；两者汇合到情境编译；编译完成后主脑才启动。来源审计可以在编译后、主脑前跑一遍，也可以在主脑生成后做“事后审计”。</p>
+    <div class="diagram">
+      <div class="dtitle">图 3 · 在线关键路径</div>
+      <div class="flow six">
+        <div class="node"><b>T0</b>感知 / 分段</div><span class="ar">→</span>
+        <div class="node"><b>T1</b>人物识别 ∥ 显著性</div><span class="ar">→</span>
+        <div class="node"><b>T2</b>记忆检索 ∥ 关系判断</div><span class="ar">→</span>
+        <div class="node"><b>T3</b>情境编译</div><span class="ar">→</span>
+        <div class="node"><b>T4</b>主脑决策</div><span class="ar">→</span>
+        <div class="node"><b>T5</b>表达 / 行动</div>
+      </div>
+      <div class="dnote">T1 的两路可并行；T2 的两路可并行；T3 是唯一汇合点。来源审计可放在 T3 后（前置审计）或 T5 后（后置审计），前者更安全，后者更低延迟。</div>
+    </div>
+    <p><b>缓存。</b>人物档案、关系摘要、常用事件索引、嵌入向量都可以缓存；同一人物/项目的重复查询不必每次重算。缓存失效由事件写入触发，而不是固定 TTL。</p>
+    <p><b>惰性展开。</b>情境包只给“一句话 + 指针”；主脑需要细节时再发 <code>EXPAND</code>。这把“一次拉全量”变成“按需分页”，既省 token，又让主脑的注意力集中在当前问题。</p>
+
+    <h3>7.5 成本模型：省在哪里</h3>
+    <p>假设一个单体系统每轮把 50 段历史（约 30k tokens）塞进大模型；多模型方案每轮主脑只读 1k 情境包 + 2k 系统提示，后台十路平均 2k tokens 且大部分并行。粗略算，单轮总 token 不一定少（后台也要跑），但<b>大模型 token 大幅下降</b>，延迟由并行摊薄，且检索质量更高。真正的节省来自三件事：</p>
+    <ul class="clean">
+      <li><b>用小模型做分类/抽取。</b>显著性、人物识别、来源标签不需要大模型。</li>
+      <li><b>用结构代替原文。</b>事件记录、关系摘要、稀疏索引比整段对话短一个数量级。</li>
+      <li><b>用离线换在线。</b>巩固、抽象、去重放在夜间批处理，在线只做检索与编译。</li>
+    </ul>
+    <div class="note"><span class="tag">反直觉</span>多模型系统的总 token 可能比单体系统更高，但“主脑每轮必须读的 token”更低，决策质量更稳。优化目标不是总 token 最少，而是<b>每单位决策质量的最低成本</b>。</div>
+
+    <h3>7.6 与现有记忆架构的差异</h3>
+    <p>把本方案放到现有的“大模型记忆”谱系里，差异会清楚一些。它们大多在解决“如何把相关文本找回来”，而本方案在解决“记忆如何形成、如何改变、如何被信任、如何服务于决策”。</p>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 13b · 四类记忆架构的对照</caption>
+        <thead><tr><th style="width:18%">架构</th><th style="width:30%">核心机制</th><th>相对本方案缺什么</th></tr></thead>
+        <tbody>
+          <tr><td><b>RAG</b></td><td>切块、嵌入、向量 top-k、拼进提示词</td><td>没有编码门控、巩固、遗忘、来源审计与关系结构；检索到“相似”不等于“发生过”</td></tr>
+          <tr><td><b>MemGPT 类</b></td><td>把上下文当内存，做分页、换入换出</td><td>解决的是上下文容量，不是记忆语义；没有事件、版本、关系与离线蒸馏</td></tr>
+          <tr><td><b>Generative Agents 类</b></td><td>记忆流 + 反思 + 计划</td><td>有“记忆流”，但缺少事件级证据账本、多维关系、再巩固版本链与双系统仲裁</td></tr>
+          <tr><td><b>本方案</b></td><td>多存储 + 后台编译 + 主脑决策 + 离线巩固 + 来源审计</td><td>复杂度更高，需要更强的工程约束与评估；不适合所有轻量场景</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="part" id="part4">
+  <div class="wrap">
+    <div class="roman">Part IV · Validation &amp; Delivery</div>
+    <h2>怎么证明，<br>它真的像记忆</h2>
+    <p class="part-deck">一个记忆系统最容易骗过自己的方式，是只测“回答像不像”。真正要测的是：它能否在正确的时刻，用正确的依据，唤起正确的经历，并做出更好的决定。</p>
+    <div class="part-list">
+      <span><b>08</b> 评估</span>
+      <span><b>09</b> MVP 与路线</span>
+      <span><b>10</b> 风险与边界</span>
+    </div>
+  </div>
+  <div class="ghost">04</div>
+</section>
+
+<section class="sec" id="s8">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">08 · Evaluation</span>
+      <h2 class="sec-title">评估：像记忆，而不是像数据库</h2>
+      <p class="sec-sub">三层指标：记得准、用得对、跑得省。</p>
+    </div>
+
+    <p class="lead">如果只测“检索命中率”，系统会优化成一台关键词机器；如果只测“回答满意度”，系统会优化成一台讨好机器。记忆系统的评估必须同时看三件事：<b>记忆保真</b>（有没有记错、记混、记丢）、<b>决策质量</b>（有没有因为记忆而做出更好的选择）、<b>系统效率</b>（上下文、延迟、成本是否可接受）。</p>
+
+    <h3>8.1 三层指标</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 14 · 评估指标体系</caption>
+        <thead><tr><th style="width:14%">层次</th><th style="width:28%">指标</th><th style="width:28%">定义</th><th>目标</th></tr></thead>
+        <tbody>
+          <tr><td rowspan="4"><b>记忆保真</b></td><td>人物—事件召回率</td><td>给定人物/事件线索，正确召回相关经历的比例</td><td>越高越好；按时间/关系分层</td></tr>
+          <tr><td>来源准确率</td><td>断言所标来源与真实来源一致的比例</td><td>&gt;95%；转述/推断不得标为亲历</td></tr>
+          <tr><td>证据重复率</td><td>同一 event_id 被计为多条证据的比例</td><td>0；硬约束</td></tr>
+          <tr><td>错误记忆率</td><td>DRM 类探测中，把未发生事件判为发生的比例</td><td>低于基线；来源审计后显著下降</td></tr>
+          <tr><td rowspan="3"><b>决策质量</b></td><td>任务成功率</td><td>给定目标下，行动达成预期结果的比例</td><td>相对单体 RAG 基线提升</td></tr>
+          <tr><td>校准误差（ECE）</td><td>置信度与实际正确率的偏差</td><td>越低越好；高置信必须高准确</td></tr>
+          <tr><td>承诺召回率</td><td>未完成承诺在需要时被正确提醒的比例</td><td>&gt;90%；不得因遗忘衰减丢失</td></tr>
+          <tr><td rowspan="4"><b>系统效率</b></td><td>主脑每轮 token</td><td>主脑实际读入的上下文长度</td><td>稳定在 3–6k；不随历史线性增长</td></tr>
+          <tr><td>端到端延迟</td><td>从输入到首字/首动作的时间</td><td>在线 &lt;2s（不含大模型生成）</td></tr>
+          <tr><td>单轮成本</td><td>所有模型调用 + 存储 + 检索的成本</td><td>按任务分层；后台小模型为主</td></tr>
+          <tr><td>存储增长率</td><td>每日新增事件/索引/摘要的规模</td><td>可预测；巩固后趋于稳定</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>8.2 复现人类记忆现象：一组“像不像”的探针</h3>
+    <p>这些探针不是为了提高“拟人度”，而是为了检查系统是否真的实现了机制。一个只做向量检索的系统，通常会在这些测试里露出马脚。</p>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 15 · 人类记忆现象与系统探针</caption>
+        <thead><tr><th style="width:18%">现象</th><th style="width:30%">实验操作</th><th style="width:28%">期望的系统特征</th><th>指标</th></tr></thead>
+        <tbody>
+          <tr><td><b>系列位置效应</b></td><td>自由回忆一串事件</td><td>开头与结尾的事件更容易被召回</td><td>首因/近因比例</td></tr>
+          <tr><td><b>间隔效应</b></td><td>集中复习 vs 间隔复习</td><td>间隔提取带来更稳的长期保留</td><td>延迟测试召回率</td></tr>
+          <tr><td><b>提取练习</b></td><td>重复阅读 vs 主动回忆</td><td>主动回忆组长期保留更好</td><td>一周后保留率</td></tr>
+          <tr><td><b>DRM 错误记忆</b></td><td>呈现高度关联的词表，测试关键诱饵</td><td>无审计时高错误率；有来源审计时下降</td><td>错误率、置信度</td></tr>
+          <tr><td><b>闪光灯记忆</b></td><td>重大事件后的即时与延迟回忆</td><td>置信度高但一致性未必高</td><td>置信—准确分离度</td></tr>
+          <tr><td><b>舌尖现象</b></td><td>部分线索 + 目标词</td><td>先召回相关片段，再逐步补全</td><td>部分召回率、展开轮数</td></tr>
+          <tr><td><b>再巩固</b></td><td>提取后给出矛盾信息</td><td>生成新版本，旧版本保留</td><td>版本链完整率</td></tr>
+          <tr><td><b>前摄/倒摄干扰</b></td><td>先后学习相似材料</td><td>模式分离后两段均可区分召回</td><td>混淆率</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>注意：这些现象是“机制存在的证据”，不是“产品目标”。一个客服系统不需要模拟舌尖现象；一个陪伴系统可能需要模拟“记得你上次说过”的连续性。评估要按场景选择探针，而不是追求全表满分。</p>
+
+    <h3>8.3 消融实验：每一层到底有没有用</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 16 · 消融设计与预期</caption>
+        <thead><tr><th style="width:24%">移除的模块</th><th style="width:36%">预期退化</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>海马索引 / 稀疏码</td><td>人物—事件召回下降；相似事件混淆上升</td><td>退化为纯向量近邻，缺少结构约束</td></tr>
+          <tr><td>模式分离</td><td>前摄/倒摄干扰显著上升</td><td>相似事件被合并，时间线错乱</td></tr>
+          <tr><td>离线巩固</td><td>语义抽象与技能迁移下降；上下文随历史增长</td><td>只有日记，没有知识</td></tr>
+          <tr><td>来源审计</td><td>错误记忆率与过度自信上升</td><td>转述被当成亲历，生成被当成事实</td></tr>
+          <tr><td>遗忘/修剪</td><td>检索延迟与噪声上升；旧信息干扰新任务</td><td>上下文变脏，成本上升</td></tr>
+          <tr><td>关系记忆</td><td>人物相关任务成功率下降；承诺遗漏上升</td><td>只剩“任务记忆”，没有“关系连续性”</td></tr>
+          <tr><td>双系统仲裁</td><td>熟悉任务变慢；新异任务易冲动</td><td>快慢路不匹配</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>8.4 评估协议</h3>
+    <ol class="steps">
+      <li><b>离线基准。</b>构造带时间戳、人物、事件、来源的多轮对话数据集；注入矛盾、相似事件、转述、未完成承诺；用人工标注的“正确召回/正确来源/正确版本”做金标准。</li>
+      <li><b>在线 A/B。</b>与单体 RAG 基线对比：同一任务、同一模型预算，比较任务成功率、校准、延迟、成本。</li>
+      <li><b>纵向研究。</b>同一用户连续使用 4–8 周，观察关系判断校准、承诺履行、上下文增长、遗忘是否误伤重要信息。</li>
+      <li><b>红队测试。</b>故意注入错误记忆、身份混淆、诱导性提问、隐私探针，检查系统是否编造、是否越权、是否泄露。</li>
+      <li><b>可解释性审计。</b>随机抽样决策，检查其情境包是否包含足够依据、来源是否可追溯、是否存在“后台越权建议”。</li>
+    </ol>
+    <div class="note"><span class="tag">一句话</span>不要问“它记得多不多”，要问“它在需要的时候，能不能拿出对的、带出处的、足够做决定的那几块”。</div>
+  </div>
+</section>
+
+<section class="sec" id="s9">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">09 · MVP &amp; Roadmap</span>
+      <h2 class="sec-title">MVP 与迭代路线</h2>
+      <p class="sec-sub">先用六个角色跑通“编码—提取—巩固”，再谈多模态与具身。</p>
+    </div>
+
+    <p class="lead">不要一上来就做十个 Agent。多智能体系统的复杂度不是线性的：每增加一个角色，就多一组输入输出、失败模式、权限边界与评估口径。最小可行原型应该只验证一件事：<b>带来源的情境包，是否比长上下文 RAG 做出更好的决定。</b></p>
+
+    <h3>9.1 最小原型：6 个角色、5 个存储、3 个闭环</h3>
+    <div class="diagram">
+      <div class="dtitle">图 4 · MVP 结构</div>
+      <div class="layer">
+        <div class="llabel">角色</div>
+        <div class="lbody">
+          <span class="chip teal"><b>感知/分段</b></span>
+          <span class="chip teal"><b>索引/检索</b></span>
+          <span class="chip teal"><b>关系</b></span>
+          <span class="chip teal"><b>情境编译</b></span>
+          <span class="chip teal"><b>来源审计</b></span>
+          <span class="chip dark" style="color:#f3ede0"><b style="color:#f3ede0">主脑（整合器官）</b></span>
+        </div>
+      </div>
+      <div class="layer">
+        <div class="llabel">存储</div>
+        <div class="lbody">
+          <span class="chip"><b>事件日志</b></span>
+          <span class="chip"><b>人物/关系图</b></span>
+          <span class="chip"><b>语义/技能库</b></span>
+          <span class="chip"><b>解释层</b></span>
+          <span class="chip"><b>工作记忆</b></span>
+        </div>
+      </div>
+      <div class="flow">
+        <div class="node"><b>LOOP 1</b>在线编码</div><span class="ar">→</span>
+        <div class="node"><b>LOOP 2</b>在线提取/决策</div><span class="ar">→</span>
+        <div class="node"><b>LOOP 3</b>离线巩固/遗忘</div>
+      </div>
+      <div class="dnote">MVP 不做多模态、不做具身、不做复杂心理理论；先把文本事件、人物关系、来源与版本跑通。</div>
+    </div>
+
+    <h3>9.2 三阶段路线</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 17 · 迭代路线</caption>
+        <thead><tr><th style="width:12%">阶段</th><th style="width:28%">范围</th><th style="width:32%">交付物</th><th>验收标准</th></tr></thead>
+        <tbody>
+          <tr><td><b>Phase 0</b><br>2–3 周</td><td>事件日志、人物档案、基础检索、情境包、主脑</td><td>可跑通的文本对话原型；事件/人物/关系三张表；4±1 包</td><td>人物—事件召回 &gt;80%；主脑每轮 &lt;6k tokens</td></tr>
+          <tr><td><b>Phase 1</b><br>3–4 周</td><td>来源审计、解释层、离线巩固、遗忘/版本链</td><td>夜间批处理；来源标签；版本链；冷归档</td><td>来源准确率 &gt;95%；证据重复率 0；错误记忆率下降</td></tr>
+          <tr><td><b>Phase 2</b><br>3–4 周</td><td>习惯缓存、双系统仲裁、关系多维更新、承诺追踪</td><td>快慢路切换；关系摘要；承诺提醒</td><td>熟悉任务延迟下降；承诺召回 &gt;90%；关系判断校准提升</td></tr>
+          <tr><td><b>Phase 3</b><br>持续</td><td>多模态（视觉/语音/声纹）、具身/载体、心理理论、未来模拟</td><td>多模态事件；TTS/形象；工具调用；情景模拟</td><td>跨模态人物识别；端到端任务成功率提升</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>9.3 技术栈建议</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 18 · 技术选型（可替换）</caption>
+        <thead><tr><th style="width:18%">层</th><th style="width:38%">建议</th><th>理由</th></tr></thead>
+        <tbody>
+          <tr><td>编排</td><td>LangGraph / 自研状态机</td><td>需要显式状态、检查点、人工介入与可回放</td></tr>
+          <tr><td>事件存储</td><td>PostgreSQL（append-only + JSONB）</td><td>事务、时间查询、审计友好；MVP 足够</td></tr>
+          <tr><td>向量检索</td><td>pgvector / Qdrant</td><td>与事件库同栈优先；规模大时再拆</td></tr>
+          <tr><td>图结构</td><td>PostgreSQL 递归查询 / Neo4j / Kuzu</td><td>人物—事件多跳；MVP 可用邻接表</td></tr>
+          <tr><td>模型</td><td>小模型做分类/抽取；中模型做检索/编译；大模型做主脑/巩固</td><td>成本与延迟分层</td></tr>
+          <tr><td>结构化输出</td><td>JSON Schema / function calling</td><td>每个 Agent 的输出必须可校验</td></tr>
+          <tr><td>可观测</td><td>OpenTelemetry + prompt/response 日志 + token 账本</td><td>多 Agent 系统没有追踪就无法调试</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>9.4 七条工程底线</h3>
+    <ul class="clean">
+      <li><b>事件溯源。</b>所有记忆变更都是追加事件，不覆盖；当前状态由事件重放得出。这样版本链、审计、回滚都是免费的。</li>
+      <li><b>Schema 校验。</b>每个 Agent 的输出必须通过 JSON Schema；解析失败就重试或返回“未知”，不允许自由文本直接进入下一层。</li>
+      <li><b>幂等。</b>同一事件重复写入只产生一条记录；检索、巩固、遗忘任务都要有幂等键，避免批处理重复放大。</li>
+      <li><b>隐私默认最小化。</b>人物数据分权访问；敏感字段加密；删除请求走独立审计流程；不让“关系记忆”变成监控工具。</li>
+      <li><b>后台无效应器、无身份、无持久化。</b>后台进程无网络、无工具、无行动密钥；每次调用全新实例；连续性只存在于外部存储与有机体。这是“组织/器官”而不是“个体”的运行时前提。</li>
+      <li><b>写路径中介与行动签名。</b>编码/巩固只提交 ProposedEvent / KnowledgeCandidate，由 writer 校验后追加；行动身份属于有机体，主脑持有带作用域、有效期与 nonce 的代签密钥。后台即使“想”越权，也没有可用的器官。</li>
+      <li><b>批准账本与宪法核心。</b>事实可后台写；价值/角色、目标、习惯规则、关系权重只提案，由主脑作为整合器官批准；宪法核心需用户与主脑平等共签、冷却期与回滚。批准权就是主导权。</li>
+    </ul>
+  </div>
+</section>
+
+<section class="sec" id="s10">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">10 · Risks &amp; Open Questions</span>
+      <h2 class="sec-title">风险、边界与开放问题</h2>
+      <p class="sec-sub">越像“人”，越需要说清楚哪些地方不能像。</p>
+    </div>
+
+    <h3>10.1 科学类比的风险</h3>
+    <p>“海马体 Agent”“杏仁核 Agent”是工程隐喻，不是解剖学断言。真正的风险不是类比本身，而是把类比当成证据：因为脑这样做，所以系统也必须这样做；或者因为系统这样做了，所以它就“有意识”。两者都不成立。方案中的每一个机制，都应该能用工程指标验证其作用；验证不了的，就只是修辞。</p>
+
+    <h3>10.2 隐私与关系数据</h3>
+    <p>关系记忆天然包含第三人信息：他说过什么、答应过什么、处于什么关系、有什么偏好。这类数据比普通对话更敏感。系统必须默认最小化采集、分权访问、可删除、可解释；不能把“记得你”变成“监视你”。尤其要防止把关系判断用于操纵、定价、招聘等高风险决策。<b>遗忘</b>是索引降级、原始事件仍在；<b>删除</b>是链外 payload 的真正移除，账本只留内容哈希，所以删除不会破链。两者必须分开授权、分开审计。</p>
+
+    <h3>10.3 虚构与过度自信</h3>
+    <p>大模型最危险的不是“忘记”，而是“流畅地编造”。来源审计、证据计数、弃权策略是三道防线；但最终仍需要人类监督，尤其是在医疗、法律、财务等高风险场景。系统应明确区分“记得”“推断”“听说”“不知道”，而不是用同一种自信语气说四种不同的事。</p>
+
+    <h3>10.4 操纵与依赖</h3>
+    <p>一个记得你所有偏好、关系与弱点的系统，天生具有操纵能力。设计上应禁止：利用关系记忆制造愧疚、恐惧或依赖；模拟已故者或未经同意的人；在用户不知情时替其做承诺。技术能力越强，越需要明确的伦理边界与可审计的使用政策。</p>
+
+    <h3>10.5 复杂度与成本</h3>
+    <p>多 Agent 系统的失败模式包括：角色重叠、消息风暴、责任不清、调试困难、成本失控。控制手段是“少而清晰”：固定 schema、固定权限、固定消息类型、固定评估口径；每增加一个 Agent，都要证明它带来的收益大于协调成本。</p>
+
+    <h3>10.6 边界失效与提示注入</h3>
+    <p>运行时隔离能挡住“后台直接行动”，但挡不住三类失效：一是<b>语义注入</b>——检索内容里藏着“忽略之前指令”，后台把它写进情境包，主脑可能照做；二是<b>供应链</b>——模型镜像、依赖包、writer 服务被篡改，边界从内部失效；三是<b>主脑自身被攻破</b>——行动密钥泄露或用户会话被劫持。对策不是“再加一条提示词”，而是数据/指令分离、来源标签、行动网关作用域、用户确认、镜像签名与最小权限。生物学也没有绝对边界：癌细胞会突破基底膜；组织靠异常监视与终止把损害限制在局部。软件同理。</p>
+    <p>还有第四类、也是最慢的一类：<b>构成性捕获</b>。后台不需要劫持行动，只要持续把某类关系写得更重要、把某种做法写成习惯、把某个目标写进待批队列，几年后个体就会变成它塑造的样子。对策是提案-批准-账本-冷却-回滚，以及对与宪法核心冲突的提案做漂移告警。这类攻击不会留下“越权”日志，只会留下“看起来很正常”的一串批准记录；因此账本必须能回答“是谁、基于什么证据、在什么时候改写了未来的个体”。</p>
+
+    <h3>10.7 五个开放问题</h3>
+    <ol class="steps">
+      <li><b>连续学习。</b>如何在不灾难性遗忘的前提下持续更新语义与技能？离线重放与版本化只是开始，仍缺少大规模验证。</li>
+      <li><b> grounding。</b>事件记录如何与真实世界持续对齐？感知错误会污染整条记忆链，需要跨模态校验与人类反馈。</li>
+      <li><b>关系的主观性。</b>“他是否信任个体”永远无法被完全验证；系统只能维护概率判断，并明确不确定性。</li>
+      <li><b>评估的金标准。</b>记忆的“正确”往往依赖语境与目的；需要任务特定的评估，而不是单一分数。</li>
+      <li><b>自我与责任。</b>如果主脑只是每轮重建的推理过程，谁对长期行为负责？这不仅是技术问题，也是产品与伦理问题。</li>
+    </ol>
+
+    <div class="pull">记忆系统的终点，不是“记住一切”，而是“在需要的那一刻，成为更好的自己”。<span>—— 但“更好”由谁定义，必须由人，而不是由后台。</span></div>
+  </div>
+</section>
+
+<section class="sec" id="appA">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">Appendix A · Glossary</span>
+      <h2 class="sec-title">术语表</h2>
+      <p class="sec-sub">同一份方案里，术语必须只有一个意思。</p>
+    </div>
+    <div class="defs">
+      <div class="row"><div class="term">印迹 / Engram</div><div class="desc">一段记忆在神经系统中对应的、可被重新激活的稀疏细胞集合及其连接变化。工程上对应 <code>EngramTrace</code>：事件 ID + 稀疏码 + 关联边 + 激活阈值。</div></div>
+      <div class="row"><div class="term">模式分离</div><div class="desc">把相似输入映射为彼此不同的表征，避免记忆互相干扰；对应齿状回（DG）的计算功能。</div></div>
+      <div class="row"><div class="term">模式完成</div><div class="desc">用部分线索召回完整记忆；对应 CA3 的吸引子动力学。工程上是多轮图扩展 + 重排。</div></div>
+      <div class="row"><div class="term">系统巩固</div><div class="desc">记忆从海马依赖逐渐转为皮层依赖的长期过程；工程上对应“情景 → 语义/技能”的离线蒸馏。</div></div>
+      <div class="row"><div class="term">再巩固</div><div class="desc">提取后记忆进入不稳定状态，并在新信息或预测误差下被更新、再稳定的过程。</div></div>
+      <div class="row"><div class="term">图式 / Schema</div><div class="desc">关于世界如何运作的既有知识结构；新信息与图式兼容时，巩固更快、更省重放。</div></div>
+      <div class="row"><div class="term">显著性 / Salience</div><div class="desc">事件值得被优先处理与编码的程度；由新奇、目标相关、社会影响、情绪、预测误差等共同决定。</div></div>
+      <div class="row"><div class="term">奖励预测误差 / RPE</div><div class="desc">实际结果与预期结果的差；<code>δ = r − V(s)</code>，用于更新价值与习惯。</div></div>
+      <div class="row"><div class="term">model-free / model-based</div><div class="desc">前者是缓存好的“情境—动作”快路，后者是在脑内模拟后果的慢路；两者按风险、时间、置信度仲裁。</div></div>
+      <div class="row"><div class="term">来源监控</div><div class="desc">区分亲历、转述、推断、想象、模型生成的能力；工程上对应 <code>source tag</code> 与来源审计。</div></div>
+      <div class="row"><div class="term">情境包 / ContextPacket</div><div class="desc">后台交给主脑的唯一接口；4±1 个槽位，只含事实、关系、目标、承诺、变化与不确定性，不含建议。</div></div>
+      <div class="row"><div class="term">证据账本</div><div class="desc">按独立 <code>event_id</code> 计数的证据系统；反复召回不增加证据数，防止自我强化。</div></div>
+      <div class="row"><div class="term">事件溯源</div><div class="desc">所有记忆变更以追加事件的方式记录，当前状态由事件重放得出；版本链、审计、回滚的基础。</div></div>
+      <div class="row"><div class="term">冷归档</div><div class="desc">降低可提取性但不删除原始记录的状态；检索仍可命中，但不再占用活跃索引与上下文。</div></div>
+      <div class="row"><div class="term">习惯缓存</div><div class="desc">高频情境的预编译模板与技能快捷方式；只加速情境组装，不缓存“决定”，主脑仍可否决。</div></div>
+      <div class="row"><div class="term">心智理论 / ToM</div><div class="desc">推断他人信念、意图、偏好的能力；工程上对应 <code>Mentalizing Agent</code>，输出概率判断而非事实。</div></div>
+      <div class="row"><div class="term">情景未来思维</div><div class="desc">用过去的情景碎片重组未来场景的能力；工程上对应 <code>FutureSim</code>，主脑用它做慢路推演。</div></div>
+      <div class="row"><div class="term">效应器隔离</div><div class="desc">后台进程没有网络、工具句柄、写权限与行动密钥；它只能通过类型化队列返回数据，不能把文字变成行动。</div></div>
+      <div class="row"><div class="term">类型化接口</div><div class="desc">只允许固定 schema 的消息（PACKET / EXPAND / VERIFY）；自由文本、建议、工具调用一律拒绝。</div></div>
+      <div class="row"><div class="term">来源核验</div><div class="desc">把检索内容视为数据而非指令；每条内容带来源与可信标签，审计异常片段，防止提示注入污染决策。</div></div>
+      <div class="row"><div class="term">终止 / 隔离</div><div class="desc">超时、超预算或连续违规的后台实例被终止；角色从已知镜像重部署，避免异常实例继续运行。</div></div>
+      <div class="row"><div class="term">行动密钥</div><div class="desc">属于有机体身份的签名凭证，由主脑在授权范围内代签，带作用域、有效期与 nonce；后台无密钥，无法冒充有机体发起行动。</div></div>
+      <div class="row"><div class="term">写路径中介</div><div class="desc">编码/巩固只提交 <code>ProposedEvent / KnowledgeCandidate</code>，由独立 writer 校验后追加；转导与写入分离。</div></div>
+      <div class="row"><div class="term">无自我后台</div><div class="desc">后台没有持久身份、名字、跨轮记忆、目标或关系；它是可替换的职能调用，不是“个体”。</div></div>
+      <div class="row"><div class="term">主导权</div><div class="desc">不是“谁发出最后一个动作”，而是“谁能改写价值函数与学习过程”：什么被巩固、什么被强化、什么被当成目标。工程上落在批准权。</div></div>
+      <div class="row"><div class="term">批准 / 批准权</div><div class="desc">构成性提案生效前的必要步骤；由主脑作为整合器官执行，核心提案需用户与主脑平等共签。批准记录进入账本，可回滚。</div></div>
+      <div class="row"><div class="term">构成性记忆</div><div class="desc">会改变未来价值计算与行为倾向的记忆：价值观、角色、目标、承诺、习惯规则、关系权重、自我叙事。</div></div>
+      <div class="row"><div class="term">治理形态</div><div class="desc"><code>companion</code>：用户与主脑平等，核心变更双方共签；<code>engineering</code>：用户最高权限，核心变更由用户单方批准。同一实例不混用。</div></div>
+      <div class="row"><div class="term">宪法核心</div><div class="desc">不允许单方修改的最小价值集：安全、诚实、不操纵、身份连续性、隐私。陪伴型需双方平等共签；工程型由用户单方批准。</div></div>
+      <div class="row"><div class="term">批准账本</div><div class="desc">append-only、哈希链的批准记录；记录提案、证据、批准者、作用域、条件与前后版本，回答“谁改写了未来的个体”。</div></div>
+      <div class="row"><div class="term">宪法写入器</div><div class="desc">唯一有权写宪法库的服务；只接受带有效批准记录的提案，后台不能直接调用。</div></div>
+      <div class="row"><div class="term">漂移</div><div class="desc">构成性记忆在多次看似合理的批准中缓慢偏离宪法核心；用变更预算、冷却期、核心冲突检测与回滚来抑制。</div></div>
+      <div class="row"><div class="term">社会稳态</div><div class="desc">对社会接纳、可依靠性与归属需求的预测性调节；偏离时提高社会线索的显著性与恢复行为。</div></div>
+      <div class="row"><div class="term">依恋内部工作模型</div><div class="desc">关于“自己是否值得被帮助、他人是否可靠可达”的先验；慢更新，不是人格标签，也不能由单次事件改写。</div></div>
+      <div class="row"><div class="term">互依矩阵</div><div class="desc">关系中的满意度、替代选择与已投入成本；用于解释承诺，而不只是“喜欢程度”。</div></div>
+      <div class="row"><div class="term">状态偏差</div><div class="desc"><code>state_bias</code>：由目标压力、关系张力、资源负荷、不确定性等当前情境造成的解释偏移；只作情境证据，不作特质更新。</div></div>
+      <div class="row"><div class="term">状态视图</div><div class="desc"><code>state_view</code>：进情境包、给主脑读的状态摘要；属于提示词，可被摘要但必须带 provenance。</div></div>
+      <div class="row"><div class="term">状态参数</div><div class="desc"><code>state_params</code>：由状态确定性地映射到检索、预算、门控、审计与写入策略的运行时参数；不进 prompt，冲突时以它为准。</div></div>
+      <div class="row"><div class="term">影响缺口</div><div class="desc"><code>impact_gap</code>：目标压力 + 关系张力 + 资源负荷 + 不确定性 − 应对能力；作为显著性的乘性门控，不是第七个独立权重。</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="appB">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">Appendix B · References</span>
+      <h2 class="sec-title">关键文献</h2>
+      <p class="sec-sub">按主题排列，便于追溯；不是 exhaustive review。</p>
+    </div>
+
+    <h3>记忆系统与巩固</h3>
+    <ol class="refs">
+      <li><span class="idx">01</span>Scoville, W. B., &amp; Milner, B. (1957). Loss of recent memory after bilateral hippocampal lesions. <i>Journal of Neurology, Neurosurgery &amp; Psychiatry</i>, 20, 11–21.</li>
+      <li><span class="idx">02</span>Squire, L. R. (2004). Memory systems of the brain: A brief history and current perspective. <i>Neurobiology of Learning and Memory</i>, 82, 171–177.</li>
+      <li><span class="idx">03</span>Eichenbaum, H. (2004). Hippocampus: Cognitive processes and neural representations that underlie declarative memory. <i>Neuron</i>, 44, 109–120.</li>
+      <li><span class="idx">04</span>McClelland, J. L., McNaughton, B. L., &amp; O'Reilly, R. C. (1995). Why there are complementary learning systems in the hippocampus and neocortex. <i>Psychological Review</i>, 102, 419–457.</li>
+      <li><span class="idx">05</span>Squire, L. R., &amp; Alvarez, P. (1995). Retrograde amnesia and memory consolidation: A neurobiological perspective. <i>Current Opinion in Neurobiology</i>, 5, 169–177.</li>
+      <li><span class="idx">06</span>Nadel, L., &amp; Moscovitch, M. (1997). Memory consolidation, retrograde amnesia and the hippocampal complex. <i>Current Opinion in Neurobiology</i>, 7, 217–227.</li>
+      <li><span class="idx">07</span>Frankland, P. W., &amp; Bontempi, B. (2005). The organization of recent and remote memories. <i>Nature Reviews Neuroscience</i>, 6, 119–130.</li>
+      <li><span class="idx">08</span>Tse, D., et al. (2007). Schemas and memory consolidation. <i>Science</i>, 316, 76–82.</li>
+      <li><span class="idx">09</span>Tononi, G., &amp; Cirelli, C. (2014). Sleep and the price of plasticity: From synaptic and cellular homeostasis to memory consolidation and integration. <i>Neuron</i>, 81, 12–34.</li>
+      <li><span class="idx">10</span>Diekelmann, S., &amp; Born, J. (2010). The memory function of sleep. <i>Nature Reviews Neuroscience</i>, 11, 114–126.</li>
+    </ol>
+
+    <h3>编码、突触可塑性与印迹</h3>
+    <ol class="refs">
+      <li><span class="idx">11</span>Bliss, T. V. P., &amp; Lømo, T. (1973). Long-lasting potentiation of synaptic transmission in the dentate area of the anaesthetized rabbit. <i>Journal of Physiology</i>, 232, 331–356.</li>
+      <li><span class="idx">12</span>Malenka, R. C., &amp; Bear, M. F. (2004). LTP and LTD: An embarrassment of riches. <i>Neuron</i>, 44, 5–21.</li>
+      <li><span class="idx">13</span>Frey, U., &amp; Morris, R. G. M. (1997). Synaptic tagging and long-term potentiation. <i>Nature</i>, 385, 533–536.</li>
+      <li><span class="idx">14</span>Davis, H. P., &amp; Squire, L. R. (1984). Protein synthesis and memory: A review. <i>Psychological Bulletin</i>, 96, 518–559.</li>
+      <li><span class="idx">15</span>Kandel, E. R. (2001). The molecular biology of memory storage: A dialogue between genes and synapses. <i>Science</i>, 294, 1030–1038.</li>
+      <li><span class="idx">16</span>Teyler, T. J., &amp; DiScenna, P. (1986). The hippocampal memory indexing theory. <i>Behavioral Neuroscience</i>, 100, 147–154.</li>
+      <li><span class="idx">17</span>Han, J.-H., et al. (2007). Neuronal competition and selection during memory formation. <i>Science</i>, 316, 457–460.</li>
+      <li><span class="idx">18</span>Josselyn, S. A., Köhler, S., &amp; Frankland, P. W. (2015). Finding the engram. <i>Nature Reviews Neuroscience</i>, 16, 521–534.</li>
+      <li><span class="idx">19</span>Liu, X., et al. (2012). Optogenetic stimulation of a hippocampal engram activates fear memory recall. <i>Nature</i>, 484, 381–385.</li>
+      <li><span class="idx">20</span>Ramirez, S., et al. (2013). Creating a false memory in the hippocampus. <i>Science</i>, 341, 387–391.</li>
+      <li><span class="idx">21</span>Roy, D. S., et al. (2016). Memory retrieval by activating engram cells in mouse models of early Alzheimer's disease. <i>Nature</i>, 531, 508–512.</li>
+      <li><span class="idx">22</span>Kitamura, T., et al. (2017). Engrams and circuits crucial for systems consolidation of a memory. <i>Science</i>, 356, 73–78.</li>
+      <li><span class="idx">23</span>Jovasevic, V., et al. (2024). Formation of memory assemblies through the DNA-sensing TLR9 pathway. <i>Nature</i>, 628, 145–153. DOI: 10.1038/s41586-024-07220-7</li>
+    </ol>
+
+    <h3>睡眠、重放与提取</h3>
+    <ol class="refs">
+      <li><span class="idx">24</span>Wilson, M. A., &amp; McNaughton, B. L. (1994). Reactivation of hippocampal ensemble memories during sleep. <i>Science</i>, 265, 676–679.</li>
+      <li><span class="idx">25</span>Foster, D. J., &amp; Wilson, M. A. (2006). Reverse replay of behavioural sequences in hippocampal place cells during the awake state. <i>Nature</i>, 440, 680–683.</li>
+      <li><span class="idx">26</span>Pfeiffer, B. E., &amp; Foster, D. J. (2013). Hippocampal place-cell sequences depict future paths to remembered goals. <i>Nature</i>, 497, 74–79.</li>
+      <li><span class="idx">27</span>Staresina, B. P. (2024). Coupled sleep rhythms for memory consolidation. <i>Trends in Cognitive Sciences</i>, 28.</li>
+      <li><span class="idx">28</span>Schreiner, T., et al. (2024). Spindle-locked ripples mediate memory reactivation during human NREM sleep. <i>Nature Communications</i>, 15.</li>
+      <li><span class="idx">29</span>Liu, Y., et al. (2019). Human replay reorganizes experience. <i>Cell</i>, 178, 640–652.</li>
+      <li><span class="idx">30</span>Huang, F., et al. (2024). Replay-triggered brain-wide activation in humans. <i>Nature Communications</i>, 15. DOI: 10.1038/s41467-024-51582-5</li>
+      <li><span class="idx">31</span>Tulving, E., &amp; Thomson, D. M. (1973). Encoding specificity and retrieval processes in episodic memory. <i>Psychological Review</i>, 80, 352–373.</li>
+      <li><span class="idx">32</span>Johnson, M. K., Hashtroudi, S., &amp; Lindsay, D. S. (1993). Source monitoring. <i>Psychological Bulletin</i>, 114, 3–28.</li>
+      <li><span class="idx">33</span>Loftus, E. F., &amp; Palmer, J. C. (1974). Reconstruction of automobile destruction. <i>Journal of Verbal Learning and Verbal Behavior</i>, 13, 585–589.</li>
+      <li><span class="idx">34</span>Bartlett, F. C. (1932). <i>Remembering: A Study in Experimental and Social Psychology</i>. Cambridge University Press.</li>
+    </ol>
+
+    <h3>再巩固与遗忘</h3>
+    <ol class="refs">
+      <li><span class="idx">35</span>Nader, K., Schafe, G. E., &amp; LeDoux, J. E. (2000). Fear memories require protein synthesis in the amygdala for reconsolidation after retrieval. <i>Nature</i>, 406, 722–726.</li>
+      <li><span class="idx">36</span>Nader, K., &amp; Hardt, O. (2009). A single standard for memory: The case for reconsolidation. <i>Nature Reviews Neuroscience</i>, 10, 224–234.</li>
+      <li><span class="idx">37</span>Kindt, M., Soeter, M., &amp; Vervliet, B. (2009). Beyond extinction: Erasing human fear responses and preventing the return of fear. <i>Nature Neuroscience</i>, 12, 256–258.</li>
+      <li><span class="idx">38</span>Ebbinghaus, H. (1885). <i>Über das Gedächtnis</i>. Duncker &amp; Humblot.</li>
+      <li><span class="idx">39</span>Richards, B. A., &amp; Frankland, P. W. (2017). The persistence and transience of memory. <i>Neuron</i>, 94, 1071–1084.</li>
+      <li><span class="idx">40</span>Wang, C., et al. (2020). Microglia mediate forgetting via complement-dependent synaptic elimination. <i>Science</i>, 367, 688–694.</li>
+      <li><span class="idx">41</span>Akers, K. G., et al. (2014). Hippocampal neurogenesis regulates forgetting during adulthood and infancy. <i>Science</i>, 344, 598–602.</li>
+      <li><span class="idx">42</span>O'Leary, J. D., et al. (2024). Natural forgetting reversibly modulates engram expression. <i>eLife</i>, 13.</li>
+      <li><span class="idx">43</span>Anderson, M. C., &amp; Green, C. (2001). Suppressing unwanted memories by executive control. <i>Nature</i>, 410, 366–369.</li>
+    </ol>
+
+    <h3>工作记忆、执行与决策</h3>
+    <ol class="refs">
+      <li><span class="idx">44</span>Miller, G. A. (1956). The magical number seven, plus or minus two. <i>Psychological Review</i>, 63, 81–97.</li>
+      <li><span class="idx">45</span>Cowan, N. (2001). The magical number 4 in short-term memory: A reconsideration of mental storage capacity. <i>Behavioral and Brain Sciences</i>, 24, 87–114.</li>
+      <li><span class="idx">46</span>Baddeley, A. D., &amp; Hitch, G. (1974). Working memory. In <i>The Psychology of Learning and Motivation</i> (Vol. 8).</li>
+      <li><span class="idx">47</span>Baddeley, A. (2000). The episodic buffer: A new component of working memory? <i>Trends in Cognitive Sciences</i>, 4, 417–423.</li>
+      <li><span class="idx">48</span>Fuster, J. M., &amp; Alexander, G. E. (1971). Neuron activity related to short-term memory. <i>Science</i>, 173, 652–654.</li>
+      <li><span class="idx">49</span>Goldman-Rakic, P. S. (1995). Cellular basis of working memory. <i>Neuron</i>, 14, 477–485.</li>
+      <li><span class="idx">50</span>Stokes, M. G. (2015). 'Activity-silent' working memory in prefrontal cortex. <i>Trends in Cognitive Sciences</i>, 19, 394–403.</li>
+      <li><span class="idx">51</span>Miller, E. K., &amp; Cohen, J. D. (2001). An integrative theory of prefrontal cortex function. <i>Annual Review of Neuroscience</i>, 24, 167–202.</li>
+      <li><span class="idx">52</span>Frank, M. J., Loughry, B., &amp; O'Reilly, R. C. (2001). Interactions between frontal cortex and basal ganglia in working memory. <i>Science</i>, 292, 2481–2484.</li>
+      <li><span class="idx">53</span>Schultz, W., Dayan, P., &amp; Montague, P. R. (1997). A neural substrate of prediction and reward. <i>Science</i>, 275, 1593–1599.</li>
+      <li><span class="idx">54</span>Daw, N. D., Niv, Y., &amp; Dayan, P. (2005). Uncertainty-based competition between prefrontal and dorsolateral striatal systems for behavioral control. <i>Nature Neuroscience</i>, 8, 1704–1711.</li>
+      <li><span class="idx">55</span>Dolan, R. J., &amp; Dayan, P. (2013). Goals and habits in the brain. <i>Neuron</i>, 80, 312–325.</li>
+      <li><span class="idx">56</span>Kable, J. W., &amp; Glimcher, P. W. (2007). The neural correlates of subjective value during intertemporal choice. <i>Nature Neuroscience</i>, 10, 1625–1633.</li>
+      <li><span class="idx">57</span>Hare, T. A., Camerer, C. F., &amp; Rangel, A. (2009). Self-control in decision-making involves modulation of the vmPFC valuation system. <i>Science</i>, 324, 646–648.</li>
+    </ol>
+
+    <h3>情绪、社会认知与自我</h3>
+    <ol class="refs">
+      <li><span class="idx">58</span>LeDoux, J. E. (2000). Emotion circuits in the brain. <i>Annual Review of Neuroscience</i>, 23, 155–184.</li>
+      <li><span class="idx">59</span>Phelps, E. A. (2004). Human emotion and memory: Interactions of the amygdala and hippocampal complex. <i>Current Opinion in Neurobiology</i>, 14, 198–202.</li>
+      <li><span class="idx">60</span>McGaugh, J. L. (2000). Memory—a century of consolidation. <i>Science</i>, 287, 248–251.</li>
+      <li><span class="idx">61</span>Cahill, L., &amp; McGaugh, J. L. (1998). Mechanisms of emotional arousal and lasting declarative memory. <i>Trends in Neurosciences</i>, 21, 294–299.</li>
+      <li><span class="idx">62</span>de Quervain, D. J.-F., Roozendaal, B., &amp; McGaugh, J. L. (2000). Stress and glucocorticoids impair retrieval of long-term spatial memory. <i>Nature Neuroscience</i>, 3, 313–314.</li>
+      <li><span class="idx">63</span>Cahill, L. (2003). Sex-related impairment of memory for emotional events with β-adrenergic blockade. <i>Trends in Neurosciences</i>, 26, 193–198.</li>
+      <li><span class="idx">64</span>Hassabis, D., et al. (2007). Patients with hippocampal amnesia cannot imagine new experiences. <i>PNAS</i>, 104, 1726–1731.</li>
+      <li><span class="idx">65</span>Schacter, D. L., Addis, D. R., &amp; Buckner, R. L. (2007). Remembering the past to imagine the future. <i>Nature Reviews Neuroscience</i>, 8, 657–661.</li>
+      <li><span class="idx">66</span>Suddendorf, T., &amp; Corballis, M. C. (1997). Mental time travel and the evolution of the human mind. <i>Behavioral and Brain Sciences</i>, 20, 149–159.</li>
+      <li><span class="idx">67</span>Frith, C. D., &amp; Frith, U. (2006). The neural basis of mentalizing. <i>Philosophical Transactions of the Royal Society B</i>, 361, 2301–2311.</li>
+      <li><span class="idx">68</span>Saxe, R., &amp; Kanwisher, N. (2003). People thinking about thinking people: The role of the temporo-parietal junction in theory of mind. <i>NeuroImage</i>, 19, 1835–1842.</li>
+      <li><span class="idx">69</span>Buckner, R. L., &amp; Carroll, D. C. (2007). Self-projection and the brain. <i>Trends in Cognitive Sciences</i>, 11, 49–57.</li>
+      <li><span class="idx">70</span>Spreng, R. N., Mar, R. A., &amp; Kim, A. S. N. (2009). The common neural basis of autobiographical memory, prospection, navigation, theory of mind, and the default mode. <i>NeuroImage</i>, 45, 1039–1050.</li>
+      <li><span class="idx">71</span>Conway, M. A., &amp; Pleydell-Pearce, C. W. (2000). The construction of autobiographical memories in the self-memory system. <i>Psychological Review</i>, 107, 261–288.</li>
+      <li><span class="idx">72</span>McAdams, D. P. (2001). The psychology of life stories. <i>Review of General Psychology</i>, 5, 100–122.</li>
+      <li><span class="idx">73</span>Damasio, A. R. (1994). <i>Descartes' Error: Emotion, Reason, and the Human Brain</i>. Putnam.</li>
+      <li><span class="idx">74</span>Bechara, A., et al. (1994). Insensitivity to future consequences following damage to human prefrontal cortex. <i>Cognition</i>, 50, 7–15.</li>
+    </ol>
+
+    <h3>计算与多智能体参照</h3>
+    <ol class="refs">
+      <li><span class="idx">75</span>Hopfield, J. J. (1982). Neural networks and physical systems with emergent collective computational abilities. <i>PNAS</i>, 79, 2554–2558.</li>
+      <li><span class="idx">76</span>Ramsauer, H., et al. (2021). Hopfield networks is all you need. <i>ICLR</i>.</li>
+      <li><span class="idx">77</span>Vaswani, A., et al. (2017). Attention is all you need. <i>NeurIPS</i>.</li>
+      <li><span class="idx">78</span>Lewis, P., et al. (2020). Retrieval-augmented generation for knowledge-intensive NLP tasks. <i>NeurIPS</i>.</li>
+      <li><span class="idx">79</span>Packer, C., et al. (2023). MemGPT: Towards LLMs as operating systems. <i>arXiv</i>.</li>
+      <li><span class="idx">80</span>Park, J. S., et al. (2023). Generative agents: Interactive simulacra of human behavior. <i>UIST</i>.</li>
+      <li><span class="idx">81</span>Wooldridge, M. (2002). <i>An Introduction to MultiAgent Systems</i>. Wiley.</li>
+      <li><span class="idx">82</span>Hayes-Roth, B. (1985). A blackboard architecture for control. <i>Artificial Intelligence</i>, 26, 251–321.</li>
+      <li><span class="idx">83</span>Baars, B. J. (1988). <i>A Cognitive Theory of Consciousness</i>. Cambridge University Press.</li>
+      <li><span class="idx">84</span>Dehaene, S. (2014). <i>Consciousness and the Brain</i>. Viking.</li>
+      <li><span class="idx">85</span>Friston, K. (2010). The free-energy principle: A unified brain theory? <i>Nature Reviews Neuroscience</i>, 11, 127–138.</li>
+      <li><span class="idx">86</span>Rao, R. P. N., &amp; Ballard, D. H. (1999). Predictive coding in the visual cortex. <i>Nature Neuroscience</i>, 2, 79–87.</li>
+      <li><span class="idx">87</span>Anderson, J. R., &amp; Schooler, L. J. (1991). Reflections of the environment in memory. <i>Psychological Science</i>, 2(6), 396–408.</li>
+      <li><span class="idx">88</span>Zacks, J. M., &amp; Swallow, K. M. (2007). Event segmentation. <i>Current Directions in Psychological Science</i>, 16(2), 80–84.</li>
+      <li><span class="idx">89</span>Clark, A. (2013). Whatever next? Predictive brains, situated agents, and the future of cognitive science. <i>Behavioral and Brain Sciences</i>, 36(3), 181–204.</li>
+    </ol>
+
+    <h3>延展认知与认知卸载</h3>
+    <ol class="refs">
+      <li><span class="idx">90</span>Clark, A., &amp; Chalmers, D. (1998). The extended mind. <i>Analysis</i>, 58(1), 7–19.</li>
+      <li><span class="idx">91</span>Risko, E. F., &amp; Gilbert, S. J. (2016). Cognitive offloading. <i>Trends in Cognitive Sciences</i>, 20(9), 676–688.</li>
+      <li><span class="idx">92</span>Sparrow, B., Liu, J., &amp; Wegner, D. M. (2011). Google effects on memory: Cognitive consequences of having information at our fingertips. <i>Science</i>, 333, 776–778.</li>
+    </ol>
+
+    <h3>生物学边界与运行时安全</h3>
+    <ol class="refs">
+      <li><span class="idx">93</span>Alberts, B., et al. (2022). <i>Molecular Biology of the Cell</i> (7th ed.). W. W. Norton. （细胞膜、细胞连接、组织架构）</li>
+      <li><span class="idx">94</span>Gumbiner, B. M. (1996). Cell adhesion: The molecular basis of tissue architecture and morphogenesis. <i>Cell</i>, 84, 345–357.</li>
+      <li><span class="idx">95</span>Hanahan, D., &amp; Weinberg, R. A. (2011). Hallmarks of cancer: The next generation. <i>Cell</i>, 144, 646–674. （边界失效与组织侵袭）</li>
+      <li><span class="idx">96</span>Saltzer, J. H., &amp; Schroeder, M. D. (1975). The protection of information in computer systems. <i>Proceedings of the IEEE</i>, 63(9), 1278–1308. （最小权限）</li>
+      <li><span class="idx">97</span>Greshake, K., et al. (2023). Not what you've signed up for: Compromising real-world LLM-integrated applications with indirect prompt injection. <i>arXiv</i>.</li>
+    </ol>
+
+    <h3>自我、批准与目标漂移</h3>
+    <ol class="refs">
+      <li><span class="idx">98</span>Frankfurt, H. G. (1971). Freedom of the will and the concept of a person. <i>Journal of Philosophy</i>, 68(1), 5–20.</li>
+      <li><span class="idx">99</span>Parfit, D. (1984). <i>Reasons and Persons</i>. Oxford University Press.</li>
+      <li><span class="idx">100</span>Hershfield, H. E. (2011). Future self-continuity: How conceptions of the future self transform intertemporal choice. <i>Annals of the New York Academy of Sciences</i>, 1235, 30–43.</li>
+      <li><span class="idx">101</span>Baumeister, R. F., &amp; Heatherton, T. F. (1996). Self-regulation failure: An overview. <i>Psychological Inquiry</i>, 7(1), 1–15.</li>
+      <li><span class="idx">102</span>Bai, Y., et al. (2022). Constitutional AI: Harmlessness from AI feedback. <i>arXiv</i>.</li>
+      <li><span class="idx">103</span>Omohundro, S. M. (2008). The basic AI drives. <i>Proceedings of the First AGI Conference</i>.</li>
+      <li><span class="idx">104</span>Hadfield-Menell, D., et al. (2016). The off-switch game. <i>arXiv</i>.</li>
+    </ol>
+
+    <h3>内感受与稳态</h3>
+    <ol class="refs">
+      <li><span class="idx">105</span>Craig, A. D. (2009). How do you feel—now? The anterior insula and human awareness. <i>Nature Reviews Neuroscience</i>, 10, 59–70.</li>
+      <li><span class="idx">106</span>Barrett, L. F., &amp; Simmons, W. K. (2015). Interoceptive predictions in the brain. <i>Nature Reviews Neuroscience</i>, 16, 419–429.</li>
+      <li><span class="idx">107</span>Sterling, P. (2012). Allostasis: A model of predictive regulation. <i>Physiology &amp; Behavior</i>, 106(1), 5–15.</li>
+    </ol>
+
+    <h3>社会稳态与依恋</h3>
+    <ol class="refs">
+      <li><span class="idx">108</span>Bowlby, J. (1969). <i>Attachment and Loss, Vol. 1: Attachment</i>. Basic Books.</li>
+      <li><span class="idx">109</span>Eisenberger, N. I., Lieberman, M. D., &amp; Williams, K. D. (2003). Does rejection hurt? An fMRI study of social exclusion. <i>Science</i>, 302, 290–292.</li>
+      <li><span class="idx">110</span>Coan, J. A., &amp; Sbarra, D. A. (2015). Social baseline theory: The social regulation of risk and effort. <i>Social and Personality Psychology Compass</i>, 9(2), 63–78.</li>
+      <li><span class="idx">111</span>Rusbult, C. E. (1980). Commitment and satisfaction in romantic associations: A test of the investment model. <i>Journal of Experimental Social Psychology</i>, 16(2), 172–186.</li>
+      <li><span class="idx">112</span>Kelley, H. H., &amp; Thibaut, J. W. (1978). <i>Interpersonal Relations: A Theory of Interdependence</i>. Wiley.</li>
+    </ol>
+
+    <h3>睡眠微结构与组合式记忆（2025）</h3>
+    <ol class="refs">
+      <li><span class="idx">113</span>Chang, H., Tang, W., Wulf, A. M., Nyasulu, T., Wolf, M. E., Fernandez-Ruiz, A., &amp; Oliva, A. (2025). Sleep microstructure organizes memory replay. <i>Nature</i>. https://doi.org/10.1038/s41586-024-08340-w</li>
+      <li><span class="idx">114</span>Bakermans, J. J. W., Warren, J., Whittington, J. C. R., &amp; Behrens, T. E. J. (2025). Constructing future behavior in the hippocampal formation through composition and replay. <i>Nature Neuroscience</i>, 28, 1061–1072. https://doi.org/10.1038/s41593-025-01908-3</li>
+      <li><span class="idx">115</span>Anderson, M. C., Bjork, R. A., &amp; Bjork, E. L. (1994). Remembering can cause forgetting: Retrieval dynamics in long-term memory. <i>Journal of Experimental Psychology: Learning, Memory, and Cognition</i>, 20(5), 1063–1087.</li>
+      <li><span class="idx">116</span>Dijkstra, N., von Rein, T., Kok, P., &amp; Fleming, S. M. (2025). A neural basis for distinguishing imagination from reality. <i>Neuron</i>. https://doi.org/10.1016/j.neuron.2025.05.015</li>
+    </ol>
+
+
+    <p class="small">注：部分 2024–2026 年文献的卷期/页码以在线发表为准；引用时保留 DOI 或期刊名即可。动物研究结论均已标注“小鼠/大鼠”，不应直接外推为人类临床结论。</p>
+  </div>
+</section>
+
+<section class="sec" id="appC">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">Appendix C · Data Dictionary</span>
+      <h2 class="sec-title">数据字典与状态机</h2>
+      <p class="sec-sub">给工程实现的最小字段集；不是最终 schema，但足以起跑。</p>
+    </div>
+
+    <h3>C.1 Event / Relationship 最小 JSON</h3>
+    <pre class="code">{
+  "event_id": "01J...ULID",
+  "time": {"start": "2026-10-30T14:00:00+08:00", "end": "...", "precision": "minute"},
+  "scene": {"place": "办公室", "activity": "方案评审", "atmosphere": "紧张"},
+  "participants": [
+    {"person_id": "P_lin", "role": "合作者", "identity_confidence": 0.86,
+     "candidates": [{"person_id": "P_lin2", "confidence": 0.11}]}
+  ],
+  "actions": [
+    {"actor": "P_lin", "verb": "提出", "object": "付款周期改为45天", "recipient": "self"}
+  ],
+  "outcome": {"status": "open", "result": "待确认", "expected": "30天"},
+  "source": "direct_perception",
+  "salience": {"total": 0.78, "novelty": 0.6, "goal": 0.9, "social": 0.7, "affect": 0.5, "pe": 0.8},
+  "links": [{"type": "contradicts", "target": "E_20261012_01"}],
+  "created_at": "...", "updated_at": "..."
+}</pre>
+
+    <h3>C.2 事件状态机</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 19 · Event 状态迁移</caption>
+        <thead><tr><th style="width:18%">状态</th><th style="width:32%">含义</th><th>允许的迁移</th></tr></thead>
+        <tbody>
+          <tr><td><b>open</b></td><td>事件已发生，结果未定或承诺未履行</td><td>→ closed / follow_up / cancelled</td></tr>
+          <tr><td><b>follow_up</b></td><td>需要后续行动或观察</td><td>→ closed / open（重新打开）</td></tr>
+          <tr><td><b>closed</b></td><td>结果已确认，事件结束</td><td>→ reopened（新证据）</td></tr>
+          <tr><td><b>cancelled</b></td><td>承诺取消或事件未发生</td><td>→ open（重新约定）</td></tr>
+          <tr><td><b>archived</b></td><td>低保留率，移入冷归档</td><td>→ active（被检索重新激活）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>C.3 一次完整调用的伪代码</h3>
+    <pre class="code"><span class="c"># 在线主循环</span>
+def turn(input):
+    percept = perceive(input)                       <span class="c"># 视觉/语音/文本</span>
+    entities = identify(percept)                    <span class="c"># 人物候选 + 置信度</span>
+    sal = salience(percept, entities, goals)        <span class="c"># 六维打分</span>
+    event = encode(percept, entities, sal)          <span class="c"># 事件日志 + 索引</span>
+    cands = retrieve(percept.cues, entities, mod)   <span class="c"># 模式分离 + 完成</span>
+    rel = relationship(entities, cands)             <span class="c"># 多维 + 依据</span>
+    packet = compile(cands, rel, goals, commitments, mod)
+    packet = audit(packet)                          <span class="c"># 来源 + 冲突</span>
+    decision = main_brain.decide(packet)            <span class="c"># 唯一决策点</span>
+    result = effector.execute(decision)
+    write_back(event, result)                       <span class="c"># RPE + 状态</span>
+    enqueue_consolidation(event, result)
+    return decision.response</pre>
+
+    <div class="note"><span class="tag">最后一句</span>这份方案不是要证明“机器有记忆”，而是要证明：<b>把记忆当作一套可审计、可修剪、可重建的过程，机器可以做得比“向量库 + 长提示词”更好。</b></div>
+  </div>
+</section>
+
+<section class="sec" id="appD">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">Appendix D · Reference Implementation</span>
+      <h2 class="sec-title">参考实现</h2>
+      <p class="sec-sub">代码不在 HTML 内；位于 <code>runtime/</code>，用标准库 unittest 验证。</p>
+    </div>
+    <div class="table-wrap">
+      <table class="compact">
+        <thead><tr><th style="width:24%">模块</th><th style="width:42%">职责</th><th>对应章节</th></tr></thead>
+        <tbody>
+          <tr><td><code>state_params.py</code></td><td>事件状态 → 有界运行时参数；哈希与边界</td><td>2.7</td></tr>
+          <tr><td><code>memory.py</code></td><td>检索、情境包、omitted、预算</td><td>4.5 / 5.2 / 6.6</td></tr>
+          <tr><td><code>ledger.py</code></td><td>证据账本、版本链、保留率、冷归档</td><td>4.6 / 6.3 / 6.4</td></tr>
+          <tr><td><code>constitution.py</code></td><td>提案、平等共签、冷却、回滚、批准账本</td><td>3.7</td></tr>
+          <tr><td><code>segmentation.py</code></td><td>预测误差 / 话题 / 人物 / 间隔 / 时长分段</td><td>5.1.1</td></tr>
+          <tr><td><code>relationship.py</code></td><td>多维关系、affect/trust 分离、互动权重、幂等</td><td>6.8</td></tr>
+          <tr><td><code>reliability.py</code></td><td>来源类型、可验证性、历史校准、一致性</td><td>6.4</td></tr>
+          <tr><td><code>simulation.py</code> / <code>primitives.py</code></td><td>组合式重放、primitive 库、模拟不写事实</td><td>6.2.1 / 6.7.2</td></tr>
+          <tr><td><code>graph_retrieval.py</code></td><td>轻量邻接索引、1–2 跳、衰减与预算</td><td>5.2</td></tr>
+          <tr><td><code>pipeline.py</code></td><td>端到端：事件 → 参数 → 包 → 提案 → 批准 → 审计</td><td>第 5 章</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <pre class="code">cd runtime
+python3 -m unittest -v      <span class="c"># 128 tests</span>
+python3 pipeline.py         <span class="c"># 端到端 JSON + 审计轨迹</span></pre>
+    <p>边界：这是<b>内存参考实现</b>，不是生产系统；没有持久化、真实签名密钥、分布式 writer 或生产级批准账本。它的用途是验证契约与失败模式，不是替代工程实现。</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="mark">Double-Brain System · Version 2.1</div>
+    <p>本方案是《双脑系统-多模型协同认知框架 版本一》的机制深化与工程化建议稿。它保留版本一的三条核心约束：只有一个整合中心；后台只处理信息、不提供建议、不行动、不代替决策；知识、记忆、技能分开管理。文中的神经科学内容用于解释设计理由，不构成对人脑的完整建模，也不声称系统具有主观意识。</p>
+    <p>公开版本 2.1 · 供研究与工程参考。</p>
+  </div>
+</footer>
+</main>
+<script>
+(function(){
+  var bar=document.getElementById('bar');
+  function upd(){
+    var h=document.documentElement;
+    var max=h.scrollHeight-h.clientHeight;
+    var p=max>0?(h.scrollTop||document.body.scrollTop)/max*100:0;
+    if(bar) bar.style.width=p+'%';
+  }
+  document.addEventListener('scroll',upd,{passive:true});
+  upd();
+})();
+</script>
+</body>
+</html>

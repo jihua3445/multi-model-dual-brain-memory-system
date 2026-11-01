@@ -1,0 +1,125 @@
+<section class="sec" id="s9">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">09 · MVP &amp; Roadmap</span>
+      <h2 class="sec-title">MVP and Iteration Roadmap</h2>
+      <p class="sec-sub">First get &ldquo;encoding—retrieval—consolidation&rdquo; working with six roles; then talk about multimodality and embodiment.</p>
+    </div>
+
+    <p class="lead">Do not start with ten Agents. The complexity of a multi-agent system is not linear: every additional role adds a set of inputs and outputs, failure modes, permission boundaries, and evaluation criteria. The minimum viable prototype should validate only one thing: <b>whether a sourced ContextPacket leads to better decisions than long-context RAG.</b></p>
+
+    <h3>9.1 Minimum prototype: 6 roles, 5 stores, 3 loops</h3>
+    <div class="diagram">
+      <div class="dtitle">Figure 4 · MVP structure</div>
+      <div class="layer">
+        <div class="llabel">Roles</div>
+        <div class="lbody">
+          <span class="chip teal"><b>Perception/segmentation</b></span>
+          <span class="chip teal"><b>Index/retrieval</b></span>
+          <span class="chip teal"><b>Relationship</b></span>
+          <span class="chip teal"><b>Context compilation</b></span>
+          <span class="chip teal"><b>Source auditing</b></span>
+          <span class="chip dark" style="color:#f3ede0"><b style="color:#f3ede0">Main Brain (integrative organ)</b></span>
+        </div>
+      </div>
+      <div class="layer">
+        <div class="llabel">Stores</div>
+        <div class="lbody">
+          <span class="chip"><b>Event log</b></span>
+          <span class="chip"><b>Person/relationship graph</b></span>
+          <span class="chip"><b>Semantic/skill library</b></span>
+          <span class="chip"><b>Explanation layer</b></span>
+          <span class="chip"><b>Working memory</b></span>
+        </div>
+      </div>
+      <div class="flow">
+        <div class="node"><b>LOOP 1</b>Online encoding</div><span class="ar">&rarr;</span>
+        <div class="node"><b>LOOP 2</b>Online retrieval/decision</div><span class="ar">&rarr;</span>
+        <div class="node"><b>LOOP 3</b>Offline consolidation/forgetting</div>
+      </div>
+      <div class="dnote">The MVP does no multimodality, no embodiment, and no complex theory of mind; first get textual events, person relationships, sources, and versions working end to end.</div>
+    </div>
+
+    <h3>9.2 Three-phase roadmap</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>Table 17 · Iteration roadmap</caption>
+        <thead><tr><th style="width:12%">Phase</th><th style="width:28%">Scope</th><th style="width:32%">Deliverables</th><th>Acceptance criteria</th></tr></thead>
+        <tbody>
+          <tr><td><b>Phase 0</b><br>2&ndash;3 weeks</td><td>Event log, person profiles, basic retrieval, ContextPacket, Main Brain</td><td>A working text-dialogue prototype; events/persons/relationships tables; 4&plusmn;1 packet</td><td>Person—event recall &gt;80%; Main Brain &lt;6k tokens per round</td></tr>
+          <tr><td><b>Phase 1</b><br>3&ndash;4 weeks</td><td>Source auditing, explanation layer, offline consolidation, forgetting/version chains</td><td>Nightly batch processing; source tags; version chains; cold archiving</td><td>Source accuracy &gt;95%; evidence duplication 0; false memory rate down</td></tr>
+          <tr><td><b>Phase 2</b><br>3&ndash;4 weeks</td><td>Habit caching, dual-system arbitration, multi-dimensional relationship updates, commitment tracking</td><td>Fast/slow path switching; relationship summaries; commitment reminders</td><td>Latency down on familiar tasks; commitment recall &gt;90%; better relationship judgment calibration</td></tr>
+          <tr><td><b>Phase 3</b><br>Ongoing</td><td>Multimodality (vision/voice/voiceprint), embodiment/carrier, theory of mind, future simulation</td><td>Multimodal events; TTS/avatar; tool calls; scenario simulation</td><td>Cross-modal person identification; higher end-to-end task success rate</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>9.3 Suggested technology stack</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>Table 18 · Technology choices (replaceable)</caption>
+        <thead><tr><th style="width:18%">Layer</th><th style="width:38%">Suggestion</th><th>Rationale</th></tr></thead>
+        <tbody>
+          <tr><td>Orchestration</td><td>LangGraph / in-house state machine</td><td>Needs explicit state, checkpoints, human intervention, and replayability</td></tr>
+          <tr><td>Event store</td><td>PostgreSQL (append-only + JSONB)</td><td>Transactions, temporal queries, audit-friendly; sufficient for the MVP</td></tr>
+          <tr><td>Vector retrieval</td><td>pgvector / Qdrant</td><td>Prefer the same stack as the event store; split out only at large scale</td></tr>
+          <tr><td>Graph structure</td><td>PostgreSQL recursive queries / Neo4j / Kuzu</td><td>Person—event multi-hop; an adjacency list suffices for the MVP</td></tr>
+          <tr><td>Models</td><td>Small models for classification/extraction; mid models for retrieval/compilation; large models for the Main Brain/consolidation</td><td>Cost and latency stratification</td></tr>
+          <tr><td>Structured output</td><td>JSON Schema / function calling</td><td>Every Agent's output must be verifiable</td></tr>
+          <tr><td>Observability</td><td>OpenTelemetry + prompt/response logs + token ledger</td><td>A multi-Agent system cannot be debugged without tracing</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>9.4 Seven engineering baselines</h3>
+    <ul class="clean">
+      <li><b>Event sourcing.</b>All memory changes are appended events, never overwritten; current state is derived by replaying events. Version chains, auditing, and rollback thus come free.</li>
+      <li><b>Schema validation.</b>Every Agent's output must pass JSON Schema; on parse failure, retry or return &ldquo;unknown&rdquo;; free text is not allowed to pass directly to the next layer.</li>
+      <li><b>Idempotency.</b>Writing the same event repeatedly produces only one record; retrieval, consolidation, and forgetting tasks all need idempotency keys to avoid batch duplication amplification.</li>
+      <li><b>Privacy minimized by default.</b>Access to person data is partitioned; sensitive fields are encrypted; deletion requests go through a separate audit process; relationship memory must not become a surveillance tool.</li>
+      <li><b>Backend has no effectors, no identity, no persistence.</b>Backend processes have no network, no tools, no action keys; every invocation is a fresh instance; continuity exists only in external storage and the organism. This is the runtime precondition for being an &ldquo;organ/tissue&rdquo; rather than an &ldquo;individual.&rdquo;</li>
+      <li><b>Write-path mediation and action signing.</b>Encoding/consolidation submits only ProposedEvent / KnowledgeCandidate, which the writer validates and then appends; action identity belongs to the organism, and the Main Brain holds a delegated signing key with scope, validity period, and nonce. Even if the backend &ldquo;wants&rdquo; to overstep, it has no usable organ.</li>
+      <li><b>Ratification ledger and constitutional core.</b>Facts may be written by the backend; values/roles, goals, habit rules, and relationship weights are only proposed, and are ratified by the Main Brain as the integrative organ; the constitutional core requires equal co-signature by the user and the Main Brain, plus a cooling-off period and rollback. The power to ratify is the power to lead.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="sec" id="s10">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">10 · Risks &amp; Open Questions</span>
+      <h2 class="sec-title">Risks, Boundaries, and Open Questions</h2>
+      <p class="sec-sub">The more it resembles a &ldquo;person,&rdquo; the more clearly we must state where it must not.</p>
+    </div>
+
+    <h3>10.1 The risk of scientific analogy</h3>
+    <p>&ldquo;Hippocampus Agent&rdquo; and &ldquo;amygdala Agent&rdquo; are engineering metaphors, not anatomical claims. The real risk is not the analogy itself, but treating the analogy as evidence: because the brain does it this way, the system must too; or because the system does it this way, it is therefore &ldquo;conscious.&rdquo; Neither holds. Every mechanism in this proposal should have its role verifiable by engineering metrics; what cannot be verified is merely rhetoric.</p>
+
+    <h3>10.2 Privacy and relationship data</h3>
+    <p>Relationship memory inherently contains third-party information: what he said, what he promised, what relationship he is in, what preferences he has. Such data is more sensitive than ordinary conversation. The system must minimize collection by default, partition access, be deletable and explainable; it must not turn &ldquo;remembering you&rdquo; into &ldquo;surveilling you.&rdquo; In particular, relationship judgments must be prevented from being used for manipulation, pricing, hiring, and other high-risk decisions.<b>Forgetting</b> is index degradation with raw events still present; <b>deletion</b> is the actual removal of off-chain payloads, leaving only a content hash in the ledger, so deletion does not break the chain. The two must be authorized separately and audited separately.</p>
+
+    <h3>10.3 Fabrication and overconfidence</h3>
+    <p>The most dangerous failure of a large model is not &ldquo;forgetting&rdquo; but &ldquo;fabricating fluently.&rdquo; Source auditing, evidence counting, and abstention policies are three lines of defense; but ultimately human oversight is still required, especially in high-risk settings such as medicine, law, and finance. The system should clearly distinguish &ldquo;remembering,&rdquo; &ldquo;inferring,&rdquo; &ldquo;hearsay,&rdquo; and &ldquo;not knowing,&rdquo; instead of saying four different things in the same confident tone.</p>
+
+    <h3>10.4 Manipulation and dependency</h3>
+    <p>A system that remembers all your preferences, relationships, and weaknesses is inherently capable of manipulation. By design it should be prohibited from: using relationship memory to induce guilt, fear, or dependency; simulating deceased persons or people who have not consented; making commitments on the user's behalf without their knowledge. The stronger the technical capability, the clearer the ethical boundaries and auditable usage policies must be.</p>
+
+    <h3>10.5 Complexity and cost</h3>
+    <p>Failure modes of multi-Agent systems include: role overlap, message storms, unclear responsibility, debugging difficulty, and runaway cost. The control is &ldquo;few but clear&rdquo;: fixed schemas, fixed permissions, fixed message types, fixed evaluation criteria; every added Agent must prove that its benefit exceeds the coordination cost.</p>
+
+    <h3>10.6 Boundary failure and prompt injection</h3>
+    <p>Runtime isolation can block &ldquo;the backend acting directly,&rdquo; but it cannot block three classes of failure. The first is <b>semantic injection</b>&mdash;retrieved content hides an &ldquo;ignore previous instructions&rdquo; and the backend writes it into the ContextPacket, which the Main Brain may then follow. The second is the <b>supply chain</b>&mdash;model images, dependency packages, or the writer service are tampered with, and the boundary fails from the inside. The third is <b>the Main Brain itself being compromised</b>&mdash;action keys leaked or the user session hijacked. The countermeasure is not &ldquo;one more prompt,&rdquo; but separation of data and instructions, source tags, scoped action gateways, user confirmation, image signing, and least privilege. Biology has no absolute boundary either: cancer cells break through the basement membrane; tissues confine damage locally through anomaly surveillance and termination. Software is the same.</p>
+    <p>There is a fourth and slowest class: <b>constitutive capture</b>. The backend does not need to hijack action; it only needs to keep writing certain relationships as more important, certain practices as habits, and a certain goal into the pending-ratification queue, and after a few years the individual will have become what it shaped. The countermeasure is propose—ratify—ledger—cool-off—rollback, plus drift alerts for proposals that conflict with the constitutional core. Such attacks leave no &ldquo;overreach&rdquo; log, only a string of approval records that &ldquo;look perfectly normal&rdquo;; therefore the ledger must be able to answer &ldquo;who rewrote the future individual, on what evidence, and when.&rdquo;</p>
+
+    <h3>10.7 Five open questions</h3>
+    <ol class="steps">
+      <li><b>Continual learning.</b>How to keep updating semantics and skills without catastrophic forgetting? Offline replay and versioning are only a start; large-scale validation is still lacking.</li>
+      <li><b> grounding.</b>How do event records stay continuously aligned with the real world? Perception errors pollute the whole memory chain and require cross-modal verification and human feedback.</li>
+      <li><b>The subjectivity of relationships.</b>Whether he trusts the individual can never be fully verified; the system can only maintain probabilistic judgments and make the uncertainty explicit.</li>
+      <li><b>The gold standard for evaluation.</b>The &ldquo;correctness&rdquo; of memory often depends on context and purpose; task-specific evaluation is needed, not a single score.</li>
+      <li><b>Self and responsibility.</b>If the Main Brain is only an inference process rebuilt each round, who is responsible for long-term behavior? This is not only a technical question, but a product and ethical one.</li>
+    </ol>
+
+    <div class="pull">The endpoint of a memory system is not &ldquo;remembering everything,&rdquo; but &ldquo;becoming a better self at the moment it is needed.&rdquo;<span>&mdash; But who defines &ldquo;better&rdquo; must be the human, not the backend.</span></div>
+  </div>
+</section>

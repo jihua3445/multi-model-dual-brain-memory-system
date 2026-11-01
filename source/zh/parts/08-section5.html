@@ -1,0 +1,128 @@
+<section class="sec" id="s5">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-no">05 · Runtime Loops</span>
+      <h2 class="sec-title">六个运行闭环</h2>
+      <p class="sec-sub">在线三环负责“此刻”，离线三环负责“以后”。</p>
+    </div>
+
+    <p class="lead">一个记忆系统是否真的在“工作”，不看它有多少张表，而看它有没有稳定的闭环：输入能不能被正确编码，线索能不能召回正确的片段，召回后能不能做出更好的决定，行动结果能不能回写，夜里能不能把经验蒸馏成知识，旧信息能不能被安全地遗忘或更新。六个闭环，缺一不可。</p>
+
+    <div class="diagram">
+      <div class="dtitle">图 2 · 记忆生命周期</div>
+      <div class="flow vertical">
+        <div class="node"><b>01 ENCODE · 在线</b>感知 → 候选事件 → 显著性门控 → 事件日志 / 索引</div>
+        <div class="ar">↓</div>
+        <div class="node"><b>02 CONSOLIDATE · 离线</b>扫描 → 聚类 → 重放 → 抽象 → 合并 / 修剪</div>
+        <div class="ar">↓</div>
+        <div class="node"><b>03 RETRIEVE · 在线</b>线索 → 模式分离 / 完成 → 重建 → 来源审计 → 情境包</div>
+        <div class="ar">↓</div>
+        <div class="node"><b>04 DECIDE · 在线</b>主脑读包 → 快路 / 慢路 → 选择 → 写下预期结果</div>
+        <div class="ar">↓</div>
+        <div class="node"><b>05 ACT · 在线</b>表达 / 工具 / 载体 → 观察结果 → 回写事件</div>
+        <div class="ar">↓</div>
+        <div class="node"><b>06 RECONSOLIDATE / FORGET · 在线+离线</b>版本化更新 或 衰减 / 冷归档</div>
+      </div>
+      <div class="dnote">在线闭环：01 → 03 → 04 → 05 → 06；离线闭环：02 在夜间或空闲时运行，读取 01/05 的事件，反哺 03 的检索质量。06 不是终点，而是下一轮 01 的输入。</div>
+    </div>
+
+    <h3>5.1 编码闭环：从感知流到事件</h3>
+    <ol class="steps">
+      <li><b>分段。</b>用预测误差峰值、目标切换、场景变化、话题转折把连续感知切成候选事件。分段过细会碎片化，过粗会丢细节；默认以“一个可命名的情节”为单位。</li>
+      <li><b>显著性打分。</b><code>salience = σ(w·[novelty, goal_relevance, social_impact, |valence|, prediction_error, explicit])</code>。分数低于阈值的事件进入短 TTL 缓冲，不立即分配长期印迹。</li>
+      <li><b>身份解析。</b>人脸、声纹、称呼、上下文共同给出人物候选；不确定时保留 candidates，不强行认定。身份错误会污染整条关系链，宁可多问一句。</li>
+      <li><b>事件写入。</b>写不可变事件日志：时间、场景、参与者、动作、结果、来源、状态。动作要结构化（谁对谁做了什么），不能只写一段摘要。</li>
+      <li><b>索引分配。</b>生成稀疏码与关联边：人物、地点、话题、目标、情绪、前因后果。索引只存指针与权重，不复制全文。</li>
+      <li><b>三类派生。</b>判断这次经历是否产生知识候选、技能候选、关系证据；候选不立即晋升，先进入待验证队列。</li>
+      <li><b>工作记忆。</b>如果事件与当前任务相关，给情境包分配一个槽位指针；否则只留在长时存储。</li>
+    </ol>
+    <h4>5.1.1 事件分割的可执行规则</h4>
+    <p>事件分割理论认为，边界出现在预测误差峰值或目标/场景切换处（Zacks &amp; Swallow 2007）。工程上不要用固定窗口，而用四条规则的“或”：</p>
+    <pre class="code">boundary = (precision * |observed - expected| &gt; θ_pe)
+        or topic_changed or person_changed
+        or gap_seconds &gt; θ_gap
+        or duration_seconds &gt; θ_max</pre>
+    <p>θ_pe 由 2.4 的精度加权误差给出：误差越大、精度越高，越容易触发边界。θ_gap / θ_max 防止一段对话被切成无限碎片。分段后，事件继承参与者、话题、最大显著性、起始时间；文本只作摘要，原始感知仍保留。</p>
+
+    <div class="note"><span class="tag">实现口径</span>这里的“图”不是图数据库，而是<b>轻量关联索引</b>：邻接表 + 1–2 跳扩展，每跳衰减、预算封顶；输出 <code>path / hop</code>，模拟边默认排除。它只用于候选扩展，不替代原打分。参考 <code>runtime/graph_retrieval.py</code>。</div>
+
+    <div class="note"><span class="tag">前沿补注</span>提取不是中性的：目标提取会暂时抑制竞争项（retrieval-induced forgetting），也可能促进相关项；但 2024–2026 的直接证据仍有限。当前实现<b>只做可逆、限时的可及性惩罚</b>：命中后同话题/同人物的竞争项在 3 个逻辑时间单位内 ×0.85（默认按轮次；生产可配置为秒），TTL 到期恢复；不删证据、不改关系。</div>
+
+    <div class="note"><span class="tag">保护栏</span>编码阶段不允许“边写边总结成事实”。事实与解释必须分开；摘要只能作为 <code>summary</code> 字段，不能替代原始事件。</div>
+
+    <h3>5.2 提取闭环：从线索到情境包</h3>
+    <ol class="steps">
+      <li><b>线索解析。</b>抽取人物、时间、地点、话题、情绪、目标；判断查询类型：事实、经历、关系、承诺、程序、还是“说不清”。</li>
+      <li><b>模式分离。</b>先消歧：两个“张总”、两次“上次”、两版合同。相似度高于阈值但时间/场景/结果不同的，强制分成不同候选，并给出区分证据。</li>
+      <li><b>模式完成。</b>从人物—事件—关系图做多轮扩展；向量近邻补充语义相似；时间与因果约束过滤。每一轮按 <code>cue_overlap + association + recency + salience + source_reliability − interference</code> 重排。</li>
+      <li><b>重建。</b>把候选片段组装成一段连贯叙事，逐句标注来源 <code>[E102]</code>；事实与解释分开表述；不确定的地方明确说“不确定”。</li>
+      <li><b>来源审计。</b>检查每一句的来源类型（亲历/转述/推断/生成）、证据数量、是否与已知记录冲突；给出整体置信度。</li>
+      <li><b>情境编译。</b>把结果压缩成 4±1 槽位：who、relationship、experiences、goal、commitments、changes、uncertainties。每槽有 token 上限，超出则摘要或改为指针。</li>
+    </ol>
+    <p>提取不是“把相关文档都找出来”。它是“为当前这一轮思考，选出最少但足够的几块”。如果情境包需要 20 个片段才能说清楚，通常说明系统没有巩固好，而不是主脑需要更多上下文。</p>
+
+    <h3>5.3 决策闭环：主脑如何用情境包</h3>
+    <ol class="steps">
+      <li><b>定位。</b>读情境包，确认：个体是谁、对面是谁、双方是什么关系、现在要做什么、有什么未完成承诺、有哪些不确定。</li>
+      <li><b>选模式。</b>若情境签名命中习惯缓存，且风险低、时间紧、结果稳定 → 走 model-free 快路；否则走 model-based 慢路。仲裁权在主脑，不在后台。</li>
+      <li><b>推演。</b>慢路中，主脑可调用未来模拟：基于相关情景生成 2–3 个可选剧本，比较预期结果、风险、关系影响；也可以要求后台展开某个事件或核查某条断言。</li>
+      <li><b>决定。</b>主脑选择一个行动，并写下预期结果（用于之后的 RPE）。决定不需要后台“批准”，后台也没有批准权。</li>
+      <li><b>表达/行动。</b>通过 Effector 执行：说话、发消息、调用工具、做出动作。Effector 只执行，不自行发起。</li>
+    </ol>
+
+    <h3>5.4 行动回写闭环：结果如何改变记忆</h3>
+    <ol class="steps">
+      <li><b>观察。</b>记录实际结果、对方回应、副作用、是否达成预期。</li>
+      <li><b>算 RPE。</b><code>δ = r − V(s)</code>；正误差强化前一步，负误差削弱并标记“需要重新评估”。</li>
+      <li><b>更新事件。</b>把事件状态从“开放”改为“已关闭/待跟进”；追加结果，不覆盖原记录。</li>
+      <li><b>更新关系。</b>一次互动只作为一条证据；关系摘要按滑动窗口聚合，不因单次事件剧烈跳变（除非影响极大）。</li>
+      <li><b>更新来源校准。</b>结果回写时调用 <code>record_outcome</code>：证实/推翻更新来源历史；结果作为直接事件写入；预测误差大时触发解释新版本；同一结果只算一条关系证据，重复回写不重复计入。</li>
+      <li><b>标记巩固。</b>高显著性、高预测误差、未完成承诺的事件进入夜间巩固队列。</li>
+    </ol>
+
+    <h3>5.5 离线巩固闭环：睡眠做什么</h3>
+    <p>离线巩固不是“把今天的对话总结一下”。它至少包含五道工序：</p>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 9 · 巩固批处理的五道工序</caption>
+        <thead><tr><th style="width:14%">工序</th><th style="width:30%">做什么</th><th>对应机制</th></tr></thead>
+        <tbody>
+          <tr><td><b>扫描</b></td><td>遍历当日事件，按显著性 × 预测误差 × 目标相关 × 未完成度排序</td><td>慢振荡的全局扫描</td></tr>
+          <tr><td><b>聚类</b></td><td>按人物、项目、主题、时间把事件分组，选代表事件</td><td>纺锤波的局部打包</td></tr>
+          <tr><td><b>重放</b></td><td>对每组重放“前因 → 行动 → 结果”，生成反事实与教训</td><td>海马涟漪的序列重放</td></tr>
+          <tr><td><b>抽象</b></td><td>从多个事件中抽取图式、规则、技能候选；要求独立证据数达标</td><td>系统巩固 / 图式同化</td></tr>
+          <tr><td><b>合并与修剪</b></td><td>写入语义图谱/技能库；更新关系摘要；衰减低价值索引；压缩普通交互为阶段摘要</td><td>突触稳态 / 自适应遗忘</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>巩固的优先级不是“最新的优先”，而是“最值得未来用的优先”：高显著性、高预测误差、与未完成目标相关、被反复访问但尚未抽象的事件，优先重放。相反，低价值、重复、无后果的日常交互，应该被压缩成阶段摘要，而不是逐条保留。</p>
+
+    <h3>5.6 遗忘与再巩固闭环：安全地改变过去</h3>
+    <p>这两个闭环常被混为一谈，其实方向相反：<b>遗忘</b>是降低可提取性，<b>再巩固</b>是更新内容。它们共享同一个触发点：提取。每次提取都记一次 <code>access</code>，但不增加证据数；如果提取伴随显著的预测误差或新信息，就创建新版本；否则只更新时间戳与可及性。</p>
+    <pre class="code"><span class="c"># 再巩固的极简判定</span>
+access_log.append(event_id, timestamp, cue, context)
+
+PE = |expected_outcome − observed_outcome|
+novelty = 1 − cos(new_info, existing_summary)
+
+if PE &gt; θ_pe or novelty &gt; θ_novelty:
+    new_version = revise(event, new_info, basis=evidence_ids)
+    new_version.supersedes = old_version.id
+    store.append(new_version)          <span class="c"># 不覆盖旧版本</span>
+    enqueue_for_consolidation(new_version)
+else:
+    event.last_accessed = now
+    event.access_count += 1            <span class="c"># 只提升可及性，不增加证据</span></pre>
+    <p>遗忘则按保留率公式执行：<code>R = exp(−Δt / S) × (1 + α|valence|) × (0.5 + 0.5·utility) × relationship_factor</code>。低于阈值的内容移入冷归档；低于更低阈值且不属于豁免清单的，移除活跃索引。原始事件日志仍然保留，供审计与“被遗忘权”之外的合法追溯使用。</p>
+
+    <h3>5.7 闭环之间的耦合：不能单独优化任何一环</h3>
+    <p>六个闭环不是流水线，而是相互咬合的回路。只优化其中一环，通常会把问题推到另一环：</p>
+    <ul class="clean">
+      <li><b>编码 ↔ 提取。</b>编码时没有留线索，提取时就会“想不起来”；提取失败的模式，应该反哺编码策略，告诉系统“下次这类事件要记什么”。</li>
+      <li><b>提取 ↔ 巩固。</b>被反复访问却始终没有抽象的事件，是巩固的优先候选；反之，从未被访问、也无未来效用的事件，应该更早进入冷归档。</li>
+      <li><b>巩固 ↔ 编码。</b>巩固形成的图式，会改变下一次编码的显著性：与图式一致的信息更容易被快速合并，不一致的信息则值得更深地写入。</li>
+      <li><b>遗忘 ↔ 提取。</b>遗忘降低干扰，让检索更准；但遗忘过度会让系统“重新发现”已经学过的教训。保留率公式与豁免清单，就是这两者之间的调节阀。</li>
+    </ul>
+    <div class="note"><span class="tag">工程含义</span>不要用“检索命中率”单独考核系统。一个只优化检索的系统，会倾向于保存一切、拒绝遗忘；最终上下文变脏、决策变慢。闭环的指标必须成对出现：召回率配精确率，保留率配误删率，压缩比配信息损失。</div>
+  </div>
+</section>

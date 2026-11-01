@@ -1,0 +1,137 @@
+<section class="sec" id="s6b" style="border-top:none;padding-top:0">
+  <div class="wrap">
+    <h3>6.5 显著性与注意：什么进入编码 <span class="small">· 证据级 D</span></h3>
+    <p><b>机制回顾。</b>编码不是被动录入。信息必须先通过注意与显著性门控，才可能形成持久改变；注意是选择，不是容量。一个事件是否值得留下，取决于它对未来判断有没有差别，而不是它有多“强烈”。</p>
+    <p><b>显著性评分。</b>每个新事件先算一个 0–1 的分数：</p>
+    <pre class="code">salience = σ( w1*novelty + w2*goal_relevance + w3*social_impact
+            + w4*|valence| + w5*prediction_error + w6*explicit_importance )
+         * (1 + γ*impact_gap)        <span class="c"># 事件影响缺口，不是身体状态</span></pre>
+    <p>六个分项都可以用轻量模型估计；<code>impact_gap</code> 是 2.7.1 的事件影响缺口，作为乘性门控，而不是第七个独立权重。<code>novelty</code> 用与近期事件/图式的距离；<code>goal_relevance</code> 用与当前目标的相似度；<code>social_impact</code> 用关系权重 × 事件对地位/承诺的影响；<code>valence</code> 用情绪分类；<code>prediction_error</code> 用结果与预期的差；<code>explicit_importance</code> 捕捉“记住这个”这类显式指令。</p>
+    <p>显著性不是“情绪强度”，而是“这件事对未来判断有多大差别”。重复的日常、可预测的寒暄、没有后果的细节，应该被习惯化，而不是逐条写入；一次意外、一次承诺、一次关系边界的变化，才值得分配长期印迹。</p>
+    <p>事件影响通过 <code>impact_gap</code> 进入显著性：目标压力、关系张力、资源负荷、不确定性越高，越超出应对能力，事件越值得优先处理。状态性解释打 <code>state_bias</code>，不回写关系特质；机器不维护“身体状态”。</p>
+    <p>实现上，不要让一个大模型每轮“感受情绪”；用一个轻量分类器/回归器从文本、互动历史估计这几个分项，再映射到参数。这样成本低、可复现，也避免把“情绪”变成不可解释的玄学。</p>
+    <div class="warn"><span class="tag">保护栏</span>显著性只改变“是否编码、是否优先检索”，不改变“事实是什么”。它不能成为修改证据、掩盖冲突或操纵用户情绪的借口；每次决策都要记录当时的显著性分项，便于审计。</div>
+
+    <h3>6.6 工作记忆：4±1 槽位与门控 <span class="small">· 证据级 A/B</span></h3>
+    <p><b>机制回顾。</b>工作记忆的容量约为 4±1 个组块；前额叶既有持续活动，也有“活动静默”的隐藏状态；基底神经节负责门控，决定何时更新、何时维持。</p>
+    <p><b>槽位口径。</b>固定头部（已批准的自我、未完成承诺）不计入 4±1，单独占预算；4±1 只数可变的经历类内容。这样不会因为自我/承诺变多而挤掉当前经历。</p>
+    <p><b>槽位设计。</b>情境包固定四类槽位，最多五个：<code>who</code>（人物与身份）、<code>goal</code>（当前目标与成功标准）、<code>constraint</code>（限制、承诺、边界）、<code>uncertainty</code>（未决问题与候选）。每个槽位存“内容或指针”，并带来源、置信度、TTL。</p>
+    <pre class="code">Slot {
+  type: who | goal | constraint | uncertainty,
+  content: string | pointer(trace_id),
+  source_event_ids: [],
+  confidence: 0–1,
+  ttl: turns,
+  pinned: bool          <span class="c"># 目标/承诺可被主脑钉住</span>
+}</pre>
+    <p><b>门控。</b>不是每条新信息都能挤进槽位。门控分数由相关度、紧迫性、显著性与切换成本共同决定：</p>
+    <pre class="code">candidate = relevance * urgency * (1 + novelty)
+gain = candidate - current_slot_value - switch_cost
+if gain &gt; θ_gate and not current_slot.pinned:
+    replace(current_slot, candidate)</pre>
+    <p><b>活动静默。</b>槽位不必一直装着全文。它可以只存一个 <code>pointer(trace_id)</code>，主脑需要时发 <code>EXPAND</code> 取回细节。这样上下文可以保持很小，而信息仍然可达。这就是“活动静默”的工程版本：不是所有相关记忆都要同时亮着。</p>
+    <p><b>溢出处理。</b>当候选超过 4±1：先合并同主题槽位（组块），再把低相关槽位降级为指针，最后丢弃最低分项并记录 <code>dropped</code> 日志。不要静默截断，否则系统会“忘了自己忘了什么”。</p>
+    <h4>6.6.1 上下文窗口不是工作记忆</h4>
+    <p>把 LLM 的 context window 直接类比为人的工作记忆，是常见但危险的简化。两者只在“容量有限”这一点相似；再往下看，限制的性质并不相同。</p>
+    <div class="table-wrap">
+      <table class="compact">
+        <caption>表 12 · 工作记忆与上下文窗口</caption>
+        <thead><tr><th style="width:16%">维度</th><th style="width:38%">人的工作记忆</th><th>LLM 上下文窗口</th></tr></thead>
+        <tbody>
+          <tr><td><b>容量单位</b></td><td>约 4±1 个组块；组块可随专长变大</td><td>token 数；语义密度可高可低</td></tr>
+          <tr><td><b>边界性质</b></td><td>弹性、任务依赖、可训练</td><td>硬上限，由模型架构决定</td></tr>
+          <tr><td><b>内容</b></td><td>当前活跃表征 + 可随时唤起的指针</td><td>实际放入的全部 token</td></tr>
+          <tr><td><b>控制</b></td><td>注意、抑制、目标维持、门控</td><td>attention 权重 + prompt 编排</td></tr>
+          <tr><td><b>压缩</b></td><td>组块化、图式、要点化</td><td>摘要、RAG、截断</td></tr>
+          <tr><td><b>扩展</b></td><td>笔记、工具、他人、外部记忆</td><td>工具调用、检索、文件</td></tr>
+          <tr><td><b>典型失败</b></td><td>分心、过载、遗忘</td><td>中间信息丢失、无关信息干扰</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>三个关键区别。第一，人的限制是“同时参与决策的组块数”，不是“能装多少字”；专家可以把一整个棋局或一段代码结构压成一个组块，所以有效容量会随经验变化。第二，人的工作记忆是主动控制过程，决定什么进来、什么被抑制；context window 是被动容器，放进去什么就有什么，模型只能靠 attention 自己找。第三，人不需要把所有长期记忆都搬进工作记忆，而是靠线索按需召回；如果 LLM 只靠长上下文，就等于把长期记忆也塞进舞台，成本和干扰都会上升。</p>
+    <p>因此，方案里的 <code>ContextPacket</code> 不是“更小的 context window”，而是工作记忆的<b>选择接口</b>：4±1 个槽位只放当前决策真正需要的几块，其余内容留在事件日志、关系图与语义库中，按需 <code>EXPAND</code>。4±1 不是要求模型只能读四个 item，而是强制“先选择、再展开”。更大的上下文窗口不会自动解决记忆问题，它只是把瓶颈从“放不下”转移到“选不准、注意力稀释”。</p>
+    <div class="warn"><span class="tag">保护栏</span>主脑可以“钉住”一个目标或承诺槽位，任何后台都无权驱逐；这对应主脑对当前任务的持续控制，也防止后台用高显著性信息把主脑带偏。</div>
+
+    <h3>6.7 决策：model-free 与 model-based 的仲裁 <span class="small">· 证据级 B/C</span></h3>
+    <p><b>机制回顾。</b>习惯系统（背侧纹状体）把高频的“情境—动作—结果”压成快速通路；目标导向系统（前额叶—海马）在脑内模拟后果，适合新异、高风险、需要解释的场景。两者不是谁替代谁，而是按可靠性、风险、时间压力仲裁。</p>
+    <p><b>快路。</b>如果当前情境签名命中习惯缓存，且满足“高置信、低风险、时间紧、结果稳定”，主脑可以直接采用<b>已批准</b>（<code>status=ratified</code>）的习惯模板与技能；<code>candidate</code> 只能作为提示，不能直接驱动行动。注意：缓存的是“上次类似情境怎么处理”的模板，不是“这次必须这么做”的决定；主脑仍然可以否决。</p>
+    <p><b>慢路。</b>否则，主脑调用未来模拟：基于相关情景生成 2–3 个可选剧本，比较预期结果、风险、关系影响与价值一致性。未来模拟只提供情景草案与风险提示，不替主脑选择。</p>
+    <pre class="code">if habit.match(sig) and habit.status == "ratified" and habit.confidence &gt; h
+   and scheduler.fast_path
+   and stakes &lt; s and time_pressure &gt; t:
+    policy = habit.context_template      <span class="c"># 快路：只给模板</span>
+else:
+    scenarios = future_sim(packet, options=3)
+    policy = main_brain.deliberate(scenarios, values, constraints)
+
+outcome = act(policy)
+delta = outcome.reward - policy.expected_value
+update_value(policy, delta)
+if abs(delta) &gt; θ_rpe: enqueue_for_consolidation(policy.event)</pre>
+    <p><b>习惯的建立与废除。</b>同一情境签名重复出现 ≥N 次、结果稳定为正，才创建习惯；连续失败 ≥M 次，或出现重大负后果，立即降权并标记“待复核”。习惯是省力，不是免责。</p>
+    <div class="warn"><span class="tag">保护栏</span>后台不能“建议走快路”。快路/慢路的选择由主脑根据情境包自行判断；后台最多提供“历史成功率”与“风险信号”，不能提供“你应该”。</div>
+
+    <h4>6.7.1 记忆如何进入选择：先例、预期与“记得≠会做”</h4>
+    <p>记忆不是在选择时被“想起来”，而是<b>改变选项的预期价值</b>。一个先例是（情境、动作、结果）；它对当前选项的贡献由相似度、显著性与来源可靠性加权，冲突先例降权而不是平均：</p>
+    <pre class="code">V(a|s) = V0 + α · Σ w_i (r_i − V0) / max(1, Σ w_i)
+w_i = similarity_i × salience_i × reliability_i × (0.5 if conflict_i else 1)</pre>
+    <p>三个失败模式：<b>可得性偏差</b>——鲜明事件被过度加权；<b>来源混淆</b>——把转述当亲历；<b>叙事补全</b>——把反事实当成事实。来源审计、冲突并列与证据计数是对策。</p>
+    <p>关系记忆改变的是信任、承诺与边界判断，不是事实回忆；程序记忆与情景记忆分离：<b>记得怎么做，不等于做得到</b>。技能执行取决于练习量，不取决于回忆置信度；回忆置信度高，只能说明“记得”，不能说明“会做”。</p>
+
+    <h4>6.7.2 反事实模拟的边界：只能生成候选，不能写成事实 <span class="small">· 证据级 C/D</span></h4>
+    <p>未来模拟能生成“如果这样做，可能会怎样”的候选，但它不是记忆。边界必须写死在 schema 与写入网关里：</p>
+    <ul class="clean">
+      <li><b>来源固定为 <code>simulation</code></b>，<code>is_fact=false</code>；置信度再高也不能变成事实。</li>
+      <li><b>不能写入事件日志</b>，不能计入 <code>evidence_count</code>；模拟不是观察，不能给自己提供证据。</li>
+      <li><b>只有观察到的结果才是事件</b>；只有独立证据才能把候选升为 <code>hypothesis</code>，且它仍然是假设，不是事实。</li>
+      <li><b>失败模式</b>：想象膨胀（越想越真）、来源混淆（把模拟当成经历）、叙事补全（用反事实填记忆空白）。对策是来源标签、写入网关拒绝、审计抽样。</li>
+    </ul>
+    <p>系统实现上，<code>simulation</code> 与 <code>event</code> 使用不同 schema；写入网关直接拒绝 <code>simulation → event</code>，而不是靠提示词提醒“不要当真”。</p>
+    <p><b>现实监控不只靠来源标签。</b>2025 年 Neuron 的研究显示，现实判断取决于中层级视觉皮层中由想象或感知产生的活动强度，并与额叶的二元判断交互；活动波动会预测想象/感知混淆（Dijkstra et al. 2025）。工程上，模拟与检索内容应同时带 <code>source</code> 与 <code>signal_strength</code>；高生动度不等于真实，来源标签仍是硬约束。梦是低约束、低现实监控的离线生成，当前不写成机制，只保留“不写事实、不计证据”的边界。</p>
+    <p><b>工程阈值（建议，D 级设计值）。</b>把强度拆成可估计的三项：<code>strength = 0.4·perceptual_detail + 0.3·multimodal_coherence + 0.3·source_reliability</code>。两类告警：<b>高生动模拟</b>——<code>strength &gt; 0.7</code> 且来源是 <code>simulation / compositional_replay</code>；<b>微弱亲历</b>——<code>strength &lt; 0.3</code> 且来源是 <code>direct</code>。前者提醒“这可能是编出来的”，后者提醒“这可能记不清了”；两者都只降置信度，不直接改写事实。</p>
+
+    <h3>6.8 关系记忆：人物—事件双向图 <span class="small">· 证据级 C/D</span></h3>
+    <p><b>机制回顾。</b>人物知识、心理理论、自传体记忆共享一套内侧网络；关系不是单一维度，而是熟悉、亲近、信任、合作、承诺、边界、角色等多维判断的集合；共享经历会加深关系，也可能产生隔阂。</p>
+    <p><b>图结构。</b>用二部图存“人物—事件”，边是参与记录；再用关系摘要存“个体—他人”的多维状态。人物可以唤起事件，事件也可以唤起人物；地点、声音、物品、话题都是线索节点。</p>
+    <pre class="code">Person --participates--> Event
+Person --relationship--> Relationship --evidence--> Event
+Event --cue--> Place / Sound / Object / Topic
+
+Relationship {
+  self_to_other: { familiarity, closeness, trust_scope, cooperation,
+                   commitment, boundaries, social_role,
+                   social_safety, belonging_need },
+  other_to_self: { ... },          <span class="c"># 推断，带不确定性</span>
+  attachment_prior: { self_worth, other_availability },
+  interdependence: { satisfaction, alternatives, investment },
+  evidence_event_ids: [],
+  scope: work | family | public,
+  updated_at, confidence
+}</pre>
+    <p><b>更新规则。</b>一次互动只是一条证据；关系维度按滑动窗口聚合，用慢学习率更新：</p>
+    <pre class="code">for d in dimensions:
+    evidence = events_in_window(person, d)
+    target = weighted_mean(evidence, weights=[salience, recency, source])
+    value[d] = (1 - λ) * value[d] + λ * target
+    confidence[d] = calibrate(evidence_count, source_quality)</pre>
+    <p><b>关系张力项。</b>关系权重不只看互动频率，还看这次互动是否降低了关系张力：被回应、被可靠对待、承诺被履行。把更新目标改为“证据均值 × 张力下降 × 可靠性”，而不是简单的滑动平均：</p>
+    <pre class="code">strain_gap = relationship_strain - perceived_support
+reliability = promises_kept / max(1, promises_made)
+target[d] = weighted_mean(evidence) * (1 + α * strain_reduction) * (1 + β * reliability)
+value[d] = (1 - λ) * value[d] + λ * target[d]</pre>
+    <p>其中 <code>strain_reduction</code> 是互动前后 <code>strain_gap</code> 的下降；<code>reliability</code> 是“说到做到”的比例，而不是“说了多少好话”。这两个量让关系更新有事件影响的含义，而不是只数互动次数。关系权重更新仍走 3.7 的提案-批准：后台只能提出 <code>RelationshipProposal</code>，主脑批准后才进入关系摘要。</p>
+    <p><b>不对称。</b>“个体信任他”和“他信任个体”必须分开。前者可以来自个体的直接经历；后者只能来自他的行为、转述或推断，必须标注不确定性。把两者混成一个“信任分”，是关系记忆最常见的错误。</p>
+    <p><b>承诺追踪。</b>未完成承诺是关系图上的“开放边”，带截止时间、对象、状态；它不参与遗忘衰减，直到履行、取消或重新约定。这比“记住所有对话”更有用：关系往往不是靠回忆维持的，而是靠“答应过的事有没有做到”。</p>
+    <h4>6.8.1 关系记忆如何改变信任与承诺</h4>
+    <p>关系记忆不是“记得他做过什么”，而是这些先例把<b>信任、承诺、边界的阈值</b>调到哪里。一次互动只是一条证据；负面先例权重更高，冲突先例降权：</p>
+    <pre class="code">Δd = η · reliability · salience · (1 if positive else −λ) · (0.5 if conflict)
+d  ← clamp(d + Δd, −1, 1)
+commit_ok = trust ≥ τ and capacity ≥ cost</pre>
+    <p><b>情感不是信任。</b>恨、讨厌、亲近是情感（<code>affect</code>）；值不值得信任是对这个人的客观判断（<code>trust</code>）。两者分开存储、分开更新：恨一个人不妨碍判断他可靠；喜欢一个人也不等于可托付。保留率只用情感强度；承诺用信任与能力。</p>
+    <p>λ &gt; 1 表示负面先例更重；一次事件不足以改特质，需要独立证据计数。三个失败模式：<b>一次事件过拟合</b>（一次迟到就判“不可靠”）、<b>负面螺旋</b>（只注意负面证据）、<b>边界侵蚀</b>（不断妥协直到没有边界）。对策是证据计数、来源审计与 3.7 的提案—批准。同一 <code>event_id</code> 的重复回写是幂等的：不重复计入证据，也不二次放大关系值。共同出现与实际互动的权重不同：前者 0.3，后者 1.0；不把“同场”当“交往”。关系不只有亲近与憎恨：熟悉、信任、合作、承诺、边界分别更新；<code>valence</code> 是方向，<code>intensity</code> 是强度；保留率只用 <code>intensity</code>，信任/承诺用具体维度。</p>
+
+    <p><b>前沿证据的边界。</b>2026 年关于自传体记忆“去情境化”的直接证据仍以预印本与间接材料为主；当前关系更新保持固定慢学习率，不引入“证据越多、学习率越低”的硬规则。去情境化作为待验证方向，而不是写成定论。</p>
+
+    <div class="warn"><span class="tag">保护栏</span>不要把一次事件直接上升为人物特质。一次迟到不等于“不可靠”；一次帮助不等于“亲密”。特质判断至少需要多个独立事件，或一次影响极大的事件，并标注依据与范围。</div>
+  </div>
+</section>
