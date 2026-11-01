@@ -1,4 +1,4 @@
-[Chinese](README.md) ｜ **English**
+[简体中文](README.md) | **English**
 
 # Dual-Brain Memory System: From Neural Mechanisms to a Multi-Model Simulation Approach
 
