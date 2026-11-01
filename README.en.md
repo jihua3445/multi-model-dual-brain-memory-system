@@ -29,8 +29,8 @@ If memory is organized by person–event–relationship; if context contains onl
 
 | Language | HTML | PDF |
 |---|---|---|
-| 中文 | [双脑记忆系统-从神经机制到多模型模拟方案.html](docs/zh/双脑记忆系统-从神经机制到多模型模拟方案.html) | [双脑记忆系统-从神经机制到多模型模拟方案.pdf](docs/zh/双脑记忆系统-从神经机制到多模型模拟方案.pdf) |
-| English | [dual-brain-memory-system-v2.1-en.html](docs/en/dual-brain-memory-system-v2.1-en.html) | [dual-brain-memory-system-v2.1-en.pdf](docs/en/dual-brain-memory-system-v2.1-en.pdf) |
+| 中文 | [双脑记忆系统-从神经机制到多模型模拟方案.html](https://jihua3445.github.io/dual-brain-memory-system-from-neural-mechanisms-to-multi-model-simulation/zh/双脑记忆系统-从神经机制到多模型模拟方案.html) | [双脑记忆系统-从神经机制到多模型模拟方案.pdf](https://jihua3445.github.io/dual-brain-memory-system-from-neural-mechanisms-to-multi-model-simulation/zh/双脑记忆系统-从神经机制到多模型模拟方案.pdf) |
+| English | [dual-brain-memory-system-v2.1-en.html](https://jihua3445.github.io/dual-brain-memory-system-from-neural-mechanisms-to-multi-model-simulation/en/dual-brain-memory-system-v2.1-en.html) | [dual-brain-memory-system-v2.1-en.pdf](https://jihua3445.github.io/dual-brain-memory-system-from-neural-mechanisms-to-multi-model-simulation/en/dual-brain-memory-system-v2.1-en.pdf) |
 
 Read online: <https://jihua3445.github.io/dual-brain-memory-system-from-neural-mechanisms-to-multi-model-simulation/>
 
@@ -64,4 +64,4 @@ python3 pipeline.py         # end-to-end JSON with audit trace
 
 ## License
 
-MIT License. See [LICENSE](LICENSE).
+MIT License. See [LICENSE](https://github.com/jihua3445/dual-brain-memory-system-from-neural-mechanisms-to-multi-model-simulation/blob/main/LICENSE).
