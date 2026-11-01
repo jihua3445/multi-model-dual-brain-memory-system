@@ -1,3 +1,5 @@
+**中文** ｜ [English](README.en.md)
+
 # 双脑记忆系统：从神经机制到多模型模拟方案
 
 **Dual-Brain Memory System: From Neural Mechanisms to a Multi-Model Simulation Approach**  
@@ -5,8 +7,6 @@
 
 > **状态：思路稿。**  
 > 本仓库记录的是一条构建思路，不是已落地的框架、产品，也不是经过验证的实践。文档讨论记忆、关系与多模型分工可以如何组织，不声称已经给出完整架构或实现。`runtime/` 只是对部分契约的参考探针，不代表框架本身。
-
-**中文** | [English](README.en.md)
 
 ## 为什么做这套方案
 

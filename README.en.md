@@ -1,12 +1,11 @@
+[Chinese](README.md) ｜ **English**
+
 # Dual-Brain Memory System: From Neural Mechanisms to a Multi-Model Simulation Approach
 
-**双脑记忆系统：从神经机制到多模型模拟方案**  
 Version 2.1 · 2026
 
 > **Status: a conceptual note.**  
 > This repository records a line of thinking, not a framework, product, or validated practice. It explores how memory, relationships, and multi-model division might be organized; it does not claim a complete architecture or implementation. `runtime/` is a small reference probe for selected contracts, not the framework itself.
-
-[中文](README.md) | **English**
 
 ## Why this project
 
@@ -29,7 +28,7 @@ If memory is organized by person–event–relationship; if context contains onl
 
 | Language | HTML | PDF |
 |---|---|---|
-| 中文 | [双脑记忆系统-从神经机制到多模型模拟方案.html](https://jihua3445.github.io/dual-brain-memory-system-from-neural-mechanisms-to-multi-model-simulation/zh/双脑记忆系统-从神经机制到多模型模拟方案.html) | [双脑记忆系统-从神经机制到多模型模拟方案.pdf](https://jihua3445.github.io/dual-brain-memory-system-from-neural-mechanisms-to-multi-model-simulation/zh/双脑记忆系统-从神经机制到多模型模拟方案.pdf) |
+| Chinese | [Chinese HTML](https://jihua3445.github.io/dual-brain-memory-system-from-neural-mechanisms-to-multi-model-simulation/zh/双脑记忆系统-从神经机制到多模型模拟方案.html) | [Chinese PDF](https://jihua3445.github.io/dual-brain-memory-system-from-neural-mechanisms-to-multi-model-simulation/zh/双脑记忆系统-从神经机制到多模型模拟方案.pdf) |
 | English | [dual-brain-memory-system-v2.1-en.html](https://jihua3445.github.io/dual-brain-memory-system-from-neural-mechanisms-to-multi-model-simulation/en/dual-brain-memory-system-v2.1-en.html) | [dual-brain-memory-system-v2.1-en.pdf](https://jihua3445.github.io/dual-brain-memory-system-from-neural-mechanisms-to-multi-model-simulation/en/dual-brain-memory-system-v2.1-en.pdf) |
 
 Read online: <https://jihua3445.github.io/dual-brain-memory-system-from-neural-mechanisms-to-multi-model-simulation/>
