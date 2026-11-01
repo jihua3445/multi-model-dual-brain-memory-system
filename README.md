@@ -1,5 +1,7 @@
 **简体中文** | [English](README.en.md)
 
+![version](https://img.shields.io/badge/version-2.1.0-0d5b55) ![license](https://img.shields.io/badge/license-MIT-0d5b55) ![tests](https://img.shields.io/badge/tests-128%20passed-0d5b55)
+
 # 多模型双脑记忆系统
 
 **从神经机制到多模型模拟方案**
