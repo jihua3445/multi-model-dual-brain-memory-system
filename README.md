@@ -1,81 +1,67 @@
 # 双脑记忆系统：从神经机制到多模型模拟方案
 
 **Dual-Brain Memory System: From Neural Mechanisms to a Multi-Model Simulation Approach**  
-Version 2.1 · 2026
+版本 2.1 · 2026
 
 > **状态：思路稿。**  
 > 本仓库记录的是一条构建思路，不是已落地的框架、产品，也不是经过验证的实践。文档讨论记忆、关系与多模型分工可以如何组织，不声称已经给出完整架构或实现。`runtime/` 只是对部分契约的参考探针，不代表框架本身。
 
-> **Status: a conceptual note.**  
-> This repository records a line of thinking, not a framework, product, or validated practice. It explores how memory, relationships, and multi-model division might be organized; it does not claim a complete architecture or implementation. The `runtime/` directory is a small reference probe for selected contracts, not the framework itself.
+[English README](README.en.md)
 
-## 我们要解决的问题
+## 为什么做这套方案
 
-今天的大模型不是“记不住”，而是**记住了也不会用**。
+**1. 单模型装不下“一个连续的人”。**  
+一个人的连续存在，不是一次对话，而是长期的关系、承诺、共同经历。把全部历史塞进上下文，既昂贵，也会让判断被无关信息稀释；只做向量检索，又只能得到“相似片段”，得不到“这个人是谁、个体与他是什么关系、彼此答应过什么”。这套方案想验证：能不能让整合中心每轮只读很小一块，但这一块足够做出判断。
 
-1. **上下文越大，判断越差。**  
-   把更多历史塞进上下文，不会让模型更懂当前情况；它会被无关信息稀释，被相似但不相干的内容带偏。缺的不是“更多记忆”，而是“此刻真正相关的那几块”。
+**2. 记忆的理由是关系，不是存档。**  
+人是社会性动物，记忆帮助个体认清自己与他人的关系与地位。共同经历把人物与事件连接起来：看到一个人，会想起相关的事；想起一件事，也会想到参与其中的人。人物与事件的对应，是人与人的关系原点，也是记忆存在的理由。关系越平淡，相关记忆越容易淡化；亲密或憎恨越深，相关经历越深刻；承诺要留，解释可改。只按时间/频率存，不按关系组织，它就只是日志，不是“记得一个人”。
 
-2. **现有记忆方案记的是对话，不是关系。**  
-   向量库能回答“哪段话最像”，但回答不了：这个人是谁、个体与他是什么关系、共同经历过什么、哪些是事实、哪些是解释、哪些承诺还没履行。人物与事件的对应，才是关系与记忆的原点。
+**3. 多模型不是多 Agent，是同一个体的器官。**  
+现有 agent 框架通常把任务拆给多个 agent，各自有目标、工具、行动，最后像委员会一样协商。这套方案想模拟的不是“一群 agent 开会”，而是：多个模型像脑的不同功能单元，分别处理人物识别、记忆检索、关系判断、情境整理；它们只准备情境，不替个体决定；最后只有一个整合中心。重点不是“多”，而是“多而一”。
 
-3. **模型没有跨时间的连续身份。**  
-   每次对话从零开始，记得的只是“这次说了什么”，不是“彼此之间发生过什么”。陪伴型产品最需要的不是更多知识，而是记得关系、记得承诺、记得共同经历。
+**4. 现有方案缺的不是记忆，是“关系的连续性”。**  
+只存对话，不存人物—事件—关系；只做相似检索，不区分事实、解释与承诺；只服务单次任务，不服务跨时间的连续关系；多模型协作容易变成委员会，没有唯一负责的整合中心。这套方案要补的，是关系与判断的连续性，而不是再建一个更大的向量库。
 
-4. **记忆不可审计。**  
-   来源不明、转述当亲历、解释覆盖事实、冲突被平均、遗忘与删除不分。一个不能说明“凭什么记得”的系统，无法承担长期关系。
+**5. 想验证的假设。**  
+如果记忆按人物—事件—关系组织；上下文只给此刻关系与承诺的切片；后台只做情境准备，不提供建议、不代替决定；多个模型分工，但只有一个整合中心；那么，一个模型群可能在小上下文下表现出连续的个体感，而不是每次重新认识。这只是一个假设，不是已经落地的框架，也不是经过验证的实践。
 
-5. **多模型协作容易变成委员会。**  
-   后台都能建议、都能行动，最后没人对后果负责。分工不是目的；分工之后仍然只有一个整合与决策中心，才是目的。
+## 文档
 
-## Documents
-
-| Language | HTML | PDF |
+| 语言 | HTML | PDF |
 |---|---|---|
-| 中文 | [dual-brain-memory-system-v2.1-zh.html](docs/zh/dual-brain-memory-system-v2.1-zh.html) | [dual-brain-memory-system-v2.1-zh.pdf](docs/zh/dual-brain-memory-system-v2.1-zh.pdf) |
+| 中文 | [双脑记忆系统-从神经机制到多模型模拟方案.html](docs/zh/双脑记忆系统-从神经机制到多模型模拟方案.html) | [双脑记忆系统-从神经机制到多模型模拟方案.pdf](docs/zh/双脑记忆系统-从神经机制到多模型模拟方案.pdf) |
 | English | [dual-brain-memory-system-v2.1-en.html](docs/en/dual-brain-memory-system-v2.1-en.html) | [dual-brain-memory-system-v2.1-en.pdf](docs/en/dual-brain-memory-system-v2.1-en.pdf) |
+
+在线浏览：<https://jihua3445.github.io/dual-brain-memory-system-from-neural-mechanisms-to-multi-model-simulation/>
 
 ## Reference Implementation (Reference Only)
 
-This repository includes the scripts used to build the documents and a small in-memory reference implementation. They are included for transparency and reproducibility — **not** as a production system.
+本仓库包含构建脚本与一个内存参考实现，用于透明与可复现，**不是生产系统**。
 
-| Path | Purpose |
+| 路径 | 用途 |
 |---|---|
-| `source/zh/build.py` | Build the Chinese HTML from `source/zh/parts` |
-| `source/en/build.py` | Build the English HTML from `source/en/parts` |
-| `source/zh/parts/` | Chinese source fragments |
-| `source/en/parts/` | English source fragments |
-| `runtime/` | In-memory reference implementation |
-| `docs/zh/`, `docs/en/` | Built HTML / PDF |
-
-`runtime/` contains the executable counterpart of selected contracts:
-
-- `state_params.py` — event-derived state → bounded runtime parameters
-- `memory.py` — retrieval, `ContextPacket`, `omitted`, budget
-- `ledger.py` — evidence ledger, version chain, retention
-- `constitution.py` — proposals, co-signature, ratification ledger
-- `segmentation.py` — event boundaries
-- `relationship.py` — multi-dimensional relationships, affect/trust separation
-- `reliability.py` — source reliability
-- `simulation.py` / `primitives.py` — compositional replay and primitive library
-- `graph_retrieval.py` — lightweight association index
-- `pipeline.py` — end-to-end audit trace
+| `source/zh/build.py` | 从 `source/zh/parts` 构建中文 HTML |
+| `source/en/build.py` | 从 `source/en/parts` 构建英文 HTML |
+| `source/zh/parts/` | 中文源片段 |
+| `source/en/parts/` | 英文源片段 |
+| `runtime/` | 内存参考实现 |
+| `docs/zh/`, `docs/en/` | 构建产物 HTML / PDF |
 
 ```bash
 cd runtime
 python3 -m unittest -v      # 128 tests
-python3 pipeline.py         # end-to-end JSON with audit trace
+python3 pipeline.py         # 端到端 JSON + 审计轨迹
 ```
 
-## What this is not
+## 这不是什么
 
-- It is **not** a framework: the document describes a line of thinking, not a complete architecture.
-- It is **not** a product or a validated practice; no production deployment is claimed.
-- It is **not** a clinical or neuroscience claim; neuroscience is used to explain design rationale.
-- The `runtime/` code is **not** a production system: no real persistence, signing keys, distributed writer, or production-grade ratification ledger.
-- The API and schema are **not stable**; they exist to make selected contracts testable and reviewable.
-- The repository does **not** include the GitHub token, QA renders, or temporary build artifacts.
+- 不是框架：文档描述的是一条思路，不是完整架构。
+- 不是产品，也不是经过验证的实践；不声称可生产部署。
+- 不是临床或神经科学结论；神经科学用于解释设计理由。
+- `runtime/` 不是生产系统：没有真实持久化、签名密钥、分布式写入或生产级批准账本。
+- API 与 schema 不稳定；它们只是让部分契约可测试、可审查。
+- 仓库不包含 GitHub token、QA 渲染图或临时构建产物。
 
 ## License
 
-No open-source license is granted in this release; all rights reserved. Contact the author for reuse.
+MIT License. See [LICENSE](LICENSE).
